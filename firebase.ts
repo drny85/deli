@@ -8,6 +8,7 @@ import {
 import { getAuth } from 'firebase/auth';
 import { getStorage } from 'firebase/storage';
 import { getFunctions, httpsCallable } from 'firebase/functions';
+import { AppUser } from './redux/auth/authSlide';
 
 const firebaseConfig = {
     apiKey: process.env.FIREBASE_APIKEY,
@@ -38,7 +39,7 @@ const functions = getFunctions(app, 'us-central1');
 
 // export const referralsCollection = (userId: string) =>
 //     createCollection<Referral>(`referrals/${userId}/referrals`);
-// export const usersCollection = createCollection<AppUser>('users');
+export const usersCollection = createCollection<AppUser>('users');
 
 
 

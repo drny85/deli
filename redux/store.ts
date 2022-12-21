@@ -1,9 +1,11 @@
 import { configureStore } from '@reduxjs/toolkit';
 import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux';
+import authSlide from './auth/authSlide';
 import themeSlide from './themeSlide';
 
 const reducer = {
     theme: themeSlide,
+    auth:authSlide
    
 };
 

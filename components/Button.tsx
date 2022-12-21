@@ -4,7 +4,8 @@ import {
     TextStyle,
     TouchableOpacity,
     ViewStyle,
-    View
+    View,
+    ActivityIndicator
 } from 'react-native';
 import React from 'react';
 import Text from './Text';
@@ -17,6 +18,7 @@ interface Props {
     small?: boolean;
     large?: boolean;
     block?: boolean;
+    isLoading?: boolean;
     notRounded?: boolean;
     title: string;
     py_4?: boolean;
@@ -24,6 +26,7 @@ interface Props {
     onPress: () => void;
     disabled?: boolean;
     containerStyle?: ViewStyle;
+
     textStyle?: StyleProp<TextStyle>;
     leftIcon?: React.ReactElement;
 }
@@ -34,6 +37,7 @@ const Button = ({
     small,
     block,
     notRounded,
+    isLoading,
     primary,
     onPress,
     disabled,
@@ -56,11 +60,12 @@ const Button = ({
                         : theme.ASCENT,
                     marginVertical: py_4 ? 8 : py_6 ? 12 : 2,
                     borderRadius: notRounded ? SIZES.radius : 35,
-                    maxWidth: small ? SIZES.width * 0.33 : undefined
+                    maxWidth: small ? SIZES.width * 0.33 : undefined,
+                    minWidth: SIZES.width * 0.2
                 },
                 containerStyle
             ]}
-            disabled={disabled}
+            disabled={disabled || isLoading}
             onPress={onPress}
         >
             {leftIcon && (
@@ -74,9 +79,13 @@ const Button = ({
                     {leftIcon}
                 </View>
             )}
-            <Text lightText bold style={[styles.text, textStyle]}>
-                {title}
-            </Text>
+            {isLoading ? (
+                <ActivityIndicator color={theme.CARD_BACKGROUND} size="small" />
+            ) : (
+                <Text lightText bold style={[styles.text, textStyle]}>
+                    {title}
+                </Text>
+            )}
         </TouchableOpacity>
     );
 };
