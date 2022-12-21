@@ -5,8 +5,7 @@ import Screen from '../../components/Screen';
 import Text from '../../components/Text';
 import Button from '../../components/Button';
 import { useAppDispatch, useAppSelector } from '../../redux/store';
-import { switchTheme } from '../../redux/themeSlide';
-import { darkTheme, lightTheme } from '../../Theme';
+
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { AuthScreens } from '../../navigation/auth/typing';
 import InputField from '../../components/InputField';
@@ -14,12 +13,17 @@ import { FontAwesome } from '@expo/vector-icons';
 import { isEmailValid } from '../../utils/isEmailValid';
 
 import KeyboardScreen from '../../components/KeyboardScreen';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import {
+    createUserWithEmailAndPassword,
+    sendEmailVerification
+} from 'firebase/auth';
 import { auth } from '../../firebase';
 import { FIREBASE_ERRORS } from '../../utils/errorMesssages';
 import Row from '../../components/Row';
 import { SIZES } from '../../constants';
-import Stack from '../../components/Stack';
+import { createBusiness } from '../../redux/business/businessActions';
+import { Business } from '../../redux/business/businessSlide';
+import { autoLogin } from '../../redux/auth/authActions';
 
 type Props = NativeStackScreenProps<AuthScreens, 'BusinessSignup'>;
 
@@ -27,6 +31,7 @@ const BusinessSignUp = ({ navigation }: Props) => {
     const dispatch = useAppDispatch();
     const theme = useAppSelector((state) => state.theme);
     const emailRef = useRef<TextInput>(null);
+    const businessNameRef = useRef<TextInput>(null);
     const passwordRef = useRef<TextInput>(null);
     const [businessName, setBusinessName] = useState('');
     const [name, setName] = useState('');
@@ -39,7 +44,7 @@ const BusinessSignUp = ({ navigation }: Props) => {
         try {
             const isValid = validateInputs();
             if (!isValid) return;
-            const { user } = await signInWithEmailAndPassword(
+            const { user } = await createUserWithEmailAndPassword(
                 auth,
                 email,
                 password
@@ -47,32 +52,55 @@ const BusinessSignUp = ({ navigation }: Props) => {
             if (!user) {
                 return;
             }
-            console.log(user);
+            await sendEmailVerification(user);
+            const { claims } = await user.getIdTokenResult();
+            console.log(claims);
+            const business: Business = {
+                name: businessName,
+                owner: { name, lastName },
+                stripeAccount: null,
+                email,
+                isActive: true,
+                userId: user.uid
+            };
+            await dispatch(createBusiness(business));
+            await dispatch(
+                autoLogin({
+                    userId: user.uid,
+                    emailVerified: user.emailVerified,
+                    type: claims.type
+                })
+            );
         } catch (error) {
             const err = error as any;
 
-            console.log('Error =>', err.message);
+            console.log('Error @signup fro business =>', err.message);
             Alert.alert('Error', FIREBASE_ERRORS[err.message] || err.message);
         }
     };
 
     const validateInputs = (): boolean => {
+        if (!businessName) {
+            Alert.alert('Please enter a name for your business');
+            businessNameRef.current?.focus();
+            return false;
+        }
         if (!name || !lastName || !email || !password) return false;
         if (!email && !password) {
-            emailRef.current?.focus();
             Alert.alert('Error', 'both fields are required');
+            emailRef.current?.focus();
             return false;
         }
 
         if (!isEmailValid(email)) {
-            emailRef.current?.focus();
             Alert.alert('Error', 'Invalid email');
+            emailRef.current?.focus();
             return false;
         }
 
         if (!password) {
-            passwordRef.current?.focus();
             Alert.alert('Error', 'please type your password');
+            passwordRef.current?.focus();
             return false;
         }
 
@@ -93,6 +121,7 @@ const BusinessSignUp = ({ navigation }: Props) => {
                     </Text>
 
                     <InputField
+                        ref={businessNameRef}
                         label="Business' Name"
                         placeholder="Ex. John's Store"
                         value={businessName}

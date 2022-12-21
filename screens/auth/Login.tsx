@@ -57,7 +57,7 @@ const Login = ({ navigation }: Props) => {
             }
             const result = await user.getIdTokenResult();
             const data = result.claims;
-
+            console.log('DATA from Login => ', data.type, user.email);
             dispatch(
                 autoLogin({
                     userId: user.uid,

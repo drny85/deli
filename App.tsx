@@ -17,6 +17,7 @@ const App = () => {
     const isReady = useCachedResources();
     const theme = useAppSelector((state) => state.theme);
     const { user, loading } = useAppSelector((state) => state.auth);
+    console.log('USER => ', user);
 
     if (!isReady || loading) return <Loader />;
     return (

@@ -20,3 +20,10 @@ export type BusinessProductsStackScreens = {
 export type BusinessSettingsStackScreens = {
     Settings: undefined
 }
+
+export type BusinessOnBoardingStackScreens = {
+    EmailVerification:undefined;
+    BusinessInformation:undefined;
+    BusinessStripeAccountCreation:undefined;
+    BusinessCreatedSuccesfull: undefined;
+}

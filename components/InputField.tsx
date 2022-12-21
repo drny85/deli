@@ -88,16 +88,17 @@ const InputField: FC<Props> = React.forwardRef(
                             flexDirection: 'row',
                             alignItems: 'center',
                             backgroundColor: theme.BACKGROUND_COLOR,
-                            paddingHorizontal: 8,
-                            paddingVertical: p_y ? p_y : 14,
+                            paddingHorizontal: 6,
+                            paddingVertical: p_y ? p_y : 12,
                             borderRadius: SIZES.radius * 2,
                             //marginHorizontal: 10,
-                            shadowOffset: { width: 6, height: 4 },
+                            shadowOffset: { width: -3, height: -2 },
                             shadowColor: theme.SHADOW_COLOR,
 
                             shadowOpacity: 0.4,
                             shadowRadius: 3,
-                            elevation: 6,
+                            elevation: 5,
+
                             width: '100%'
                         },
                         containerStyle
@@ -110,8 +111,8 @@ const InputField: FC<Props> = React.forwardRef(
                         style={[
                             {
                                 flex: 1,
-
-                                paddingHorizontal: 10,
+                                paddingHorizontal: SIZES.base,
+                                fontSize: SIZES.font,
                                 color:
                                     theme.mode === 'dark'
                                         ? '#ffffff'
