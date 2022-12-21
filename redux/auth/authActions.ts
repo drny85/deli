@@ -4,7 +4,7 @@ import { doc, getDoc } from "firebase/firestore";
 import { auth, usersCollection } from "../../firebase";
 import { AppUser } from "./authSlide";
 
-export const autoLogin = createAsyncThunk('auth/login',async(data:{userId:string, emailVerified:boolean, type:AppUser['type']}, {dispatch, rejectWithValue}) :Promise<AppUser | null> => {
+export const autoLogin = createAsyncThunk('auth/login',async(data:{userId:string, emailVerified:boolean, type:AppUser['type']}) :Promise<AppUser | null> => {
     try {
         if (!data.userId) return  null
         const userRef = doc(usersCollection, data.userId)
@@ -17,6 +17,7 @@ export const autoLogin = createAsyncThunk('auth/login',async(data:{userId:string
 
     } catch (error) {
         const err = error as any;
+        console.log(err.message)
         return null
     }
 })
@@ -27,6 +28,8 @@ export const logoutUser = createAsyncThunk('auth/logout', async(_):Promise<null>
        return null
 
     } catch (error) {
+        const err = error as any;
+        console.log(err.message)
         return null
     }
 })
