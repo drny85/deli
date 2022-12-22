@@ -125,12 +125,12 @@ exports.createConnectedBusinessAccount = functions.https.onCall(
     }
 );
 
-exports.businessAccount = functions.https.onRequest(
+exports.webhook = functions.https.onRequest(
     async (
         req: functions.https.Request,
         res: functions.Response<any>
     ): Promise<any> => {
-        const webhookSecret = process.env.CONNECTED;
+        const webhookSecret = process.env.WEBHOOK_CONNECTED;
         const signature = req.headers['stripe-signature'];
         const payloadData = req.rawBody;
         const payloadString = payloadData.toString();
@@ -213,6 +213,45 @@ exports.checkIfEmailIsVerified = functions.https.onCall(
             const err = error as any;
             console.log('Error on verifing email', err.message);
             return null;
+        }
+    }
+);
+
+exports.addConnectedAccountToBusiness = functions.https.onCall(
+    async (data: { accountId: string }, context): Promise<Response> => {
+        try {
+            if (!context.auth)
+                return { success: false, result: 'Not authorized' };
+            const userId = context.auth?.uid;
+            const isAuth = await isAuthorizedToGrantAccess(
+                context.auth?.token.email!
+            );
+
+            if (!context.auth || !isAuth)
+                return { success: false, result: 'Not authorized' };
+
+            const { accountId } = data;
+            if (!accountId)
+                return { success: false, result: 'no account Id provided' };
+
+            const account = await stripe.accounts.retrieve({
+                stripeAccount: accountId
+            });
+            const { charges_enabled } = account;
+            if (charges_enabled) {
+                await admin.firestore().collection('business').doc(userId).set(
+                    {
+                        stripeAccount: account.id,
+                        activatedOn: new Date().toISOString()
+                    },
+                    { merge: true }
+                );
+            }
+            return { success: charges_enabled, result: 'account connected' };
+        } catch (error) {
+            console.log(error);
+            const err = error as any;
+            return { success: false, result: err.message };
         }
     }
 );

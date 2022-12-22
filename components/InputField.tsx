@@ -88,11 +88,11 @@ const InputField: FC<Props> = React.forwardRef(
                             flexDirection: 'row',
                             alignItems: 'center',
                             backgroundColor: theme.BACKGROUND_COLOR,
-                            paddingHorizontal: 6,
+                            paddingHorizontal: SIZES.base,
                             paddingVertical: p_y ? p_y : 12,
                             borderRadius: SIZES.radius * 2,
                             //marginHorizontal: 10,
-                            shadowOffset: { width: -3, height: -2 },
+                            shadowOffset: { width: -4, height: -4 },
                             shadowColor: theme.SHADOW_COLOR,
 
                             shadowOpacity: 0.4,

@@ -37,6 +37,10 @@ export default function useCachedResources() {
                     const result = await authState.getIdTokenResult();
                     const claims = result.claims;
 
+                    if (claims.type === 'business') {
+                        dispatch(getBusiness(authState.uid));
+                    }
+
                     dispatch(
                         autoLogin({
                             userId: authState.uid,
@@ -44,9 +48,7 @@ export default function useCachedResources() {
                             type: claims.type
                         })
                     );
-                    if (claims.type === 'business') {
-                        dispatch(getBusiness(authState.uid));
-                    }
+
                     //logged in and verified
                 }
             });

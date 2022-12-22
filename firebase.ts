@@ -10,6 +10,7 @@ import { getStorage } from 'firebase/storage';
 import { getFunctions, httpsCallable } from 'firebase/functions';
 import { AppUser } from './redux/auth/authSlide';
 import { Business } from './redux/business/businessSlide';
+import { ConnectedAccountParams } from './types';
 
 const firebaseConfig = {
     apiKey: process.env.FIREBASE_APIKEY,
@@ -27,6 +28,11 @@ const db = getFirestore(app);
 const auth = getAuth(app);
 const storage = getStorage(app);
 
+interface Response {
+    success: boolean;
+    result: string;
+}
+
 const createCollection = <T = DocumentData>(collectionName: string) => {
     return collection(db, collectionName) as CollectionReference<T>;
 };
@@ -36,6 +42,12 @@ const functions = getFunctions(app, 'us-central1');
 //     httpsCallable<Referral, { success: boolean }>(functions, name);
 export const emailVerifiedFunc = (name: string) =>
     httpsCallable<{ email: string }, User | null>(functions, name);
+
+export const connectedStore = (name: string) =>
+    httpsCallable<ConnectedAccountParams, Response>(functions, name);
+
+export const checkForConnectedAccount = (name: string) =>
+    httpsCallable<{ accountId: string }, Response>(functions, name);
 
 // const quoteFunc = (name: string) =>
 //     httpsCallable<WirelessQuote, { success: boolean }>(functions, name);

@@ -66,7 +66,7 @@ const EmailVerification = ({ navigation }: Props) => {
             {isVerified ? (
                 <Button
                     title="Next Step"
-                    onPress={() => navigation.navigate('BusinessInformation')}
+                    onPress={() => navigation.navigate('PrepareInfoScreen')}
                 />
             ) : (
                 <Button

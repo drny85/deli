@@ -11,3 +11,11 @@ export interface Theme {
     STATUS_BAR?: 'dark' | 'light';
     WHITE_COLOR: string;
 }
+
+export interface ConnectedAccountParams {
+    businessName: string;
+    phone: string;
+    address: string;
+    name: string;
+    lastName: string;
+}

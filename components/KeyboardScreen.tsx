@@ -18,7 +18,10 @@ const KeyboardScreen = ({ children }: Props) => {
             style={{ flex: 1 }}
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         >
-            <ScrollView showsVerticalScrollIndicator={false}>
+            <ScrollView
+                keyboardShouldPersistTaps="handled"
+                showsVerticalScrollIndicator={false}
+            >
                 <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
                     <>{children}</>
                 </TouchableWithoutFeedback>
