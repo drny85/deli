@@ -9,17 +9,30 @@ import useCachedResources from './hooks/useInit';
 import Loader from './components/Loader';
 
 import { DefaultTheme, NavigationContainer } from '@react-navigation/native';
-import AuthNavigationStack from './navigation/auth/AuthNavigationStack';
+import { useEffect, useState } from 'react';
 import AdminBottomTabs from './navigation/admin/AdminBottomTabs';
 import BusinessBottomTabs from './navigation/business/BusinessBottomTabs';
+import BusinessOnBoardingNavigation from './navigation/business/BusinessOnBoardingNavigation';
+import ConsumerBottomTabs from './navigation/consumer/ConsumerBottomTabs';
 
 const App = () => {
     const isReady = useCachedResources();
     const theme = useAppSelector((state) => state.theme);
+    const [processing, setProcessing] = useState(true);
     const { user, loading } = useAppSelector((state) => state.auth);
-    console.log('USER => ', user);
+    const { business, loading: businessLoading } = useAppSelector(
+        (state) => state.business
+    );
+    useEffect(() => {
+        if (isReady && !loading && !businessLoading) {
+            setProcessing(false);
+        } else {
+            setProcessing(true);
+        }
+    }, [isReady, loading, businessLoading]);
 
-    if (!isReady || loading) return <Loader />;
+    // console.log('PROS', processing);
+    if (processing) return <Loader />;
     return (
         <ThemeProvider theme={theme}>
             <NavigationContainer
@@ -34,12 +47,18 @@ const App = () => {
             >
                 {user && user.type === 'admin' ? (
                     <AdminBottomTabs />
-                ) : user && user.type === 'business' ? (
+                ) : user &&
+                  user.type === 'business' &&
+                  business &&
+                  business.stripeAccount !== null ? (
                     <BusinessBottomTabs />
-                ) : !loading && isReady ? (
-                    <AuthNavigationStack />
+                ) : user &&
+                  user.type === 'business' &&
+                  business &&
+                  business.stripeAccount === null ? (
+                    <BusinessOnBoardingNavigation />
                 ) : (
-                    <Loader />
+                    <ConsumerBottomTabs />
                 )}
 
                 <StatusBar style={theme.mode === 'dark' ? 'light' : 'dark'} />
