@@ -74,7 +74,7 @@ const InputField: FC<Props> = React.forwardRef(
         const theme = useAppSelector((state) => state.theme);
 
         return (
-            <View style={mainStyle}>
+            <View style={[{ maxWidth: 600 }, mainStyle]}>
                 {/* LABEL */}
                 <View>
                     <Text capitalize={!upper} uppercase={upper} bold px_4>

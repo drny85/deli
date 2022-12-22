@@ -11,8 +11,7 @@ import Screen from '../../components/Screen';
 import Text from '../../components/Text';
 import Button from '../../components/Button';
 import { useAppDispatch, useAppSelector } from '../../redux/store';
-import { switchTheme } from '../../redux/themeSlide';
-import { darkTheme, lightTheme } from '../../Theme';
+
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { AuthScreens } from '../../navigation/auth/typing';
 import InputField from '../../components/InputField';
@@ -20,12 +19,17 @@ import { FontAwesome } from '@expo/vector-icons';
 import { isEmailValid } from '../../utils/isEmailValid';
 
 import KeyboardScreen from '../../components/KeyboardScreen';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import {
+    createUserWithEmailAndPassword,
+    sendEmailVerification
+} from 'firebase/auth';
 import { auth } from '../../firebase';
 import { FIREBASE_ERRORS } from '../../utils/errorMesssages';
 import Row from '../../components/Row';
 import { SIZES } from '../../constants';
 import { AnimatePresence, MotiView } from 'moti';
+import { AppUser } from '../../redux/auth/authSlide';
+import { createUser } from '../../redux/auth/authActions';
 
 type Props = NativeStackScreenProps<AuthScreens, 'Signup'>;
 
@@ -45,7 +49,7 @@ const Signup = ({ navigation }: Props) => {
         try {
             const isValid = validateInputs();
             if (!isValid) return;
-            const { user } = await signInWithEmailAndPassword(
+            const { user } = await createUserWithEmailAndPassword(
                 auth,
                 email,
                 password
@@ -53,7 +57,16 @@ const Signup = ({ navigation }: Props) => {
             if (!user) {
                 return;
             }
-            console.log(user);
+            const data: AppUser = {
+                id: user.uid,
+                email,
+                emailVerified: user.emailVerified,
+                lastName,
+                name,
+                type: 'consumer'
+            };
+            await sendEmailVerification(user);
+            await dispatch(createUser(data));
         } catch (error) {
             const err = error as any;
 

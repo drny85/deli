@@ -13,6 +13,7 @@ import { LogBox } from 'react-native';
 import { auth } from '../firebase';
 import { switchTheme } from '../redux/themeSlide';
 import { autoLogin } from '../redux/auth/authActions';
+import { getBusiness } from '../redux/business/businessActions';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -35,10 +36,18 @@ export default function useCachedResources() {
                 if (authState?.uid) {
                     const result = await authState.getIdTokenResult();
                     const claims = result.claims;
-                    
-                      dispatch(autoLogin({userId:authState.uid, emailVerified:authState.emailVerified, type:claims.type}))
-                      //logged in and verified
-                   
+
+                    dispatch(
+                        autoLogin({
+                            userId: authState.uid,
+                            emailVerified: authState.emailVerified,
+                            type: claims.type
+                        })
+                    );
+                    if (claims.type === 'business') {
+                        dispatch(getBusiness(authState.uid));
+                    }
+                    //logged in and verified
                 }
             });
         } catch (error) {
@@ -60,12 +69,9 @@ export default function useCachedResources() {
                     SplashScreen.hideAsync();
                 }
 
-              
-
                 isDark
                     ? dispatch(switchTheme(darkTheme))
                     : dispatch(switchTheme(lightTheme));
-                   
             } catch (error) {
                 console.log(error);
             }

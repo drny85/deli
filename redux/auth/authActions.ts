@@ -1,6 +1,6 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { signOut } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 import { auth, usersCollection } from "../../firebase";
 import { AppUser } from "./authSlide";
 
@@ -19,6 +19,19 @@ export const autoLogin = createAsyncThunk('auth/login',async(data:{userId:string
         const err = error as any;
         console.log(err.message)
         return null
+    }
+})
+
+export const createUser = createAsyncThunk('auth/create', async(userData:AppUser, {dispatch}) => {
+    try {
+        if (!userData || !userData.id) return
+        const userRef = doc(usersCollection, userData.id)
+        await setDoc(userRef, {...userData})
+        dispatch(autoLogin({userId:userData.id, emailVerified:userData.emailVerified, type:userData.type}))
+        
+    } catch (error) {
+        const err = error as any;
+        console.log(err.message)
     }
 })
 

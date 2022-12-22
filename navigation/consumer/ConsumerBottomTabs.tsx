@@ -1,18 +1,18 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
 import { useAppSelector } from '../../redux/store';
+import { ConsumerBottomTabScreens } from './typing';
 
 import { Ionicons } from '@expo/vector-icons';
-import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
-import { BusinessnBottomTabScreens } from './typing';
-import BusinessHomeStackNavigation from './BusinessHomeStackNavigation';
-import BusinessOrdersStackNavigation from './BusinessOrdersStackNavigation';
-import BusinessProductsStackNavigation from './BusinessProductsStackNavigation';
-import BusinessSettingsStackNavigation from './BusinessSettingsStackNavigation';
+import ConsumerHomeStackNavigation from './ConsumerHomeStacksScreens';
+import ConsumerOrdersStackNavigation from './ConsumerOrdersStacksScreens';
+import ConsumerCartStackNavigation from './ConsumerCartStacksNavigation';
+import ConsumerProfileStackNavigation from './ConsumerProfileStacksNavigation';
 
 const { Navigator, Screen } =
-    createBottomTabNavigator<BusinessnBottomTabScreens>();
+    createBottomTabNavigator<ConsumerBottomTabScreens>();
 
-const BusinessBottomTabs = () => {
+const ConsumerBottomTabs = () => {
     const theme = useAppSelector((state) => state.theme);
     return (
         <Navigator
@@ -32,7 +32,7 @@ const BusinessBottomTabs = () => {
         >
             <Screen
                 name="HomeScreens"
-                component={BusinessHomeStackNavigation}
+                component={ConsumerHomeStackNavigation}
                 options={({ route }) => ({
                     tabBarStyle: {
                         display: tabBarVisibility(route),
@@ -46,7 +46,7 @@ const BusinessBottomTabs = () => {
             />
             <Screen
                 name="OrdersScreens"
-                component={BusinessOrdersStackNavigation}
+                component={ConsumerOrdersStackNavigation}
                 options={({ route }) => ({
                     tabBarStyle: {
                         display: tabBarVisibility(route),
@@ -55,12 +55,12 @@ const BusinessBottomTabs = () => {
                         elevation: 0
                     },
 
-                    tabBarIcon: () => <TabBarIcon name="business" />
+                    tabBarIcon: () => <TabBarIcon name="aperture" />
                 })}
             />
             <Screen
-                name="ProducsScreens"
-                component={BusinessProductsStackNavigation}
+                name="CartScreens"
+                component={ConsumerCartStackNavigation}
                 options={({ route }) => ({
                     tabBarStyle: {
                         display: tabBarVisibility(route),
@@ -69,12 +69,12 @@ const BusinessBottomTabs = () => {
                         elevation: 0
                     },
 
-                    tabBarIcon: () => <TabBarIcon name="business" />
+                    tabBarIcon: () => <TabBarIcon name="cart" />
                 })}
             />
             <Screen
-                name="SettingsScreens"
-                component={BusinessSettingsStackNavigation}
+                name="ProfileScreens"
+                component={ConsumerProfileStackNavigation}
                 options={({ route }) => ({
                     tabBarStyle: {
                         display: tabBarVisibility(route),
@@ -83,14 +83,14 @@ const BusinessBottomTabs = () => {
                         elevation: 0
                     },
 
-                    tabBarIcon: () => <TabBarIcon name="settings" />
+                    tabBarIcon: () => <TabBarIcon name="person" />
                 })}
             />
         </Navigator>
     );
 };
 
-export default BusinessBottomTabs;
+export default ConsumerBottomTabs;
 
 function TabBarIcon(props: {
     name: React.ComponentProps<typeof Ionicons>['name'];

@@ -23,7 +23,8 @@ import Row from '../../components/Row';
 import { SIZES } from '../../constants';
 import { createBusiness } from '../../redux/business/businessActions';
 import { Business } from '../../redux/business/businessSlide';
-import { autoLogin } from '../../redux/auth/authActions';
+import { autoLogin, createUser } from '../../redux/auth/authActions';
+import { AppUser } from '../../redux/auth/authSlide';
 
 type Props = NativeStackScreenProps<AuthScreens, 'BusinessSignup'>;
 
@@ -53,8 +54,7 @@ const BusinessSignUp = ({ navigation }: Props) => {
                 return;
             }
             await sendEmailVerification(user);
-            const { claims } = await user.getIdTokenResult();
-            console.log(claims);
+
             const business: Business = {
                 name: businessName,
                 owner: { name, lastName },
@@ -63,14 +63,17 @@ const BusinessSignUp = ({ navigation }: Props) => {
                 isActive: true,
                 userId: user.uid
             };
+            const userData: AppUser = {
+                id: user.uid,
+                name,
+                lastName,
+                email,
+                emailVerified: user.emailVerified,
+                type: 'business'
+            };
             await dispatch(createBusiness(business));
-            await dispatch(
-                autoLogin({
-                    userId: user.uid,
-                    emailVerified: user.emailVerified,
-                    type: claims.type
-                })
-            );
+
+            await dispatch(createUser(userData));
         } catch (error) {
             const err = error as any;
 
@@ -223,13 +226,11 @@ const BusinessSignUp = ({ navigation }: Props) => {
                         containerStyle={{ marginBottom: 20 }}
                         horizontalAlign="center"
                     >
-                        <Text px_6>Need a business account?</Text>
+                        <Text px_6>Need a consumer account?</Text>
 
                         <TouchableOpacity
                             style={{ padding: SIZES.base }}
-                            onPress={() =>
-                                navigation.navigate('BusinessSignup')
-                            }
+                            onPress={() => navigation.navigate('Signup')}
                         >
                             <Text bold>Sign Up</Text>
                         </TouchableOpacity>

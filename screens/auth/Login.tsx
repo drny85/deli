@@ -1,33 +1,24 @@
-import {
-    Alert,
-    NativeSyntheticEvent,
-    TextInput,
-    TextInputFocusEventData,
-    TouchableOpacity,
-    View
-} from 'react-native';
+import { Alert, TextInput, TouchableOpacity, View } from 'react-native';
 import React, { useRef, useState } from 'react';
 import Screen from '../../components/Screen';
 
 import Text from '../../components/Text';
 import Button from '../../components/Button';
 import { useAppDispatch, useAppSelector } from '../../redux/store';
-import { switchTheme } from '../../redux/themeSlide';
-import { darkTheme, lightTheme } from '../../Theme';
+
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { AuthScreens } from '../../navigation/auth/typing';
 import InputField from '../../components/InputField';
 import { FontAwesome } from '@expo/vector-icons';
 import { isEmailValid } from '../../utils/isEmailValid';
 
-import KeyboardScreen from '../../components/KeyboardScreen';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../../firebase';
 import { FIREBASE_ERRORS } from '../../utils/errorMesssages';
 import Row from '../../components/Row';
 import { SIZES } from '../../constants';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
-import { autoLogin, logoutUser } from '../../redux/auth/authActions';
+import { autoLogin } from '../../redux/auth/authActions';
 import Loader from '../../components/Loader';
 
 type Props = NativeStackScreenProps<AuthScreens, 'Login'>;
@@ -42,7 +33,7 @@ const Login = ({ navigation }: Props) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
-    console.log(user, loading);
+
     const handleLogin = async () => {
         try {
             const isValid = validateInputs();
@@ -151,14 +142,6 @@ const Login = ({ navigation }: Props) => {
                     isLoading={loading}
                     title="Login"
                     onPress={handleLogin}
-                />
-                <Button
-                    containerStyle={{ width: '50%', marginVertical: 20 }}
-                    isLoading={loading}
-                    title="Log Out"
-                    onPress={() => {
-                        dispatch(logoutUser());
-                    }}
                 />
 
                 <View

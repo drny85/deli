@@ -5,7 +5,7 @@ import {
     DocumentData,
     collection
 } from 'firebase/firestore';
-import { getAuth } from 'firebase/auth';
+import { getAuth, User, UserCredential } from 'firebase/auth';
 import { getStorage } from 'firebase/storage';
 import { getFunctions, httpsCallable } from 'firebase/functions';
 import { AppUser } from './redux/auth/authSlide';
@@ -18,9 +18,9 @@ const firebaseConfig = {
     messagingSenderId: process.env.FIREBASE_MESSAGING_SENDERID,
     storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
     appId: process.env.FIREBASE_APPID,
-    measurementId:process.env.FIREBASE_MEASUREMENT_ID
+    measurementId: process.env.FIREBASE_MEASUREMENT_ID
 };
-console.log(process.env.FIREBASE_APIKEY)
+console.log(process.env.FIREBASE_APIKEY);
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 
 const db = getFirestore(app);
@@ -34,6 +34,8 @@ const createCollection = <T = DocumentData>(collectionName: string) => {
 const functions = getFunctions(app, 'us-central1');
 // const func = (name: string) =>
 //     httpsCallable<Referral, { success: boolean }>(functions, name);
+export const emailVerifiedFunc = (name: string) =>
+    httpsCallable<{ email: string }, User | null>(functions, name);
 
 // const quoteFunc = (name: string) =>
 //     httpsCallable<WirelessQuote, { success: boolean }>(functions, name);
@@ -42,7 +44,5 @@ const functions = getFunctions(app, 'us-central1');
 //     createCollection<Referral>(`referrals/${userId}/referrals`);
 export const usersCollection = createCollection<AppUser>('users');
 export const businessCollection = createCollection<Business>('business');
-
-
 
 export { db, auth, storage };
