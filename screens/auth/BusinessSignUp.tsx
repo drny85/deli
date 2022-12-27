@@ -61,7 +61,8 @@ const BusinessSignUp = ({ navigation }: Props) => {
                 stripeAccount: null,
                 email,
                 isActive: true,
-                userId: user.uid
+                userId: user.uid,
+                profileCompleted: false
             };
             const userData: AppUser = {
                 id: user.uid,
@@ -116,7 +117,9 @@ const BusinessSignUp = ({ navigation }: Props) => {
                 <View
                     style={{
                         alignItems: 'center',
-                        justifyContent: 'center'
+                        justifyContent: 'center',
+                        maxWidth: 610,
+                        alignSelf: 'center'
                     }}
                 >
                     <Text py_8 animation={'fadeInDown'} lobster large py_4>

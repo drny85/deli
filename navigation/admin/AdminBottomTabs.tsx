@@ -3,7 +3,7 @@ import { useAppSelector } from '../../redux/store';
 
 import { Ionicons } from '@expo/vector-icons';
 import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
-import { AdminBottomTabScreens } from './typings';
+import { AdminBottomTabScreens } from './typing';
 import AdminHomeStackNavigation from './AdminHomeStackNavigation';
 import AdminBusinessStackNavigation from './AdminBusinessStackNavigation';
 
@@ -28,7 +28,7 @@ const AdminBottomTabs = () => {
             }}
         >
             <Screen
-                name="HomeScreens"
+                name="AdminHome"
                 component={AdminHomeStackNavigation}
                 options={({ route }) => ({
                     tabBarStyle: {
@@ -42,7 +42,7 @@ const AdminBottomTabs = () => {
                 })}
             />
             <Screen
-                name="BusinessScreens"
+                name="AdminBusiness"
                 component={AdminBusinessStackNavigation}
                 options={({ route }) => ({
                     tabBarStyle: {

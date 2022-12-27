@@ -11,6 +11,7 @@ export interface Business {
     phone?: string;
     isActive: boolean;
     userId: string;
+    profileCompleted: boolean;
 }
 interface IState {
     business: Business | null;

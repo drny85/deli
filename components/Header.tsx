@@ -11,9 +11,10 @@ type Props = {
     title?: string;
     onPressBack?: () => void;
     onPressRight?: () => void;
+    iconColor?: string;
 };
 
-const Header = ({ onPressBack, onPressRight, title }: Props) => {
+const Header = ({ onPressBack, onPressRight, title, iconColor }: Props) => {
     const theme = useAppSelector((state) => state.theme);
     return (
         <MotiView
@@ -30,7 +31,7 @@ const Header = ({ onPressBack, onPressRight, title }: Props) => {
                         <FontAwesome
                             name="chevron-left"
                             size={26}
-                            color={theme.TEXT_COLOR}
+                            color={iconColor ? iconColor : theme.TEXT_COLOR}
                         />
                     </TouchableOpacity>
                 ) : (

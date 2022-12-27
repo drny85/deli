@@ -1,7 +1,7 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import Reports from '../../screens/admin/reports/Reports';
 
-import { AdminReportsStackScreens } from './typings';
+import { AdminReportsStackScreens } from './typing';
 
 const { Navigator, Screen } =
     createNativeStackNavigator<AdminReportsStackScreens>();

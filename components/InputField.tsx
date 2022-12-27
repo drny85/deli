@@ -21,7 +21,7 @@ interface Props extends TextInputProps {
     label?: string;
     ref?: any;
     placeholder: string;
-    value: string;
+    value: string | number;
     onChangeText: (value: string) => void;
     leftIcon?: React.ReactNode | undefined;
     rightIcon?: React.ReactNode | undefined;
@@ -38,6 +38,7 @@ interface Props extends TextInputProps {
     onKeyPress?: (e: NativeSyntheticEvent<TextInputKeyPressEventData>) => void;
     secureTextEntry?: boolean;
     returnKeyLabel?: string;
+    textTheme?: 'light' | 'dark';
     p_y?: number;
     returnKeyType?: TextInputProps['returnKeyType'];
     autoCapitalize?: TextInput['props']['autoCapitalize'];
@@ -67,7 +68,8 @@ const InputField: FC<Props> = React.forwardRef(
             secureTextEntry,
             p_y,
             errorStyle,
-            upper
+            upper,
+            textTheme
         },
         ref
     ) => {
@@ -77,7 +79,14 @@ const InputField: FC<Props> = React.forwardRef(
             <View style={[{ maxWidth: 600 }, mainStyle]}>
                 {/* LABEL */}
                 <View>
-                    <Text capitalize={!upper} uppercase={upper} bold px_4>
+                    <Text
+                        capitalize={!upper}
+                        lightText={textTheme === 'light'}
+                        darkText={textTheme === 'dark'}
+                        uppercase={upper}
+                        bold
+                        px_4
+                    >
                         {label}
                     </Text>
                 </View>

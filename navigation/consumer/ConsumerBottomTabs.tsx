@@ -31,7 +31,7 @@ const ConsumerBottomTabs = () => {
             }}
         >
             <Screen
-                name="HomeScreens"
+                name="ConsumerHome"
                 component={ConsumerHomeStackNavigation}
                 options={({ route }) => ({
                     tabBarStyle: {
@@ -45,7 +45,7 @@ const ConsumerBottomTabs = () => {
                 })}
             />
             <Screen
-                name="OrdersScreens"
+                name="ConsumerOrders"
                 component={ConsumerOrdersStackNavigation}
                 options={({ route }) => ({
                     tabBarStyle: {
@@ -59,7 +59,7 @@ const ConsumerBottomTabs = () => {
                 })}
             />
             <Screen
-                name="CartScreens"
+                name="ConsumerCart"
                 component={ConsumerCartStackNavigation}
                 options={({ route }) => ({
                     tabBarStyle: {
@@ -73,7 +73,7 @@ const ConsumerBottomTabs = () => {
                 })}
             />
             <Screen
-                name="ProfileScreens"
+                name="ConsumerProfile"
                 component={ConsumerProfileStackNavigation}
                 options={({ route }) => ({
                     tabBarStyle: {

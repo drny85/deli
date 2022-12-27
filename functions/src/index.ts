@@ -69,6 +69,11 @@ exports.createConnectedBusinessAccount = functions.https.onCall(
         context
     ): Promise<Response> => {
         try {
+            console.log(
+                'ENV =>',
+                process.env.NODE_ENV === 'development',
+                process.env.NODE_ENV === 'production'
+            );
             const email = context.auth?.token.email;
             const isAuth = await isAuthorizedToGrantAccess(email!);
             if (!context.auth || !isAuth)
@@ -84,6 +89,7 @@ exports.createConnectedBusinessAccount = functions.https.onCall(
                 country: 'US',
                 email: email,
                 business_type: 'individual',
+                metadata: { businessId: context.auth.uid },
                 capabilities: {
                     card_payments: { requested: true },
                     transfers: { requested: true }
@@ -178,6 +184,20 @@ exports.webhook = functions.https.onRequest(
                     break;
                 // ... handle other event types
                 case 'account.updated':
+                    break;
+
+                case 'account.application.deauthorized':
+                    const data = event.data.object;
+                    const meta = data as any;
+                    const businessId = meta?.metadata as any;
+                    const id = businessId.businessId;
+                    if (!id) return;
+                    await admin
+                        .firestore()
+                        .collection('business')
+                        .doc(id)
+                        .update({ stripeAccount: null });
+
                     break;
 
                 default:

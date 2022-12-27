@@ -11,6 +11,8 @@ import { getFunctions, httpsCallable } from 'firebase/functions';
 import { AppUser } from './redux/auth/authSlide';
 import { Business } from './redux/business/businessSlide';
 import { ConnectedAccountParams } from './types';
+import { Product } from './redux/business/productsSlice';
+import { Category } from './redux/business/categoriesSlice';
 
 const firebaseConfig = {
     apiKey: process.env.FIREBASE_APIKEY,
@@ -54,6 +56,11 @@ export const checkForConnectedAccount = (name: string) =>
 
 // export const referralsCollection = (userId: string) =>
 //     createCollection<Referral>(`referrals/${userId}/referrals`);
+export const productsCollection = (businessId: string) =>
+    createCollection<Product>(`products/${businessId}/products`);
+
+export const categoriessCollection = (businessId: string) =>
+    createCollection<Category>(`categories/${businessId}/categories`);
 export const usersCollection = createCollection<AppUser>('users');
 export const businessCollection = createCollection<Business>('business');
 

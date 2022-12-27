@@ -2,10 +2,10 @@ import { NavigatorScreenParams } from '@react-navigation/native';
 import { ConnectedAccountParams } from '../../types';
 
 export type BusinessnBottomTabScreens = {
-    HomeScreens: NavigatorScreenParams<BusinessHomeStackScreens>;
-    OrdersScreens: NavigatorScreenParams<BusinessOrdersStackScreens>;
-    ProducsScreens: NavigatorScreenParams<BusinessProductsStackScreens>;
-    SettingsScreens: NavigatorScreenParams<BusinessSettingsStackScreens>;
+    BusinessHome: NavigatorScreenParams<BusinessHomeStackScreens>;
+    BusinessOrders: NavigatorScreenParams<BusinessOrdersStackScreens>;
+    BusinessProducts: NavigatorScreenParams<BusinessProductsStackScreens>;
+    BusinessSettings: NavigatorScreenParams<BusinessSettingsStackScreens>;
 };
 
 export type BusinessHomeStackScreens = {
@@ -16,6 +16,7 @@ export type BusinessOrdersStackScreens = {
 };
 export type BusinessProductsStackScreens = {
     Products: undefined;
+    AddProduct: undefined;
 };
 export type BusinessSettingsStackScreens = {
     Settings: undefined;

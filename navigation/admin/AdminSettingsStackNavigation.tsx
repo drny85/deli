@@ -1,7 +1,7 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import AdminSettings from '../../screens/admin/settings/AdminSettings';
-import { AdminSettingsStackScreens } from './typings';
+import { AdminSettingsStackScreens } from './typing';
 
 const { Navigator, Screen } =
     createNativeStackNavigator<AdminSettingsStackScreens>();

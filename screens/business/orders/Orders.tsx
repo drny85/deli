@@ -7,8 +7,8 @@ type Props = {};
 
 const Orders = ({}: Props) => {
     return (
-        <Screen>
-            <Text>Orders </Text>
+        <Screen center>
+            <Text>Business Orders </Text>
         </Screen>
     );
 };

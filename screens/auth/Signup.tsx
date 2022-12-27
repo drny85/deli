@@ -119,7 +119,9 @@ const Signup = ({ navigation }: Props) => {
                     style={{
                         flex: 1,
                         alignItems: 'center',
-                        justifyContent: 'center'
+                        justifyContent: 'center',
+                        maxWidth: 610,
+                        alignSelf: 'center'
                     }}
                 >
                     <Text py_8 animation={'fadeInDown'} lobster large py_4>

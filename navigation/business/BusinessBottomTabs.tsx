@@ -31,7 +31,7 @@ const BusinessBottomTabs = () => {
             }}
         >
             <Screen
-                name="HomeScreens"
+                name="BusinessHome"
                 component={BusinessHomeStackNavigation}
                 options={({ route }) => ({
                     tabBarStyle: {
@@ -45,7 +45,7 @@ const BusinessBottomTabs = () => {
                 })}
             />
             <Screen
-                name="OrdersScreens"
+                name="BusinessOrders"
                 component={BusinessOrdersStackNavigation}
                 options={({ route }) => ({
                     tabBarStyle: {
@@ -55,11 +55,11 @@ const BusinessBottomTabs = () => {
                         elevation: 0
                     },
 
-                    tabBarIcon: () => <TabBarIcon name="business" />
+                    tabBarIcon: () => <TabBarIcon name="bicycle-sharp" />
                 })}
             />
             <Screen
-                name="ProducsScreens"
+                name="BusinessProducts"
                 component={BusinessProductsStackNavigation}
                 options={({ route }) => ({
                     tabBarStyle: {
@@ -69,11 +69,13 @@ const BusinessBottomTabs = () => {
                         elevation: 0
                     },
 
-                    tabBarIcon: () => <TabBarIcon name="business" />
+                    tabBarIcon: () => (
+                        <TabBarIcon name="ios-pricetags-outline" />
+                    )
                 })}
             />
             <Screen
-                name="SettingsScreens"
+                name="BusinessSettings"
                 component={BusinessSettingsStackNavigation}
                 options={({ route }) => ({
                     tabBarStyle: {

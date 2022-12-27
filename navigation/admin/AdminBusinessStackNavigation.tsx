@@ -1,7 +1,7 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import Business from '../../screens/admin/business/Business';
 
-import { AdminBusinessStackScreens, AdminHomeStackScreens } from './typings';
+import { AdminBusinessStackScreens, AdminHomeStackScreens } from './typing';
 const { Navigator, Screen } =
     createNativeStackNavigator<AdminBusinessStackScreens>();
 const AdminBusinessStackNavigation = () => {

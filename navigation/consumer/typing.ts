@@ -2,10 +2,10 @@ import { NavigatorScreenParams } from '@react-navigation/native';
 import { AuthScreens } from '../auth/typing';
 
 export type ConsumerBottomTabScreens = {
-    HomeScreens: NavigatorScreenParams<ConsumerHomeStackScreens>;
-    OrdersScreens: NavigatorScreenParams<ConsumerOrdersStackScreens>;
-    CartScreens: NavigatorScreenParams<ConsumerCartStackScreens>;
-    ProfileScreens: NavigatorScreenParams<ConsumerProfileStackScreens>;
+    ConsumerHome: NavigatorScreenParams<ConsumerHomeStackScreens>;
+    ConsumerOrders: NavigatorScreenParams<ConsumerOrdersStackScreens>;
+    ConsumerCart: NavigatorScreenParams<ConsumerCartStackScreens>;
+    ConsumerProfile: NavigatorScreenParams<ConsumerProfileStackScreens>;
 };
 
 export type ConsumerHomeStackScreens = {
