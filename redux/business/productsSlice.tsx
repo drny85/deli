@@ -1,4 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { P_Size } from '../../utils/sizes';
 import { Category } from './categoriesSlice';
 
 export interface Product {
@@ -8,6 +9,8 @@ export interface Product {
     price: string;
     image: string | null;
     description: string | null;
+    sizes: P_Size[];
+    priceMultiplier: number | null;
 }
 interface IState {
     productImage: string | null;
@@ -26,9 +29,12 @@ const productsSlice = createSlice({
     reducers: {
         setProductImage: (state, { payload }: PayloadAction<string | null>) => {
             state.productImage = payload;
+        },
+        fetchProducts: (state, { payload }: PayloadAction<Product[]>) => {
+            state.products = payload;
         }
     }
 });
 
-export const { setProductImage } = productsSlice.actions;
+export const { setProductImage, fetchProducts } = productsSlice.actions;
 export default productsSlice.reducer;

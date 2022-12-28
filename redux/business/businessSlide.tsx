@@ -1,6 +1,10 @@
 import { createSlice } from '@reduxjs/toolkit';
 import { createBusiness, getBusiness } from './businessActions';
 
+export interface Coors {
+    lat: number;
+    lng: number;
+}
 export interface Business {
     id?: string;
     name: string;
@@ -8,6 +12,7 @@ export interface Business {
     owner: { name: string; lastName: string };
     stripeAccount: string | null;
     address?: string;
+    coors?: Coors;
     phone?: string;
     isActive: boolean;
     userId: string;

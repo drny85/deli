@@ -2,7 +2,8 @@ import {
     ImageBackground,
     StyleSheet,
     TouchableOpacity,
-    View
+    View,
+    ViewStyle
 } from 'react-native';
 import React from 'react';
 import Text from './Text';
@@ -10,26 +11,28 @@ import { Product } from '../redux/business/productsSlice';
 import { SIZES } from '../constants';
 import { AnimatePresence, MotiView } from 'moti';
 import { useAppSelector } from '../redux/store';
-import Header from './Header';
+
 import { useNavigation } from '@react-navigation/native';
 import Row from './Row';
 
 type Props = {
     product: Product;
     disabled?: boolean;
-
+    containerStyle?: ViewStyle;
     onPress: () => void;
 };
 
-const ProductCard = ({ product, disabled, onPress }: Props) => {
+const ProductCard = ({ product, disabled, onPress, containerStyle }: Props) => {
     const theme = useAppSelector((state) => state.theme);
     const { productImage } = useAppSelector((state) => state.products);
+
     const navigation = useNavigation();
     return (
         <TouchableOpacity
             style={[
                 styles.container,
-                { backgroundColor: theme.BACKGROUND_COLOR }
+                { backgroundColor: theme.BACKGROUND_COLOR },
+                containerStyle
             ]}
             disabled={disabled}
             onPress={onPress}
@@ -86,14 +89,16 @@ const ProductCard = ({ product, disabled, onPress }: Props) => {
 export default ProductCard;
 const styles = StyleSheet.create({
     container: {
-        width: '100%',
-        height: SIZES.height * 0.25,
-        marginBottom: 20,
-        borderBottomLeftRadius: 35,
-        borderBottomRightRadius: 35
+        width: SIZES.isSmallDevice ? 240 : 320,
+        height: SIZES.height * 0.19,
+        maxWidth: 400,
+        overflow: 'hidden',
+        borderRadius: SIZES.radius,
+        marginHorizontal: SIZES.base,
+        marginVertical: SIZES.base
     },
     image: {
-        borderRadius: SIZES.radius * 2,
+        borderRadius: SIZES.radius,
         width: '100%',
         height: '100%',
         overflow: 'hidden'

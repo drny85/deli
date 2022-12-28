@@ -10,6 +10,7 @@ import Stripe from 'stripe';
 import { assignUserType } from './shared';
 
 import { UserRecord } from 'firebase-functions/v1/auth';
+import { AppUser, Coors } from './typing';
 
 const stripe = new Stripe(process.env.STRIPE_TEST_KEY!, {
     apiVersion: '2022-11-15'
@@ -26,7 +27,7 @@ exports.createStripeCustomer = functions.firestore
         try {
             if (context.eventType === 'google.firestore.document.update')
                 return;
-            const data = change.after.data();
+            const data = change.after.data() as AppUser;
 
             if (!data) return;
             const email = data?.email;
@@ -65,6 +66,7 @@ exports.createConnectedBusinessAccount = functions.https.onCall(
             address: string;
             name: string;
             lastName: string;
+            coors: Coors;
         },
         context
     ): Promise<Response> => {
@@ -118,6 +120,18 @@ exports.createConnectedBusinessAccount = functions.https.onCall(
                 return_url: `https://robertdev.net/return_url?accountId=${account.id}`,
                 type: 'account_onboarding'
             });
+
+            const businessData = {
+                owner: { name: data.name, lastName: data.lastName },
+                address: data.address,
+                coors: data.coors,
+                phone: data.phone
+            };
+            await admin
+                .firestore()
+                .collection('business')
+                .doc(context.auth.uid)
+                .set({ ...businessData }, { merge: true });
 
             return { success: true, result: accountLink.url };
         } catch (error) {
@@ -276,10 +290,76 @@ exports.addConnectedAccountToBusiness = functions.https.onCall(
     }
 );
 
+exports.checkForStoreReady = functions.firestore
+    .document('business/{businessId}')
+    .onWrite(async (change, context) => {
+        try {
+            const data = change.after.data() as Business;
+
+            const { stripeAccount, profileCompleted } = data;
+            if (!stripeAccount || profileCompleted) return;
+
+            const { charges_enabled, id } = await stripe.accounts.retrieve(
+                stripeAccount
+            );
+            if (!charges_enabled) {
+                await admin
+                    .firestore()
+                    .collection(`business`)
+                    .doc(context.params.businessId)
+                    .update({ isActive: false, profileCompleted: false });
+            }
+
+            const productsRef = admin
+                .firestore()
+                .collection(`products/${context.params.businessId}/products`);
+
+            const products = await productsRef.get();
+            const hasProducts = products.size > 0;
+            const cardEnabled = charges_enabled;
+            console.log('READY =>', hasProducts, cardEnabled);
+            if (!hasProducts || !cardEnabled) return;
+
+            return admin
+                .firestore()
+                .collection(`business`)
+                .doc(context.params.businessId)
+                .set(
+                    {
+                        isActive: true,
+                        profileCompleted: true,
+                        charges_enabled: cardEnabled,
+                        stripeAccount: id
+                    },
+                    { merge: true }
+                );
+        } catch (error) {
+            console.log(error);
+            throw new functions.https.HttpsError(
+                'aborted',
+                'error creating connected account',
+                error
+            );
+        }
+    });
+
 export async function isAuthorizedToGrantAccess(
     email: string
 ): Promise<boolean> {
     const user = await admin.auth().getUserByEmail(email);
     if (user.customClaims && user.customClaims.type === 'business') return true;
     return false;
+}
+
+export interface Business {
+    id?: string;
+    name: string;
+    email: string;
+    owner: { name: string; lastName: string };
+    stripeAccount: string | null;
+    address?: string;
+    phone?: string;
+    isActive: boolean;
+    userId: string;
+    profileCompleted: boolean;
 }

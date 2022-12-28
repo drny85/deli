@@ -26,6 +26,8 @@ import { FontAwesome } from '@expo/vector-icons';
 import { connectedStore } from '../../../firebase';
 import Loader from '../../../components/Loader';
 import { ConnectedAccountParams } from '../../../types';
+import { Business } from '../../../functions/src';
+import { Coors } from '../../../redux/business/businessSlide';
 
 type Props = NativeStackScreenProps<
     BusinessOnBoardingStackScreens,
@@ -36,6 +38,7 @@ const BusinessInformation = ({ navigation }: Props) => {
     const { business } = useAppSelector((state) => state.business);
     const [loading, setLoading] = useState(false);
     const theme = useAppSelector((state) => state.theme);
+    const [coors, setCoors] = useState<Coors>({ lat: 0, lng: 0 });
     const [phone, setPhone] = useState('');
     const [address, setAddress] = useState('');
     const addressRef = useRef<GooglePlacesAutocompleteRef>(null);
@@ -62,6 +65,7 @@ const BusinessInformation = ({ navigation }: Props) => {
                 businessName: business?.name,
                 phone,
                 address,
+                coors,
                 lastName: business.owner.lastName,
                 name: business.owner.name
             };
@@ -105,7 +109,7 @@ const BusinessInformation = ({ navigation }: Props) => {
                                         _: any,
                                         details: GooglePlaceDetail
                                     ) => {
-                                        console.log(details.geometry.location);
+                                        setCoors(details.geometry.location);
                                         setAddress(details.formatted_address);
                                     }}
                                 />

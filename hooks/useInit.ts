@@ -24,7 +24,10 @@ export default function useCachedResources() {
         'montserrat-bold': require('../assets/fonts/Montserrat-Bold.ttf'),
         lobster: require('../assets/fonts/Lobster-Regular.ttf'),
         tange: require('../assets/fonts/Tangerine-Regular.ttf'),
-        italic: require('../assets/fonts/Montserrat-LightItalic.ttf')
+        italic: require('../assets/fonts/Montserrat-LightItalic.ttf'),
+        raleway: require('../assets/fonts/Raleway-Regular.ttf'),
+        'raleway-bold': require('../assets/fonts/Raleway-Bold.ttf'),
+        'raleway-italic': require('../assets/fonts/Raleway-LightItalic.ttf')
     });
 
     const isDark = useColorScheme() === 'dark';

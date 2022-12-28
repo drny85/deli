@@ -1,4 +1,4 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 export interface Category {
     id?: string;
@@ -16,6 +16,14 @@ const initialState: IState = {
 const categoriesSlice = createSlice({
     name: 'categories',
     initialState,
-    reducers: {}
+    reducers: {
+        fetchCategories(state, { payload }: PayloadAction<Category[]>) {
+            state.categories = payload;
+        },
+        setCurrentCategory(state, { payload }: PayloadAction<Category | null>) {
+            state.category = payload;
+        }
+    }
 });
+export const { fetchCategories, setCurrentCategory } = categoriesSlice.actions;
 export default categoriesSlice.reducer;

@@ -1,8 +1,6 @@
-import { ScrollView, TouchableOpacity, View } from 'react-native';
+import { ScrollView } from 'react-native';
 import React from 'react';
 
-import Text from './Text';
-import { MotiView, MotiScrollView } from 'moti';
 import { Category } from '../redux/business/categoriesSlice';
 import CategoryTile from './CategoryTile';
 import { SIZES } from '../constants';
@@ -12,19 +10,20 @@ type Props = {
 };
 
 const CategoriesList = ({ categories }: Props) => {
-    console.log(categories);
     return (
         <ScrollView
             horizontal
+            showsHorizontalScrollIndicator={false}
             contentContainerStyle={{
                 minHeight: 60,
-                height: SIZES.height * 0.1,
-                
+                height: SIZES.height * 0.1
             }}
         >
-            {categories.map((category) => (
-                <CategoryTile key={category.id} category={category} />
-            ))}
+            {categories
+                .sort((a, b) => (a.name > b.name ? 1 : -1))
+                .map((category) => (
+                    <CategoryTile key={category.id} category={category} />
+                ))}
         </ScrollView>
     );
 };

@@ -35,6 +35,7 @@ const BusinessSignUp = ({ navigation }: Props) => {
     const businessNameRef = useRef<TextInput>(null);
     const passwordRef = useRef<TextInput>(null);
     const [businessName, setBusinessName] = useState('');
+
     const [name, setName] = useState('');
     const [lastName, setlastName] = useState('');
     const [email, setEmail] = useState('');

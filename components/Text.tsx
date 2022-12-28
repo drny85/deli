@@ -17,6 +17,10 @@ interface TextProp extends TextProps {
     lightText?: boolean;
     capitalize?: boolean;
     uppercase?: boolean;
+    raleway?: boolean;
+    raleway_bold?: boolean;
+    raleway_italic?: boolean;
+
     lowercase?: boolean;
     lobster?: boolean;
     py_4?: boolean;
@@ -34,8 +38,24 @@ interface TextProp extends TextProps {
 
 const Text = styled(Animatable.Text)<TextProp>`
     color: ${({ theme }) => (theme.mode === 'dark' ? 'white' : 'black')};
-    font-family: ${({ tange, lobster }) =>
-        tange ? 'tange' : lobster ? 'lobster' : 'montserrat'};
+    font-family: ${({
+        tange,
+        lobster,
+        raleway,
+        raleway_bold,
+        raleway_italic
+    }) =>
+        tange
+            ? 'tange'
+            : lobster
+            ? 'lobster'
+            : raleway
+            ? 'raleway'
+            : raleway_bold
+            ? 'raleway-bold'
+            : raleway_italic
+            ? 'raleway-italic'
+            : 'montserrat'};
 
     ${({ small, medium, large, xlarge }: any) => {
         switch (true) {

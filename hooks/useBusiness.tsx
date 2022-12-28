@@ -12,9 +12,8 @@ export const useBusiness = (businessId: string) => {
         const sub = onSnapshot(businessRef, (snap) => {
             if (!snap.exists()) return;
             setBusiness({ id: snap.id, ...snap.data() });
-            setLoading(false);
         });
-
+        setLoading(false);
         return sub;
     }, [businessId]);
 

@@ -17,6 +17,7 @@ export type BusinessOrdersStackScreens = {
 export type BusinessProductsStackScreens = {
     Products: undefined;
     AddProduct: undefined;
+    AddCategoryScreen: undefined;
 };
 export type BusinessSettingsStackScreens = {
     Settings: undefined;

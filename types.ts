@@ -1,3 +1,5 @@
+import { Coors } from './redux/business/businessSlide';
+
 export interface Theme {
     mode: 'dark' | 'light';
     BACKGROUND_COLOR: string;
@@ -18,4 +20,5 @@ export interface ConnectedAccountParams {
     address: string;
     name: string;
     lastName: string;
+    coors: Coors;
 }

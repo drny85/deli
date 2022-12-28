@@ -14,7 +14,7 @@ type Props = {
 const KeyboardScreen = ({ children }: Props) => {
     return (
         <KeyboardAvoidingView
-            keyboardVerticalOffset={-120}
+            keyboardVerticalOffset={-100}
             style={{ flex: 1 }}
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         >

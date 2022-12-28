@@ -16,8 +16,7 @@ const CategoryTile = ({ category, onPress }: Props) => {
     return (
         <MotiView
             style={{
-                height: 40,
-
+                height: 36,
                 borderRadius: SIZES.radius * 2,
                 backgroundColor: theme.BACKGROUND_COLOR,
                 paddingVertical: SIZES.base,
