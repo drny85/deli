@@ -17,6 +17,7 @@ export interface Business {
     isActive: boolean;
     userId: string;
     profileCompleted: boolean;
+    hasItems?: boolean;
 }
 interface IState {
     business: Business | null;

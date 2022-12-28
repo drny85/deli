@@ -1,4 +1,4 @@
-import { StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Alert, StyleSheet, TouchableOpacity, View } from 'react-native';
 import React from 'react';
 import Screen from '../../../components/Screen';
 import Text from '../../../components/Text';
@@ -83,11 +83,18 @@ const Products = ({}: Props) => {
                                     backgroundColor: theme.BACKGROUND_COLOR
                                 }
                             ]}
-                            onPress={() =>
+                            onPress={() => {
+                                if (!categories.length) {
+                                    Alert.alert(
+                                        'No Categories',
+                                        'Please add at least one category'
+                                    );
+                                    return;
+                                }
                                 navigation.navigate('BusinessProducts', {
                                     screen: 'AddProduct'
-                                })
-                            }
+                                });
+                            }}
                         >
                             <FontAwesome
                                 name="plus"

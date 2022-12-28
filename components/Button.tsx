@@ -82,7 +82,7 @@ const Button = ({
             {isLoading ? (
                 <ActivityIndicator color={theme.CARD_BACKGROUND} size="small" />
             ) : (
-                <Text lightText bold style={[styles.text, textStyle]}>
+                <Text lightText center bold style={[styles.text, textStyle]}>
                     {title}
                 </Text>
             )}

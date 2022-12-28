@@ -29,6 +29,7 @@ import { AppUser } from '../../redux/auth/authSlide';
 type Props = NativeStackScreenProps<AuthScreens, 'BusinessSignup'>;
 
 const BusinessSignUp = ({ navigation }: Props) => {
+    const [loading, setLoading] = useState(false);
     const dispatch = useAppDispatch();
     const theme = useAppSelector((state) => state.theme);
     const emailRef = useRef<TextInput>(null);
@@ -46,6 +47,7 @@ const BusinessSignUp = ({ navigation }: Props) => {
         try {
             const isValid = validateInputs();
             if (!isValid) return;
+            setLoading(true);
             const { user } = await createUserWithEmailAndPassword(
                 auth,
                 email,
@@ -81,6 +83,8 @@ const BusinessSignUp = ({ navigation }: Props) => {
 
             console.log('Error @signup fro business =>', err.message);
             Alert.alert('Error', FIREBASE_ERRORS[err.message] || err.message);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -206,8 +210,8 @@ const BusinessSignUp = ({ navigation }: Props) => {
                     />
 
                     <Button
-                        containerStyle={{ width: '50%', marginVertical: 20 }}
-                        isLoading={false}
+                        large
+                        isLoading={loading}
                         title="Sign Up"
                         onPress={handleSignUp}
                     />
