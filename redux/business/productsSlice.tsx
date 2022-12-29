@@ -10,7 +10,7 @@ export interface Product {
     image: string | null;
     description: string | null;
     sizes: P_Size[];
-    priceMultiplier: number | null;
+    businessId: string;
 }
 interface IState {
     productImage: string | null;

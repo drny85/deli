@@ -14,35 +14,36 @@ import { useLocation } from '../../../hooks/useLocation';
 type Props = {};
 
 const Businesses = ({}: Props) => {
-   const { businessAvailable, isLoading } = useBusinessAvailable();
-   useLocation();
-   const dispatch = useAppDispatch();
-   const navigation = useNavigation();
-   const renderBusinesses: ListRenderItem<Business> = ({ item }) => {
-      return (
-         <BusinessCard
-            business={item}
-            onPress={() => {
-               dispatch(setBusiness(item));
-               navigation.navigate('ConsumerHome', {
-                  screen: 'BusinessPage'
-               });
-            }}
-         />
-      );
-   };
+    const { businessAvailable, isLoading } = useBusinessAvailable();
+    useLocation();
+    const dispatch = useAppDispatch();
+    const navigation = useNavigation();
+    const renderBusinesses: ListRenderItem<Business> = ({ item }) => {
+        return (
+            <BusinessCard
+                business={item}
+                onPress={() => {
+                    dispatch(setBusiness(item));
+                    navigation.navigate('ConsumerHome', {
+                        screen: 'BusinessPage'
+                    });
+                }}
+            />
+        );
+    };
 
-   if (isLoading) return <Loader />;
+    if (isLoading) return <Loader />;
 
-   return (
-      <Screen>
-         <FlatList
-            data={businessAvailable}
-            keyExtractor={(item) => item.id!}
-            renderItem={renderBusinesses}
-         />
-      </Screen>
-   );
+    return (
+        <Screen>
+            <FlatList
+                showsVerticalScrollIndicator={false}
+                data={businessAvailable}
+                keyExtractor={(item) => item.id!}
+                renderItem={renderBusinesses}
+            />
+        </Screen>
+    );
 };
 
 export default Businesses;

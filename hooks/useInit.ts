@@ -14,6 +14,8 @@ import { auth } from '../firebase';
 import { switchTheme } from '../redux/themeSlide';
 import { autoLogin } from '../redux/auth/authActions';
 import { getBusiness } from '../redux/business/businessActions';
+import { loadCart } from '../utils/saveCart';
+import { setCart } from '../redux/consumer/cartSlide';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -69,17 +71,22 @@ export default function useCachedResources() {
                 LogBox.ignoreAllLogs(true);
 
                 autoSignIn();
-              
+                const cart = await loadCart();
+                if (cart) {
+                    console.log('CART FROM INIT', cart);
+                    dispatch(setCart(cart));
+                }
 
                 isDark
                     ? dispatch(switchTheme(darkTheme))
                     : dispatch(switchTheme(lightTheme));
 
-                    await new Promise(resolve => setTimeout(resolve, 700));
+                if (fontsLoaded) {
+                    setLoadingComplete(true);
+                }
             } catch (error) {
                 console.log(error);
             } finally {
-                setLoadingComplete(true);
             }
         }
 
@@ -87,17 +94,21 @@ export default function useCachedResources() {
     }, [fontsLoaded]);
 
     const onLayoutRootView = useCallback(async () => {
-        if (isLoadingComplete) {
-          // This tells the splash screen to hide immediately! If we call this after
-          // `setAppIsReady`, then we may see a blank screen while the app is
-          // loading its initial state and rendering its first pixels. So instead,
-          // we hide the splash screen once we know the root view has already
-          // performed layout.
-          await SplashScreen.hideAsync();
+        try {
+            if (isLoadingComplete) {
+                // This tells the splash screen to hide immediately! If we call this after
+                // `setAppIsReady`, then we may see a blank screen while the app is
+                // loading its initial state and rendering its first pixels. So instead,
+                // we hide the splash screen once we know the root view has already
+                // performed layout.
+                await SplashScreen.hideAsync();
+            }
+        } catch (error) {
+            console.log(error);
         }
-      }, [isLoadingComplete]);
-    
-      onLayoutRootView();
+    }, [isLoadingComplete]);
+
+    onLayoutRootView();
 
     return isLoadingComplete;
 }

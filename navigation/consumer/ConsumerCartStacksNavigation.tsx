@@ -13,11 +13,7 @@ const ConsumerCartStackNavigation = () => {
                 animation: 'slide_from_bottom'
             }}
         >
-            <Screen
-                name="Cart"
-                component={Cart}
-                options={{ presentation: 'fullScreenModal' }}
-            />
+            <Screen name="Cart" component={Cart} />
         </Navigator>
     );
 };

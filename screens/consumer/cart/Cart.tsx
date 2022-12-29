@@ -1,16 +1,21 @@
-import { FlatList, ListRenderItem, View } from 'react-native';
+import {
+    Alert,
+    FlatList,
+    ListRenderItem,
+    TouchableOpacity,
+    View
+} from 'react-native';
 import React from 'react';
 import Screen from '../../../components/Screen';
 import Text from '../../../components/Text';
 import { useAppDispatch, useAppSelector } from '../../../redux/store';
-import {
-    addToCart,
-    CartItem,
-    removeFromCart
-} from '../../../redux/consumer/cartSlide';
-import Row from '../../../components/Row';
-import { SIZES } from '../../../constants';
-import Quantifier from '../../../components/Quantifier';
+import { CartItem, setCart } from '../../../redux/consumer/cartSlide';
+
+import CartListItem from '../../../components/CartListItem';
+import Header from '../../../components/Header';
+import { resetCart } from '../../../utils/saveCart';
+import Button from '../../../components/Button';
+import { FontAwesome } from '@expo/vector-icons';
 
 type Props = {};
 
@@ -19,73 +24,43 @@ const Cart = ({}: Props) => {
     const theme = useAppSelector((state) => state.theme);
     const dispatch = useAppDispatch();
     const renderCartItems: ListRenderItem<CartItem> = ({ item, index }) => {
-        return (
-            <View
-                style={{
-                    width: '100%',
-                    padding: SIZES.base,
-                    backgroundColor: theme.BACKGROUND_COLOR,
-                    marginVertical: SIZES.base,
-                    elevation: 4,
-                    shadowOffset: { width: 3, height: 3 },
-                    shadowColor: theme.SHADOW_COLOR,
-                    shadowOpacity: 0.4,
-                    shadowRadius: 4,
-                    borderRadius: SIZES.base
-                }}
-            >
-                <Row horizontalAlign="space-between">
-                    <Row
-                        containerStyle={{
-                            flexGrow: 1,
-                            width: '45%'
-                        }}
-                        horizontalAlign="flex-start"
-                    >
-                        <Text left>{item.quantity}</Text>
-                        <Text px_4>{item.name}</Text>
-                    </Row>
-                    <Row
-                        containerStyle={{
-                            flexGrow: 1,
-                            width: '45%'
-                        }}
-                        horizontalAlign="space-between"
-                    >
-                        <Text left px_4>
-                            {item.size === null ? item.price : item.size.price}
-                            ea
-                        </Text>
-                        <Text>
-                            {
-                                +(
-                                    +(item.size === null
-                                        ? item.price
-                                        : item.size.price) * item.quantity
-                                ).toFixed(2)
-                            }
-                        </Text>
-                    </Row>
-                </Row>
-                <Quantifier
-                    onPressLeft={() => {
-                        console.log('removing');
-                        dispatch(removeFromCart({ ...item, quantity: 1 }));
-                    }}
-                    onPressRight={() => {
-                        console.log('Adding');
-                        dispatch(addToCart({ ...item, quantity: 1 }));
-                    }}
-                    quantity={item.quantity}
-                />
-            </View>
-        );
+        return <CartListItem item={item} />;
+    };
+
+    const handleDeleteCart = () => {
+        dispatch(setCart({ quantity: 0, items: [], total: 0 }));
+        resetCart();
     };
     return (
         <Screen>
-            <Text title center>
-                Cart{' '}
-            </Text>
+            <Header
+                title="Cart"
+                rightIcon={
+                    total > 0 ? (
+                        <TouchableOpacity
+                            style={{ padding: 12 }}
+                            onPress={() => {
+                                Alert.alert('Deleting Cart', 'Are you sure?', [
+                                    { text: 'Cancel', style: 'cancel' },
+                                    {
+                                        text: 'Yes, Delete',
+                                        onPress: handleDeleteCart,
+                                        style: 'destructive'
+                                    }
+                                ]);
+                            }}
+                        >
+                            <FontAwesome
+                                name="trash-o"
+                                size={26}
+                                color={theme.TEXT_COLOR}
+                            />
+                        </TouchableOpacity>
+                    ) : (
+                        <View style={{ paddingRight: 12 }} />
+                    )
+                }
+            />
             <View style={{ flex: 1 }}>
                 <FlatList
                     data={items}
@@ -93,6 +68,21 @@ const Cart = ({}: Props) => {
                     renderItem={renderCartItems}
                 />
             </View>
+            {total > 0 && (
+                <View
+                    style={{
+                        position: 'absolute',
+                        bottom: 20,
+                        alignSelf: 'center',
+                        width: '70%'
+                    }}
+                >
+                    <Button
+                        title={`View Order $${total.toFixed(2)}`}
+                        onPress={() => {}}
+                    />
+                </View>
+            )}
         </Screen>
     );
 };

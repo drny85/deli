@@ -1,4 +1,5 @@
 import {
+    Alert,
     ImageBackground,
     ScrollView,
     StyleSheet,
@@ -43,6 +44,8 @@ const ProductDetails = ({
     const [quantity, setQuatity] = React.useState<number>(1);
     console.log(total, items, qty);
 
+    const emptyCartAndAddNewProduct = () => {};
+
     const handleAddToCart = async () => {
         try {
             const item: CartItem = {
@@ -57,6 +60,32 @@ const ProductDetails = ({
             console.log(error);
         }
     };
+
+    const checkIfItemIfFromCurrentStore = React.useCallback(async () => {
+        if (items.length > 0) {
+            if (items[0].businessId !== product.businessId) {
+                Alert.alert(
+                    'Items in Cart',
+                    'You are already shopping from another business, Switch business?',
+                    [
+                        { text: 'Stay Here', style: 'cancel' },
+                        {
+                            text: 'Switch',
+                            onPress: emptyCartAndAddNewProduct,
+                            style: 'destructive'
+                        }
+                    ]
+                );
+                return false;
+            } else {
+                console.log('UP EHRE');
+                await handleAddToCart();
+            }
+        } else {
+            console.log('HERE');
+            await handleAddToCart();
+        }
+    }, [items.length]);
 
     return (
         <View style={{ flex: 1, backgroundColor: theme.BACKGROUND_COLOR }}>
@@ -180,7 +209,7 @@ const ProductDetails = ({
                     }
                     containerStyle={{ paddingVertical: SIZES.padding * 0.8 }}
                     title={`Add to Cart`}
-                    onPress={handleAddToCart}
+                    onPress={checkIfItemIfFromCurrentStore}
                 />
             </View>
         </View>

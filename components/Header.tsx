@@ -10,18 +10,11 @@ import { useAppSelector } from '../redux/store';
 type Props = {
     title?: string;
     onPressBack?: () => void;
-    onPressRight?: () => void;
     iconColor?: string;
-    rightIcon?: React.ComponentProps<typeof FontAwesome>['name'];
+    rightIcon?: React.ReactNode;
 };
 
-const Header = ({
-    onPressBack,
-    onPressRight,
-    title,
-    iconColor,
-    rightIcon
-}: Props) => {
+const Header = ({ onPressBack, title, iconColor, rightIcon }: Props) => {
     const theme = useAppSelector((state) => state.theme);
     return (
         <MotiView
@@ -51,20 +44,7 @@ const Header = ({
                 ) : (
                     <View />
                 )}
-                {onPressRight ? (
-                    <TouchableOpacity
-                        style={{ padding: 10 }}
-                        onPress={onPressRight}
-                    >
-                        <FontAwesome
-                            name={rightIcon ? rightIcon : 'info'}
-                            size={26}
-                            color={iconColor ? iconColor : theme.TEXT_COLOR}
-                        />
-                    </TouchableOpacity>
-                ) : (
-                    <View />
-                )}
+                {rightIcon ? rightIcon : <View />}
             </Row>
         </MotiView>
     );

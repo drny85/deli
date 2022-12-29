@@ -1,4 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { saveCart } from '../../utils/saveCart';
 import { P_Size } from '../../utils/sizes';
 import { Product } from '../business/productsSlice';
 
@@ -6,7 +7,7 @@ export interface CartItem extends Product {
     quantity: number;
     size: P_Size | null;
 }
-interface IState {
+export interface IState {
     items: CartItem[];
     quantity: number;
     total: number;
@@ -23,12 +24,13 @@ const cartSlide = createSlice({
     reducers: {
         addToCart: (state, { payload }: PayloadAction<CartItem>) => {
             // IF PRODUCT IS ALREADY IN  CART AND COME IN SIZES
-            console.log('ADDING', payload);
+
             const productIndex = state.items.findIndex(
                 (item) =>
                     item.id === payload.id &&
                     item.size &&
-                    item.size.id === payload.size?.id
+                    payload.size &&
+                    item.size.id === payload.size.id
             );
             if (productIndex !== -1) {
                 // FOUND ITEM IN CART WITH SAME SIZE
@@ -36,6 +38,7 @@ const cartSlide = createSlice({
                 state.quantity += payload.quantity;
                 state.total +=
                     payload.size === null ? +payload.price : payload.size.price;
+                saveCart(state);
             } else {
                 // CART OR COME IN SIZES
                 const index = state.items.findIndex(
@@ -49,6 +52,7 @@ const cartSlide = createSlice({
                         payload.size === null
                             ? +payload.price
                             : payload.size.price;
+                    saveCart(state);
                 } else {
                     console.log('123');
                     state.items = [...state.items, payload];
@@ -58,6 +62,8 @@ const cartSlide = createSlice({
                             ? +payload.price * payload.quantity + state.total
                             : state.total +
                               payload.size.price * payload.quantity;
+
+                    saveCart(state);
                 }
             }
         },
@@ -76,6 +82,7 @@ const cartSlide = createSlice({
                         payload.size === null
                             ? +payload.price
                             : payload.size.price;
+                    saveCart(state);
                 } else {
                     state.items = state.items.filter(
                         (item) => item.id !== payload.id
@@ -85,6 +92,7 @@ const cartSlide = createSlice({
                         payload.size === null
                             ? +payload.price
                             : payload.size.price;
+                    saveCart(state);
                 }
             } else {
                 const indexP = state.items.findIndex(
@@ -98,6 +106,7 @@ const cartSlide = createSlice({
                             payload.size === null
                                 ? +payload.price
                                 : payload.size.price;
+                        saveCart(state);
                     } else {
                         state.items = state.items.filter(
                             (item) => item.id !== payload.id
@@ -107,14 +116,18 @@ const cartSlide = createSlice({
                             payload.size === null
                                 ? +payload.price
                                 : payload.size.price;
+                        saveCart(state);
                     }
                 } else {
                     console.log('DOWM HERE');
                 }
             }
+        },
+        setCart: (state, { payload }: PayloadAction<IState>) => {
+            return payload;
         }
     }
 });
-export const { addToCart, removeFromCart } = cartSlide.actions;
+export const { addToCart, removeFromCart, setCart } = cartSlide.actions;
 
 export default cartSlide.reducer;

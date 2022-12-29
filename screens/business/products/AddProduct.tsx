@@ -30,11 +30,13 @@ import { useSaveImage } from '../../../utils/saveImage';
 import { addProduct } from '../../../redux/business/productsActions';
 import { PRODUCT_SIZES, P_Size } from '../../../utils/sizes';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import Loader from '../../../components/Loader';
 
 type Props = {};
 
 const AddProduct = ({}: Props) => {
     const theme = useAppSelector((state) => state.theme);
+    const { business } = useAppSelector((state) => state.business);
     const [sizes, setSizes] = useState<P_Size[]>([]);
     const [increase, setIncrease] = useState(0.1);
     const dispatch = useAppDispatch();
@@ -52,11 +54,11 @@ const AddProduct = ({}: Props) => {
         price: '',
         category: null,
         description: '',
+        businessId: business?.id!,
         sizes:
             sizes.length > 0
                 ? sizes.sort((a, b) => (a.id > b.id ? 1 : -1)).reverse()
-                : [],
-        priceMultiplier: sizes.length > 0 ? increase : null
+                : []
     });
 
     const { pickImage } = useImage();
@@ -69,7 +71,7 @@ const AddProduct = ({}: Props) => {
             const newProduct: Product = {
                 ...product,
                 sizes,
-                priceMultiplier: increase
+                businessId: business?.id!
             };
             const { payload } = await dispatch(addProduct(newProduct));
             if (payload) {
@@ -90,7 +92,7 @@ const AddProduct = ({}: Props) => {
             category: null,
             description: '',
             sizes: [],
-            priceMultiplier: null
+            businessId: business?.id!
         });
         navigation.goBack();
     };
@@ -145,6 +147,8 @@ const AddProduct = ({}: Props) => {
             setSizes(sizes);
         }
     }, [productImage, comeInSizes]);
+
+    if (!business) return <Loader />;
     return (
         <KeyboardAwareScrollView
             keyboardShouldPersistTaps="handled"
@@ -164,7 +168,6 @@ const AddProduct = ({}: Props) => {
                     iconColor={
                         productImage ? theme.WHITE_COLOR : theme.TEXT_COLOR
                     }
-                    onPressRight={() => {}}
                     onPressBack={() => navigation.goBack()}
                 />
             </View>
