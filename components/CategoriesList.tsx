@@ -6,26 +6,27 @@ import CategoryTile from './CategoryTile';
 import { SIZES } from '../constants';
 
 type Props = {
-    categories: Category[];
+   categories: Category[];
 };
 
 const CategoriesList = ({ categories }: Props) => {
-    return (
-        <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{
-                minHeight: 60,
-                height: SIZES.height * 0.1
-            }}
-        >
-            {categories
-                .sort((a, b) => (a.name > b.name ? 1 : -1))
-                .map((category) => (
-                    <CategoryTile key={category.id} category={category} />
-                ))}
-        </ScrollView>
-    );
+   return (
+      <ScrollView
+         horizontal
+         showsHorizontalScrollIndicator={false}
+         contentContainerStyle={{
+            minHeight: 80,
+            paddingVertical: SIZES.base
+            // height: SIZES.height * 0.1
+         }}
+      >
+         {categories
+            .sort((a, b) => (a.name > b.name ? 1 : -1))
+            .map((category) => (
+               <CategoryTile key={category.id} category={category} />
+            ))}
+      </ScrollView>
+   );
 };
 
 export default CategoriesList;

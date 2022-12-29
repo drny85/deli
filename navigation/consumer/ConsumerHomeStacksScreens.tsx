@@ -1,16 +1,28 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import Business from '../../screens/consumer/home/Business';
+import Businesses from '../../screens/consumer/home/Businesses';
+import BusinessPage from '../../screens/consumer/home/BusinessPage';
+import ProductDetails from '../../screens/consumer/home/ProductDetails';
 
 import { ConsumerHomeStackScreens } from './typing';
 
 const { Navigator, Screen } =
-    createNativeStackNavigator<ConsumerHomeStackScreens>();
+   createNativeStackNavigator<ConsumerHomeStackScreens>();
 const ConsumerHomeStackNavigation = () => {
-    return (
-        <Navigator screenOptions={{ headerShown: false }}>
-            <Screen name="Business" component={Business} />
-        </Navigator>
-    );
+   return (
+      <Navigator screenOptions={{ headerShown: false }}>
+         <Screen name="Businesses" component={Businesses} />
+         <Screen
+            name="BusinessPage"
+            component={BusinessPage}
+            options={{ presentation: 'fullScreenModal' }}
+         />
+         <Screen
+            name="ProductDetails"
+            component={ProductDetails}
+            options={{ presentation: 'fullScreenModal' }}
+         />
+      </Navigator>
+   );
 };
 
 export default ConsumerHomeStackNavigation;

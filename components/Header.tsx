@@ -12,9 +12,16 @@ type Props = {
     onPressBack?: () => void;
     onPressRight?: () => void;
     iconColor?: string;
+    rightIcon?: React.ComponentProps<typeof FontAwesome>['name'];
 };
 
-const Header = ({ onPressBack, onPressRight, title, iconColor }: Props) => {
+const Header = ({
+    onPressBack,
+    onPressRight,
+    title,
+    iconColor,
+    rightIcon
+}: Props) => {
     const theme = useAppSelector((state) => state.theme);
     return (
         <MotiView
@@ -48,7 +55,13 @@ const Header = ({ onPressBack, onPressRight, title, iconColor }: Props) => {
                     <TouchableOpacity
                         style={{ padding: 10 }}
                         onPress={onPressRight}
-                    ></TouchableOpacity>
+                    >
+                        <FontAwesome
+                            name={rightIcon ? rightIcon : 'info'}
+                            size={26}
+                            color={iconColor ? iconColor : theme.TEXT_COLOR}
+                        />
+                    </TouchableOpacity>
                 ) : (
                     <View />
                 )}

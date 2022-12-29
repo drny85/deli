@@ -9,8 +9,8 @@ import { useAppDispatch } from '../../../redux/store';
 
 import { useNavigation } from '@react-navigation/native';
 import BusinessCard from '../../../components/BusinessCard';
-import { LOCATION_TASK_NAME, useLocation } from '../../../hooks/useLocation';
-import * as TaskManager from 'expo-task-manager';
+import { useLocation } from '../../../hooks/useLocation';
+
 type Props = {};
 
 const Businesses = ({}: Props) => {
@@ -31,9 +31,7 @@ const Businesses = ({}: Props) => {
          />
       );
    };
-   console.log(isLoading);
 
-   useEffect(() => {}, []);
    if (isLoading) return <Loader />;
 
    return (

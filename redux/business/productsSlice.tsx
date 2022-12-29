@@ -3,37 +3,37 @@ import { P_Size } from '../../utils/sizes';
 import { Category } from './categoriesSlice';
 
 export interface Product {
-    id?: string;
-    name: string;
-    category: Category | null;
-    price: string;
-    image: string | null;
-    description: string | null;
-    sizes: P_Size[];
-    priceMultiplier: number | null;
+   id?: string;
+   name: string;
+   category: Category | null;
+   price: string | number;
+   image: string | null;
+   description: string | null;
+   sizes: P_Size[];
+   priceMultiplier: number | null;
 }
 interface IState {
-    productImage: string | null;
-    products: Product[];
-    product: Product | null;
+   productImage: string | null;
+   products: Product[];
+   product: Product | null;
 }
 const initialState: IState = {
-    productImage: null,
-    product: null,
-    products: []
+   productImage: null,
+   product: null,
+   products: []
 };
 
 const productsSlice = createSlice({
-    name: 'products',
-    initialState,
-    reducers: {
-        setProductImage: (state, { payload }: PayloadAction<string | null>) => {
-            state.productImage = payload;
-        },
-        fetchProducts: (state, { payload }: PayloadAction<Product[]>) => {
-            state.products = payload;
-        }
-    }
+   name: 'products',
+   initialState,
+   reducers: {
+      setProductImage: (state, { payload }: PayloadAction<string | null>) => {
+         state.productImage = payload;
+      },
+      fetchProducts: (state, { payload }: PayloadAction<Product[]>) => {
+         state.products = payload;
+      }
+   }
 });
 
 export const { setProductImage, fetchProducts } = productsSlice.actions;
