@@ -4,6 +4,7 @@ import authSlide from './auth/authSlide';
 import businessSlide from './business/businessSlide';
 import categoriesSlice from './business/categoriesSlice';
 import productsSlice from './business/productsSlice';
+import cartSlide from './consumer/cartSlide';
 import themeSlide from './themeSlide';
 
 const reducer = {
@@ -11,7 +12,8 @@ const reducer = {
     auth: authSlide,
     business: businessSlide,
     categories: categoriesSlice,
-    products: productsSlice
+    products: productsSlice,
+    cart:cartSlide
 };
 
 const store = configureStore({

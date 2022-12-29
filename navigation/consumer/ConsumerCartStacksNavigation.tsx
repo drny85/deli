@@ -7,8 +7,17 @@ const { Navigator, Screen } =
     createNativeStackNavigator<ConsumerCartStackScreens>();
 const ConsumerCartStackNavigation = () => {
     return (
-        <Navigator screenOptions={{ headerShown: false }}>
-            <Screen name="Cart" component={Cart} />
+        <Navigator
+            screenOptions={{
+                headerShown: false,
+                animation: 'slide_from_bottom'
+            }}
+        >
+            <Screen
+                name="Cart"
+                component={Cart}
+                options={{ presentation: 'fullScreenModal' }}
+            />
         </Navigator>
     );
 };

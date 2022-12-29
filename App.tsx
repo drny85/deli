@@ -5,20 +5,7 @@ import { ThemeProvider } from 'styled-components/native';
 import store, { useAppSelector } from './redux/store';
 
 import useCachedResources from './hooks/useInit';
-
-import * as TaskManager from 'expo-task-manager';
-
 import Loader from './components/Loader';
-TaskManager.getRegisteredTasksAsync()
-   .then((tasks) => {
-      console.log('T', tasks);
-   })
-   .catch((err) => console.log(err));
-
-TaskManager.defineTask(LOCATION_TASK_NAME, ({ data, error }) => {
-   console.log('TASK', data, error);
-});
-
 import { DefaultTheme, NavigationContainer } from '@react-navigation/native';
 import { useEffect, useState } from 'react';
 import AdminBottomTabs from './navigation/admin/AdminBottomTabs';
@@ -62,7 +49,7 @@ const App = () => {
             ) : user &&
               user.type === 'business' &&
               business &&
-              business.stripeAccount !== null ? (
+              business.profileCompleted ? (
                <BusinessBottomTabs />
             ) : user &&
               user.type === 'business' &&

@@ -3,6 +3,6 @@
     "trailingComma": "none",
     "singleQuote": true,
     "printWidth": 80,
-    "tabWidth": 3,
+    "tabWidth": 4,
     "embeddedLanguageFormatting": "auto"
 }

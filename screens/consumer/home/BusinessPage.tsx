@@ -11,6 +11,7 @@ import Loader from '../../../components/Loader';
 
 import Header from '../../../components/Header';
 import { useNavigation } from '@react-navigation/native';
+import { setCurrentProduct } from '../../../redux/business/productsSlice';
 
 const BusinessPage = () => {
     const {
@@ -36,6 +37,7 @@ const BusinessPage = () => {
                 categories={categories}
                 products={products}
                 onPressProduct={(product) => {
+                    dispatch(setCurrentProduct(product));
                     navigation.navigate('ConsumerHome', {
                         screen: 'ProductDetails',
                         params: { product: product }
