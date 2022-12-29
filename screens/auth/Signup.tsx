@@ -107,8 +107,8 @@ const Signup = ({ navigation }: Props) => {
         });
 
         return () => {
-            Keyboard.removeSubscription(sub);
-            Keyboard.removeSubscription(hide);
+            Keyboard.removeAllListeners('keyboardWillShow');
+            Keyboard.removeAllListeners('keyboardWillHide');
         };
     }, []);
 
@@ -197,12 +197,23 @@ const Signup = ({ navigation }: Props) => {
                         }
                     />
 
-                    <Button
-                        containerStyle={{ width: '50%', marginVertical: 20 }}
-                        isLoading={false}
-                        title="Sign Up"
-                        onPress={handleSignUp}
-                    />
+                    <View
+                        style={{
+                            width: '80%',
+                            alignSelf: 'center',
+                            marginVertical: 20
+                        }}
+                    >
+                        <Button
+                            containerStyle={{
+                                width: '100%'
+                            }}
+                            textStyle={{ width: '100%' }}
+                            isLoading={false}
+                            title="Sign Up"
+                            onPress={handleSignUp}
+                        />
+                    </View>
                 </View>
                 <AnimatePresence>
                     {notTyping && (

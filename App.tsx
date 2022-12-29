@@ -15,7 +15,7 @@ import ConsumerBottomTabs from './navigation/consumer/ConsumerBottomTabs';
 import { LOCATION_TASK_NAME } from './hooks/useLocation';
 
 const App = () => {
-    const isReady = useCachedResources();
+    const { isLoadingComplete, onLayoutRootView } = useCachedResources();
     const theme = useAppSelector((state) => state.theme);
     const [processing, setProcessing] = useState(true);
     const { user, loading } = useAppSelector((state) => state.auth);
@@ -23,12 +23,13 @@ const App = () => {
         (state) => state.business
     );
     useEffect(() => {
-        if (isReady && !loading && !businessLoading) {
+        if (isLoadingComplete && !loading && !businessLoading) {
+            onLayoutRootView();
             setProcessing(false);
         } else {
             setProcessing(true);
         }
-    }, [isReady, loading, businessLoading]);
+    }, [isLoadingComplete, loading, businessLoading]);
 
     // console.log('PROS', processing);
     if (processing) return <Loader />;

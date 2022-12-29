@@ -12,7 +12,7 @@ import { FontAwesome } from '@expo/vector-icons';
 import Header from '../../../components/Header';
 import { CommonActions, useNavigation } from '@react-navigation/native';
 import { setCurrentProduct } from '../../../redux/business/productsSlice';
-import { MotiView } from 'moti';
+import { AnimatePresence, MotiView } from 'moti';
 import Row from '../../../components/Row';
 import { SIZES } from '../../../constants';
 
@@ -54,31 +54,56 @@ const BusinessPage = () => {
                 >
                     {business?.name}
                 </Text>
-                <TouchableOpacity
-                    style={[
-                        styles.rightIcon,
-                        {
-                            backgroundColor: theme.BACKGROUND_COLOR,
-                            shadowColor: theme.SHADOW_COLOR
-                        }
-                    ]}
-                    onPress={() => {
-                        navigation.navigate('ConsumerCart', { screen: 'Cart' });
-                    }}
-                >
-                    <FontAwesome
-                        name="shopping-cart"
-                        size={24}
-                        color={theme.TEXT_COLOR}
-                    />
-                    <MotiView
-                        style={[styles.qty, { backgroundColor: theme.ASCENT }]}
-                    >
-                        <Text lightText bold>
-                            {quantity}
-                        </Text>
-                    </MotiView>
-                </TouchableOpacity>
+                <AnimatePresence>
+                    {quantity > 0 && (
+                        <MotiView
+                            from={{ opacity: 0, scale: 0 }}
+                            animate={{ opacity: 1, scale: [1, 1.1, 1] }}
+                            exit={{ opacity: 0, scale: 0 }}
+                            transition={{ type: 'timing' }}
+                        >
+                            <TouchableOpacity
+                                style={[
+                                    styles.rightIcon,
+                                    {
+                                        backgroundColor: theme.BACKGROUND_COLOR,
+                                        shadowColor: theme.SHADOW_COLOR
+                                    }
+                                ]}
+                                onPress={() => {
+                                    navigation.navigate('ConsumerCart', {
+                                        screen: 'Cart'
+                                    });
+                                }}
+                            >
+                                <FontAwesome
+                                    name="shopping-cart"
+                                    size={24}
+                                    color={theme.TEXT_COLOR}
+                                />
+                                <MotiView
+                                    transition={{
+                                        type: 'timing',
+                                        duration: 800,
+                                        delay: 1000
+                                    }}
+                                    animate={{
+                                        scale: quantity > 0 ? [1, 1.1, 1] : 1
+                                    }}
+                                    style={[
+                                        styles.qty,
+                                        { backgroundColor: theme.ASCENT }
+                                    ]}
+                                >
+                                    <Text lightText bold>
+                                        {quantity}
+                                    </Text>
+                                </MotiView>
+                            </TouchableOpacity>
+                        </MotiView>
+                    )}
+                </AnimatePresence>
+                {quantity === 0 && <View />}
             </Row>
             <ProductsList
                 categories={categories}

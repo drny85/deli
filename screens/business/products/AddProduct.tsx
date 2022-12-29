@@ -196,7 +196,7 @@ const AddProduct = ({}: Props) => {
                 />
                 <InputField
                     keyboardType="numeric"
-                    value={product.price}
+                    value={product.price as string}
                     maxLenght={5}
                     placeholder="Ex. 2.99"
                     label="Product's Price"

@@ -10,12 +10,14 @@ import * as SplashScreen from 'expo-splash-screen';
 import useColorScheme from './useColorScheme';
 import { LogBox } from 'react-native';
 
-import { auth } from '../firebase';
+import { auth, usersCollection } from '../firebase';
 import { switchTheme } from '../redux/themeSlide';
 import { autoLogin } from '../redux/auth/authActions';
 import { getBusiness } from '../redux/business/businessActions';
 import { loadCart } from '../utils/saveCart';
 import { setCart } from '../redux/consumer/cartSlide';
+import { AppUser } from '../redux/auth/authSlide';
+import { doc, getDoc } from 'firebase/firestore';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -35,22 +37,32 @@ export default function useCachedResources() {
     const isDark = useColorScheme() === 'dark';
     const dispatch = useAppDispatch();
 
+    const getUser = async (userId: string): Promise<AppUser | null> => {
+        try {
+            const ref = doc(usersCollection, userId);
+            const user = await getDoc(ref);
+            if (!user.exists()) return null;
+            return { id: user.id, ...user.data() };
+        } catch (error) {
+            return null;
+        }
+    };
+
     const autoSignIn = async () => {
         try {
             auth.onAuthStateChanged(async (authState) => {
                 if (authState?.uid) {
-                    const result = await authState.getIdTokenResult();
-                    const claims = result.claims;
+                    const data = await getUser(authState.uid);
 
-                    if (claims.type === 'business') {
+                    if (data?.type === 'business') {
                         dispatch(getBusiness(authState.uid));
                     }
 
+                    console.log('TYPE', data?.type);
                     dispatch(
                         autoLogin({
                             userId: authState.uid,
-                            emailVerified: authState.emailVerified,
-                            type: claims.type
+                            emailVerified: authState.emailVerified
                         })
                     );
 
@@ -73,7 +85,6 @@ export default function useCachedResources() {
                 autoSignIn();
                 const cart = await loadCart();
                 if (cart) {
-                    console.log('CART FROM INIT', cart);
                     dispatch(setCart(cart));
                 }
 
@@ -81,12 +92,11 @@ export default function useCachedResources() {
                     ? dispatch(switchTheme(darkTheme))
                     : dispatch(switchTheme(lightTheme));
 
-                if (fontsLoaded) {
-                    setLoadingComplete(true);
-                }
+                await new Promise((resolve) => setTimeout(resolve, 1000));
             } catch (error) {
                 console.log(error);
             } finally {
+                setLoadingComplete(true);
             }
         }
 
@@ -108,7 +118,5 @@ export default function useCachedResources() {
         }
     }, [isLoadingComplete]);
 
-    onLayoutRootView();
-
-    return isLoadingComplete;
+    return { isLoadingComplete, onLayoutRootView };
 }

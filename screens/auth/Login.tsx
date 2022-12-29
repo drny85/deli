@@ -52,8 +52,7 @@ const Login = ({ navigation }: Props) => {
             dispatch(
                 autoLogin({
                     userId: user.uid,
-                    emailVerified: user.emailVerified,
-                    type: data.type
+                    emailVerified: user.emailVerified
                 })
             );
         } catch (error) {

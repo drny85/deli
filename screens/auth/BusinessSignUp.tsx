@@ -23,8 +23,10 @@ import Row from '../../components/Row';
 import { SIZES } from '../../constants';
 import { createBusiness } from '../../redux/business/businessActions';
 import { Business } from '../../redux/business/businessSlide';
-import { autoLogin, createUser } from '../../redux/auth/authActions';
+
 import { AppUser } from '../../redux/auth/authSlide';
+import Loader from '../../components/Loader';
+import { createUser } from '../../redux/auth/authActions';
 
 type Props = NativeStackScreenProps<AuthScreens, 'BusinessSignup'>;
 
@@ -65,7 +67,15 @@ const BusinessSignUp = ({ navigation }: Props) => {
                 email,
                 isActive: true,
                 userId: user.uid,
-                profileCompleted: false
+                profileCompleted: false,
+                address: null,
+                coors: null,
+                hasItems: false,
+                minimunDelivery: null,
+                phone: null,
+                hours: null,
+                image: null,
+                charges_enabled: false
             };
             const userData: AppUser = {
                 id: user.uid,
@@ -75,9 +85,11 @@ const BusinessSignUp = ({ navigation }: Props) => {
                 emailVerified: user.emailVerified,
                 type: 'business'
             };
+            console.log('BUS =>', business);
             await dispatch(createBusiness(business));
-
             await dispatch(createUser(userData));
+
+            navigation.navigate('Login');
         } catch (error) {
             const err = error as any;
 
@@ -110,6 +122,17 @@ const BusinessSignUp = ({ navigation }: Props) => {
         if (!password) {
             Alert.alert('Error', 'please type your password');
             passwordRef.current?.focus();
+            return false;
+        }
+        if (!comfirm) {
+            Alert.alert('Error', 'please type your password');
+
+            return false;
+        }
+
+        if (password !== comfirm) {
+            Alert.alert('Error', 'please type your password');
+
             return false;
         }
 
@@ -209,12 +232,24 @@ const BusinessSignUp = ({ navigation }: Props) => {
                         }
                     />
 
-                    <Button
-                        large
-                        isLoading={loading}
-                        title="Sign Up"
-                        onPress={handleSignUp}
-                    />
+                    <View
+                        style={{
+                            width: '80%',
+                            alignSelf: 'center',
+                            marginVertical: 20
+                        }}
+                    >
+                        <Button
+                            containerStyle={{
+                                width: '100%'
+                            }}
+                            textStyle={{ width: '100%' }}
+                            isLoading={loading}
+                            disabled={loading}
+                            title="Sign Up"
+                            onPress={handleSignUp}
+                        />
+                    </View>
                 </View>
                 <View>
                     <Row

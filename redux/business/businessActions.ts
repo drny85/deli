@@ -11,7 +11,7 @@ export const createBusiness = createAsyncThunk(
     async (business: Business): Promise<ReturnResponse> => {
         try {
             if (!business) {
-                business: null;
+                return { business: null };
             }
             const businessRef = doc(businessCollection, business.userId);
             await setDoc(businessRef, { ...business });

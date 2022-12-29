@@ -47,7 +47,7 @@ const GoogleAutoComplete: FC<Props> = React.forwardRef(
                             color: theme.TEXT_COLOR,
                             backgroundColor: theme.BACKGROUND_COLOR,
                             paddingHorizontal: SIZES.base * 1.5,
-                            paddingVertical: SIZES.base,
+                            paddingVertical: 14,
                             borderRadius: SIZES.radius * 2,
                             marginHorizontal: 6,
                             shadowOffset: { width: -4, height: -4 },

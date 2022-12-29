@@ -12,6 +12,7 @@ import { useAppDispatch, useAppSelector } from '../../../redux/store';
 import { addCategory } from '../../../redux/business/categoriesActions';
 import { useNavigation } from '@react-navigation/native';
 import Button from '../../../components/Button';
+import KeyboardScreen from '../../../components/KeyboardScreen';
 
 type Props = {};
 
@@ -44,82 +45,84 @@ const AddCategoryScreen = ({}: Props) => {
         }
     };
     return (
-        <MotiView
-            from={{
-                opacity: 0,
-                translateY: -20
-            }}
-            animate={{
-                opacity: 1,
-                translateY: 0
-            }}
-            transition={{ type: 'timing' }}
-            exit={{
-                opacity: 0,
-                translateY: -20,
-                scale: 0
-            }}
-            style={[
-                styles.categoryModal,
-                {
-                    backgroundColor: theme.SECONDARY_BUTTON_COLOR,
-                    marginTop: SIZES.statusBarHeight
-                }
-            ]}
-        >
-            <Row
-                containerStyle={{
-                    maxWidth: 600,
-                    width: '100%',
-                    alignSelf: 'center'
+        <KeyboardScreen>
+            <MotiView
+                from={{
+                    opacity: 0,
+                    translateY: -20
                 }}
-                horizontalAlign="space-between"
+                animate={{
+                    opacity: 1,
+                    translateY: 0
+                }}
+                transition={{ type: 'timing' }}
+                exit={{
+                    opacity: 0,
+                    translateY: -20,
+                    scale: 0
+                }}
+                style={[
+                    styles.categoryModal,
+                    {
+                        backgroundColor: theme.SECONDARY_BUTTON_COLOR,
+                        marginTop: SIZES.statusBarHeight
+                    }
+                ]}
             >
-                <Text py_6 title lightText>
-                    Add Category
-                </Text>
-                <TouchableOpacity
-                    onPress={() => navigation.goBack()}
-                    style={[
-                        styles.rounded,
-                        {
-                            shadowColor: theme.SHADOW_COLOR,
-                            backgroundColor: theme.BACKGROUND_COLOR
-                        }
-                    ]}
+                <Row
+                    containerStyle={{
+                        maxWidth: 600,
+                        width: '100%',
+                        alignSelf: 'center'
+                    }}
+                    horizontalAlign="space-between"
                 >
-                    <FontAwesome
-                        name="close"
-                        color={theme.TEXT_COLOR}
-                        size={24}
-                    />
-                </TouchableOpacity>
-            </Row>
-            <Divider />
-            <InputField
-                textTheme="light"
-                autoCapitalize="words"
-                value={category}
-                onChangeText={setCategory}
-                placeholder="Ex. Juices, Coffee"
-                label="Catefory's Name"
-                rightIcon={
-                    category.length > 0 && (
-                        <TouchableOpacity onPress={() => setCategory('')}>
-                            <FontAwesome
-                                style={{
-                                    paddingHorizontal: SIZES.base
-                                }}
-                                name="close"
-                                size={16}
-                                color={theme.TEXT_COLOR}
-                            />
-                        </TouchableOpacity>
-                    )
-                }
-            />
-            <Button title="Add Category" onPress={handleAddCategory} />
-        </MotiView>
+                    <Text py_6 title lightText>
+                        Add Category
+                    </Text>
+                    <TouchableOpacity
+                        onPress={() => navigation.goBack()}
+                        style={[
+                            styles.rounded,
+                            {
+                                shadowColor: theme.SHADOW_COLOR,
+                                backgroundColor: theme.BACKGROUND_COLOR
+                            }
+                        ]}
+                    >
+                        <FontAwesome
+                            name="close"
+                            color={theme.TEXT_COLOR}
+                            size={24}
+                        />
+                    </TouchableOpacity>
+                </Row>
+                <Divider />
+                <InputField
+                    textTheme="light"
+                    autoCapitalize="words"
+                    value={category}
+                    onChangeText={setCategory}
+                    placeholder="Ex. Juices, Coffee"
+                    label="Catefory's Name"
+                    rightIcon={
+                        category.length > 0 && (
+                            <TouchableOpacity onPress={() => setCategory('')}>
+                                <FontAwesome
+                                    style={{
+                                        paddingHorizontal: SIZES.base
+                                    }}
+                                    name="close"
+                                    size={16}
+                                    color={theme.TEXT_COLOR}
+                                />
+                            </TouchableOpacity>
+                        )
+                    }
+                />
+                <Button title="Add Category" onPress={handleAddCategory} />
+            </MotiView>
+        </KeyboardScreen>
     );
 };
 

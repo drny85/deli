@@ -21,7 +21,7 @@ interface Props extends TextInputProps {
     label?: string;
     ref?: any;
     placeholder: string;
-    value: string | number;
+    value: string;
     onChangeText: (value: string) => void;
     leftIcon?: React.ReactNode | undefined;
     rightIcon?: React.ReactNode | undefined;
@@ -98,7 +98,7 @@ const InputField: FC<Props> = React.forwardRef(
                             alignItems: 'center',
                             backgroundColor: theme.BACKGROUND_COLOR,
                             paddingHorizontal: SIZES.base,
-                            paddingVertical: p_y ? p_y : 12,
+                            paddingVertical: 2,
                             borderRadius: SIZES.radius * 2,
                             //marginHorizontal: 10,
                             shadowOffset: { width: -4, height: -4 },
@@ -122,6 +122,7 @@ const InputField: FC<Props> = React.forwardRef(
                                 flex: 1,
                                 paddingHorizontal: SIZES.base,
                                 fontSize: SIZES.font,
+                                paddingVertical: p_y ? p_y : 14,
                                 color:
                                     theme.mode === 'dark'
                                         ? '#ffffff'

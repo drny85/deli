@@ -14,9 +14,8 @@ type Props = {
 const KeyboardScreen = ({ children }: Props) => {
     return (
         <KeyboardAvoidingView
-            keyboardVerticalOffset={-100}
-            style={{ flex: 1 }}
-            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            behavior={Platform.OS === 'ios' ? 'height' : 'padding'}
+            contentContainerStyle={{ height: '100%', width: '100%' }}
         >
             <ScrollView
                 keyboardShouldPersistTaps="handled"
