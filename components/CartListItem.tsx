@@ -105,7 +105,7 @@ const CartListItem = ({ item }: Props) => {
                                         }}
                                         quantity={item.quantity}
                                     />
-                                    <Text>
+                                    <Text capitalize bold>
                                         {' '}
                                         {item.size
                                             ? item.size.size.substring(

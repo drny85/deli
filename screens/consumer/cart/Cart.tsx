@@ -88,7 +88,11 @@ const Cart = ({}: Props) => {
                 >
                     <Button
                         title={`View Order $${total.toFixed(2)}`}
-                        onPress={() => {}}
+                        onPress={() => {
+                            naviagation.navigate('ConsumerCart', {
+                                screen: 'OrderReview'
+                            });
+                        }}
                     />
                 </View>
             )}

@@ -242,16 +242,40 @@ const ProductDetails = ({
                 )}
             </ScrollView>
             <View style={[styles.btn]}>
-                <Button
-                    disabled={
-                        product.sizes &&
-                        product.sizes.length > 0 &&
-                        selected === null
-                    }
-                    containerStyle={{ paddingVertical: SIZES.padding * 0.8 }}
-                    title={`Add to Cart`}
-                    onPress={checkIfItemIfFromCurrentStore}
-                />
+                <Row horizontalAlign="space-evenly">
+                    <View
+                        style={{
+                            shadowOffset: { width: 3, height: 3 },
+                            shadowColor: theme.SHADOW_COLOR,
+                            shadowOpacity: 0.5,
+                            backgroundColor: theme.BACKGROUND_COLOR,
+                            paddingVertical: SIZES.base * 1.5,
+                            paddingHorizontal: SIZES.padding * 1.5,
+                            borderRadius: SIZES.radius,
+                            elevation: 4,
+                            borderWidth: 0.3,
+                            borderColor: theme.SHADOW_COLOR
+                        }}
+                    >
+                        <Text bold medium>
+                            $
+                            {(selected ? selected.price : +product.price) *
+                                quantity}
+                        </Text>
+                    </View>
+                    <Button
+                        disabled={
+                            product.sizes &&
+                            product.sizes.length > 0 &&
+                            selected === null
+                        }
+                        containerStyle={{
+                            paddingVertical: SIZES.padding * 0.8
+                        }}
+                        title={`Add to Cart`}
+                        onPress={checkIfItemIfFromCurrentStore}
+                    />
+                </Row>
             </View>
         </View>
     );

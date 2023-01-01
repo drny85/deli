@@ -19,6 +19,7 @@ export type ConsumerOrdersStackScreens = {
 };
 export type ConsumerCartStackScreens = {
     Cart: undefined;
+    OrderReview:undefined;
 };
 export type ConsumerProfileStackScreens = {
     Profile: undefined;
