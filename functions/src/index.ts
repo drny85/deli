@@ -10,7 +10,7 @@ import Stripe from 'stripe';
 import { assignUserType } from './shared';
 
 import { UserRecord } from 'firebase-functions/v1/auth';
-import { AppUser, Coors } from './typing';
+import { AppUser, Business } from './typing';
 
 const stripe = new Stripe(process.env.STRIPE_TEST_KEY!, {
     apiVersion: '2022-11-15'
@@ -66,7 +66,6 @@ exports.createConnectedBusinessAccount = functions.https.onCall(
             address: string;
             name: string;
             lastName: string;
-            coors: Coors;
         },
         context
     ): Promise<Response> => {
@@ -120,18 +119,6 @@ exports.createConnectedBusinessAccount = functions.https.onCall(
                 return_url: `https://robertdev.net/return_url?accountId=${account.id}`,
                 type: 'account_onboarding'
             });
-
-            const businessData = {
-                owner: { name: data.name, lastName: data.lastName },
-                address: data.address,
-                coors: data.coors,
-                phone: data.phone
-            };
-            await admin
-                .firestore()
-                .collection('business')
-                .doc(context.auth.uid)
-                .set({ ...businessData }, { merge: true });
 
             return { success: true, result: accountLink.url };
         } catch (error) {
@@ -276,12 +263,21 @@ exports.addConnectedAccountToBusiness = functions.https.onCall(
                 await admin.firestore().collection('business').doc(userId).set(
                     {
                         stripeAccount: account.id,
-                        activatedOn: new Date().toISOString()
+                        activatedOn: new Date().toISOString(),
+                        charges_enabled: charges_enabled
                     },
                     { merge: true }
                 );
+
+                return {
+                    success: charges_enabled,
+                    result: 'account connected'
+                };
             }
-            return { success: charges_enabled, result: 'account connected' };
+            return {
+                success: charges_enabled,
+                result: 'account not connected'
+            };
         } catch (error) {
             console.log(error);
             const err = error as any;
@@ -349,17 +345,4 @@ export async function isAuthorizedToGrantAccess(
     const user = await admin.auth().getUserByEmail(email);
     if (user.customClaims && user.customClaims.type === 'business') return true;
     return false;
-}
-
-export interface Business {
-    id?: string;
-    name: string;
-    email: string;
-    owner: { name: string; lastName: string };
-    stripeAccount: string | null;
-    address?: string;
-    phone?: string;
-    isActive: boolean;
-    userId: string;
-    profileCompleted: boolean;
 }

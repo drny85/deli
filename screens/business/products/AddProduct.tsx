@@ -176,278 +176,310 @@ const AddProduct = ({}: Props) => {
                     maxWidth: 600,
                     alignSelf: 'center',
                     width: '100%',
-                    flex: 1
+                    flex: 1,
+                    paddingHorizontal: 10
                 }}
             >
-                <ProductCard
-                    containerStyle={{ alignSelf: 'center', width: '100%' }}
-                    product={product}
-                    onPress={pickImage}
-                />
-
-                <InputField
-                    value={product?.name}
-                    autoCapitalize="words"
-                    placeholder="Ex. Orange Juice"
-                    label="Product's Name"
-                    onChangeText={(text) =>
-                        setProduct({ ...product!, name: text })
-                    }
-                />
-                <InputField
-                    keyboardType="numeric"
-                    value={product.price as string}
-                    maxLenght={5}
-                    placeholder="Ex. 2.99"
-                    label="Product's Price"
-                    onChangeText={(text) =>
-                        setProduct({ ...product!, price: +text })
-                    }
-                />
-                <AnimatePresence>
-                    {product.image && product.price && product.name && (
-                        <MotiView
-                            from={{ opacity: 0, scale: 0 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            transition={{ type: 'timing' }}
-                            exit={{ opacity: 0, scale: 0 }}
-                        >
-                            <Row
-                                containerStyle={{
-                                    marginVertical: SIZES.padding
-                                }}
-                            >
-                                <Text px_4 bold>
-                                    Category
-                                </Text>
-                                <TouchableOpacity
-                                    onPress={() => setShowCategoryModal(true)}
-                                    style={{
-                                        paddingVertical: SIZES.base,
-                                        paddingHorizontal: SIZES.padding,
-                                        justifyContent: 'center',
-                                        alignItems: 'center',
-                                        marginLeft: 20,
-                                        borderRadius: 35,
-                                        backgroundColor: theme.BACKGROUND_COLOR,
-                                        borderColor: theme.ASCENT,
-                                        borderWidth: 0.5
-                                    }}
-                                >
-                                    <Text bold capitalize>
-                                        {product.category
-                                            ? product.category.name
-                                            : 'Pick One'}
-                                    </Text>
-                                </TouchableOpacity>
-                            </Row>
-                            <Row
-                                containerStyle={{
-                                    marginVertical: SIZES.padding
-                                }}
-                            >
-                                <Text bold px_4>
-                                    Come In Sizes?
-                                </Text>
-                                <Switch
-                                    trackColor={{
-                                        true: theme.SHADOW_COLOR,
-                                        false: theme.SHADOW_COLOR
-                                    }}
-                                    value={comeInSizes}
-                                    onValueChange={() =>
-                                        setComeInSizes((prev) => !prev)
-                                    }
-                                    thumbColor={theme.ASCENT}
-                                />
-                            </Row>
-                            <AnimatePresence>
-                                {comeInSizes && (
-                                    <MotiView
-                                        style={{
-                                            backgroundColor:
-                                                theme.BACKGROUND_COLOR,
-                                            shadowOffset: {
-                                                width: 2,
-                                                height: 2
-                                            },
-                                            shadowOpacity: 0.4,
-                                            shadowRadius: 3,
-                                            shadowColor: theme.SHADOW_COLOR,
-                                            borderRadius: SIZES.radius,
-                                            padding: SIZES.base,
-                                            alignSelf: 'center',
-                                            justifyContent: 'center',
-                                            alignItems: 'center'
-                                        }}
-                                        from={{ opacity: 0, translateY: -10 }}
-                                        animate={{ opacity: 1, translateY: 0 }}
-                                        transition={{
-                                            type: 'timing'
-                                        }}
-                                        exit={{ opacity: 0, translateY: -10 }}
-                                    >
-                                        <Text center>
-                                            Increase price per size by:{' '}
-                                            {(increase * 100).toFixed(0)}%
-                                        </Text>
-                                        <Slider
-                                            style={{
-                                                width: SIZES.width * 0.6,
-                                                maxWidth: 500,
-                                                height: 30,
-                                                marginVertical: SIZES.base * 1.5
-                                            }}
-                                            minimumValue={0.1}
-                                            maximumValue={1}
-                                            value={increase}
-                                            minimumTrackTintColor={theme.ASCENT}
-                                            maximumTrackTintColor={
-                                                theme.SHADOW_COLOR
-                                            }
-                                            step={0.1}
-                                            thumbTintColor={theme.ASCENT}
-                                            onValueChange={(value) => {
-                                                setIncrease(value);
-                                            }}
-                                        />
-                                        <View
-                                            style={{
-                                                flexDirection: 'row',
-                                                justifyContent: 'space-evenly'
-                                            }}
-                                        >
-                                            {PRODUCT_SIZES.map(
-                                                (size, index) => (
-                                                    <View key={size.id}>
-                                                        <Row>
-                                                            <Text
-                                                                capitalize
-                                                                bold
-                                                                px_4
-                                                            >
-                                                                {size.size ===
-                                                                'xlarge'
-                                                                    ? size.size.substring(
-                                                                          0,
-                                                                          2
-                                                                      )
-                                                                    : size
-                                                                          .size[0]}
-                                                            </Text>
-                                                            <Switch
-                                                                thumbColor={
-                                                                    theme.ASCENT
-                                                                }
-                                                                trackColor={{
-                                                                    true: theme.SHADOW_COLOR,
-                                                                    false: theme.SHADOW_COLOR
-                                                                }}
-                                                                value={
-                                                                    sizes.findIndex(
-                                                                        (s) =>
-                                                                            s.size ===
-                                                                            size.size
-                                                                    ) !== -1
-                                                                }
-                                                                onValueChange={(
-                                                                    e
-                                                                ) => {
-                                                                    setSizes(
-                                                                        (
-                                                                            prev
-                                                                        ) => {
-                                                                            if (
-                                                                                e
-                                                                            ) {
-                                                                                return [
-                                                                                    ...prev,
-                                                                                    {
-                                                                                        ...size,
-                                                                                        price:
-                                                                                            index ===
-                                                                                            0
-                                                                                                ? +(+product.price).toFixed(
-                                                                                                      2
-                                                                                                  )
-                                                                                                : +(
-                                                                                                      +product.price *
-                                                                                                          increase *
-                                                                                                          index +
-                                                                                                      +product.price
-                                                                                                  ).toFixed(
-                                                                                                      2
-                                                                                                  )
-                                                                                    }
-                                                                                ];
-                                                                            } else {
-                                                                                return prev.filter(
-                                                                                    (
-                                                                                        s
-                                                                                    ) =>
-                                                                                        s.size !==
-                                                                                        size.size
-                                                                                );
-                                                                            }
-                                                                        }
-                                                                    );
-                                                                }}
-                                                            />
-                                                        </Row>
-                                                        {product.price && (
-                                                            <Text py_4 center>
-                                                                $
-                                                                {(index === 0
-                                                                    ? +product.price
-                                                                    : +product.price *
-                                                                          increase *
-                                                                          index +
-                                                                      +product.price
-                                                                ).toFixed(2)}
-                                                            </Text>
-                                                        )}
-                                                    </View>
-                                                )
-                                            )}
-                                        </View>
-                                    </MotiView>
-                                )}
-                            </AnimatePresence>
-                            <InputField
-                                value={product.description!}
-                                multiline
-                                containerStyle={{ minHeight: 80 }}
-                                placeholder="Ex. a delicious coffee with milk and cream"
-                                label="Product's Description"
-                                onChangeText={(text) => {
-                                    setProduct({
-                                        ...product!,
-                                        description: text
-                                    });
-                                }}
-                            />
-                        </MotiView>
-                    )}
-                </AnimatePresence>
-                <View
-                    style={{
-                        position: 'absolute',
-                        bottom: 60,
-                        alignSelf: 'center'
-                    }}
-                >
-                    <Button
+                <View style={{ height: SIZES.height * 0.2, marginBottom: 16 }}>
+                    <ProductCard
                         containerStyle={{
-                            marginTop: SIZES.isSmallDevice ? 40 : 60,
-                            maxWidth: 600,
                             alignSelf: 'center',
-                            marginHorizontal: 20,
-                            width: '80%'
+                            width: '100%',
+                            height: '100%'
                         }}
-                        title="Add Product"
-                        onPress={handleAddProduct}
+                        product={product}
+                        onPress={pickImage}
                     />
                 </View>
+                <ScrollView contentContainerStyle={{ flex: 1 }}>
+                    <InputField
+                        value={product?.name}
+                        autoCapitalize="words"
+                        placeholder="Ex. Orange Juice"
+                        label="Product's Name"
+                        onChangeText={(text) =>
+                            setProduct({ ...product!, name: text })
+                        }
+                    />
+                    <InputField
+                        keyboardType="numeric"
+                        value={product.price as string}
+                        maxLenght={5}
+                        placeholder="Ex. 2.99"
+                        label="Product's Price"
+                        onChangeText={(text) =>
+                            setProduct({ ...product!, price: +text })
+                        }
+                    />
+                    <AnimatePresence>
+                        {product.image && product.price && product.name && (
+                            <MotiView
+                                from={{ opacity: 0, scale: 0 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                transition={{ type: 'timing' }}
+                                exit={{ opacity: 0, scale: 0 }}
+                            >
+                                <Row
+                                    containerStyle={{
+                                        marginVertical: SIZES.padding
+                                    }}
+                                >
+                                    <Text px_4 bold>
+                                        Category
+                                    </Text>
+                                    <TouchableOpacity
+                                        onPress={() =>
+                                            setShowCategoryModal(true)
+                                        }
+                                        style={{
+                                            paddingVertical: SIZES.base,
+                                            paddingHorizontal: SIZES.padding,
+                                            justifyContent: 'center',
+                                            alignItems: 'center',
+                                            marginLeft: 20,
+                                            borderRadius: 35,
+                                            backgroundColor:
+                                                theme.BACKGROUND_COLOR,
+                                            borderColor: theme.ASCENT,
+                                            borderWidth: 0.5
+                                        }}
+                                    >
+                                        <Text bold capitalize>
+                                            {product.category
+                                                ? product.category.name
+                                                : 'Pick One'}
+                                        </Text>
+                                    </TouchableOpacity>
+                                </Row>
+                                <Row
+                                    containerStyle={{
+                                        marginVertical: SIZES.padding
+                                    }}
+                                >
+                                    <Text bold px_4>
+                                        Come In Sizes?
+                                    </Text>
+                                    <Switch
+                                        trackColor={{
+                                            true: theme.SHADOW_COLOR,
+                                            false: theme.SHADOW_COLOR
+                                        }}
+                                        value={comeInSizes}
+                                        onValueChange={() =>
+                                            setComeInSizes((prev) => !prev)
+                                        }
+                                        thumbColor={theme.ASCENT}
+                                    />
+                                </Row>
+                                <AnimatePresence>
+                                    {comeInSizes && (
+                                        <MotiView
+                                            style={{
+                                                backgroundColor:
+                                                    theme.BACKGROUND_COLOR,
+                                                shadowOffset: {
+                                                    width: 2,
+                                                    height: 2
+                                                },
+                                                shadowOpacity: 0.4,
+                                                shadowRadius: 3,
+                                                shadowColor: theme.SHADOW_COLOR,
+                                                borderRadius: SIZES.radius,
+                                                padding: SIZES.base,
+                                                alignSelf: 'center',
+                                                justifyContent: 'center',
+                                                alignItems: 'center'
+                                            }}
+                                            from={{
+                                                opacity: 0,
+                                                translateY: -10
+                                            }}
+                                            animate={{
+                                                opacity: 1,
+                                                translateY: 0
+                                            }}
+                                            transition={{
+                                                type: 'timing'
+                                            }}
+                                            exit={{
+                                                opacity: 0,
+                                                translateY: -10
+                                            }}
+                                        >
+                                            <Text center>
+                                                Increase price per size by:{' '}
+                                                {(increase * 100).toFixed(0)}%
+                                            </Text>
+                                            <Slider
+                                                style={{
+                                                    width: SIZES.width * 0.6,
+                                                    maxWidth: 500,
+                                                    height: 30,
+                                                    marginVertical:
+                                                        SIZES.base * 1.5
+                                                }}
+                                                minimumValue={0.1}
+                                                maximumValue={1}
+                                                value={increase}
+                                                minimumTrackTintColor={
+                                                    theme.ASCENT
+                                                }
+                                                maximumTrackTintColor={
+                                                    theme.SHADOW_COLOR
+                                                }
+                                                step={0.1}
+                                                thumbTintColor={theme.ASCENT}
+                                                onValueChange={(value) => {
+                                                    setIncrease(value);
+                                                }}
+                                            />
+                                            <View
+                                                style={{
+                                                    flexDirection: 'row',
+                                                    justifyContent:
+                                                        'space-evenly'
+                                                }}
+                                            >
+                                                {PRODUCT_SIZES.map(
+                                                    (size, index) => (
+                                                        <View key={size.id}>
+                                                            <Row>
+                                                                <Text
+                                                                    capitalize
+                                                                    bold
+                                                                    px_4
+                                                                >
+                                                                    {size.size ===
+                                                                    'xlarge'
+                                                                        ? size.size.substring(
+                                                                              0,
+                                                                              2
+                                                                          )
+                                                                        : size
+                                                                              .size[0]}
+                                                                </Text>
+                                                                <Switch
+                                                                    thumbColor={
+                                                                        theme.ASCENT
+                                                                    }
+                                                                    trackColor={{
+                                                                        true: theme.SHADOW_COLOR,
+                                                                        false: theme.SHADOW_COLOR
+                                                                    }}
+                                                                    value={
+                                                                        sizes.findIndex(
+                                                                            (
+                                                                                s
+                                                                            ) =>
+                                                                                s.size ===
+                                                                                size.size
+                                                                        ) !== -1
+                                                                    }
+                                                                    onValueChange={(
+                                                                        e
+                                                                    ) => {
+                                                                        setSizes(
+                                                                            (
+                                                                                prev
+                                                                            ) => {
+                                                                                if (
+                                                                                    e
+                                                                                ) {
+                                                                                    return [
+                                                                                        ...prev,
+                                                                                        {
+                                                                                            ...size,
+                                                                                            price:
+                                                                                                index ===
+                                                                                                0
+                                                                                                    ? +(+product.price).toFixed(
+                                                                                                          2
+                                                                                                      )
+                                                                                                    : +(
+                                                                                                          +product.price *
+                                                                                                              increase *
+                                                                                                              index +
+                                                                                                          +product.price
+                                                                                                      ).toFixed(
+                                                                                                          2
+                                                                                                      )
+                                                                                        }
+                                                                                    ];
+                                                                                } else {
+                                                                                    return prev.filter(
+                                                                                        (
+                                                                                            s
+                                                                                        ) =>
+                                                                                            s.size !==
+                                                                                            size.size
+                                                                                    );
+                                                                                }
+                                                                            }
+                                                                        );
+                                                                    }}
+                                                                />
+                                                            </Row>
+                                                            {product.price && (
+                                                                <Text
+                                                                    py_4
+                                                                    center
+                                                                >
+                                                                    $
+                                                                    {(index ===
+                                                                    0
+                                                                        ? +product.price
+                                                                        : +product.price *
+                                                                              increase *
+                                                                              index +
+                                                                          +product.price
+                                                                    ).toFixed(
+                                                                        2
+                                                                    )}
+                                                                </Text>
+                                                            )}
+                                                        </View>
+                                                    )
+                                                )}
+                                            </View>
+                                        </MotiView>
+                                    )}
+                                </AnimatePresence>
+                                <InputField
+                                    value={product.description!}
+                                    multiline
+                                    containerStyle={{ minHeight: 80 }}
+                                    placeholder="Ex. a delicious coffee with milk and cream"
+                                    label="Product's Description"
+                                    onChangeText={(text) => {
+                                        setProduct({
+                                            ...product!,
+                                            description: text
+                                        });
+                                    }}
+                                />
+                            </MotiView>
+                        )}
+                    </AnimatePresence>
+                    <View
+                        style={{
+                            position: 'absolute',
+                            bottom: 60,
+                            alignSelf: 'center'
+                        }}
+                    >
+                        <Button
+                            containerStyle={{
+                                marginTop: SIZES.isSmallDevice ? 40 : 60,
+                                maxWidth: 600,
+                                alignSelf: 'center',
+                                marginHorizontal: 20,
+                                width: '80%'
+                            }}
+                            title="Add Product"
+                            onPress={handleAddProduct}
+                        />
+                    </View>
+                </ScrollView>
             </View>
 
             <Modal

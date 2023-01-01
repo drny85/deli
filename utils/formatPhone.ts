@@ -30,3 +30,11 @@ export function formatPhone(value: string) {
         6
     )}-${phoneNumber.slice(6, 10)}`;
 }
+
+export const formatHour = (value: string) => {
+    if (!value) return value;
+    const hour = value.replace(/[^\d]/g, '');
+    const hourLength = hour.length;
+    if (hourLength < 3) return value;
+    return `${hour.slice(0, 2)}:${hour.slice(2, 4)}`;
+};

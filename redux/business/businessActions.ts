@@ -1,5 +1,5 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import { businessCollection } from '../../firebase';
 import { Business } from './businessSlide';
 
@@ -37,6 +37,26 @@ export const getBusiness = createAsyncThunk(
             return { business: { id: data.id, ...data.data() } };
         } catch (error) {
             return { business: null };
+        }
+    }
+);
+
+export const updateBusiness = createAsyncThunk(
+    'business/update',
+    async (businessData: Business, _): Promise<boolean> => {
+        try {
+            if (!businessData.id) return false;
+            const businessRef = doc(businessCollection, businessData.id);
+            const data = await getDoc(businessRef);
+            if (!data.exists()) return false;
+            await updateDoc(businessRef, { ...businessData });
+
+            getBusiness(businessData.id);
+            return true;
+        } catch (error) {
+            const err = error as any;
+            console.log('Error updating store => ', err.message);
+            return false;
         }
     }
 );

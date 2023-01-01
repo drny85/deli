@@ -12,7 +12,7 @@ import Header from '../../../components/Header';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { BusinessOnBoardingStackScreens } from '../../../navigation/business/typing';
 import { SIZES } from '../../../constants';
-import { useAppSelector } from '../../../redux/store';
+import { useAppDispatch, useAppSelector } from '../../../redux/store';
 import KeyboardScreen from '../../../components/KeyboardScreen';
 import GoogleAutoComplete from '../../../components/GoogleAutoCompleteField';
 import InputField from '../../../components/InputField';
@@ -26,8 +26,10 @@ import { FontAwesome } from '@expo/vector-icons';
 import { connectedStore } from '../../../firebase';
 import Loader from '../../../components/Loader';
 import { ConnectedAccountParams } from '../../../types';
-import { Business } from '../../../functions/src';
-import { Coors } from '../../../redux/business/businessSlide';
+
+import { Business, Coors } from '../../../redux/business/businessSlide';
+import Row from '../../../components/Row';
+import { updateBusiness } from '../../../redux/business/businessActions';
 
 type Props = NativeStackScreenProps<
     BusinessOnBoardingStackScreens,
@@ -36,55 +38,67 @@ type Props = NativeStackScreenProps<
 
 const BusinessInformation = ({ navigation }: Props) => {
     const { business } = useAppSelector((state) => state.business);
+    const dispatch = useAppDispatch();
     const [loading, setLoading] = useState(false);
     const theme = useAppSelector((state) => state.theme);
     const [coors, setCoors] = useState<Coors>({ lat: 0, lng: 0 });
     const [phone, setPhone] = useState('');
+    const [milesRadius, setMilesRadius] = useState('');
+    const [minimunDeliveryAmount, setMinimunDeliveryAmount] = useState('');
     const [address, setAddress] = useState('');
     const addressRef = useRef<GooglePlacesAutocompleteRef>(null);
 
     const handleNext = async () => {
         try {
-            if (!address) {
-                Alert.alert('No Address Provided', 'Please type an address');
-                addressRef.current?.focus();
+            const isValid = validateInputs();
+            console.log(isValid);
+            if (!isValid) {
                 return;
             }
-            if (address.length && phone.length === 14) {
-                await getConnectedStoreUrl();
-            }
-        } catch (error) {}
-    };
 
-    const getConnectedStoreUrl = async () => {
-        try {
-            if (!business) return;
-            const func = connectedStore('createConnectedBusinessAccount');
-            setLoading(true);
-            const params: ConnectedAccountParams = {
-                businessName: business?.name,
-                phone,
-                address,
+            const businessData: Business = {
+                ...business!,
+                address: address,
                 coors,
-                lastName: business.owner.lastName,
-                name: business.owner.name
+                phone,
+                milesRadius: +milesRadius,
+                minimumDelivery: +minimunDeliveryAmount
             };
-            const { data } = await func({
-                ...params
-            });
-            if (data.success) {
-                console.log(data.result);
+            setLoading(true);
 
-                navigation.navigate('BusinessStripeAccountCreation', {
-                    url: data.result,
-                    data: { ...params }
-                });
-            }
+            const { payload } = await dispatch(updateBusiness(businessData));
+            if (!payload) return;
+            setAddress('');
+            setMilesRadius('');
+            setMinimunDeliveryAmount('');
+
+            navigation.navigate('BusinessHoursScreen');
         } catch (error) {
             console.log(error);
+        } finally {
             setLoading(false);
         }
     };
+
+    const validateInputs = (): boolean => {
+        if (!address) {
+            Alert.alert('No Address Provided', 'Please type an address');
+            addressRef.current?.focus();
+            return false;
+        }
+        if (!address.length && phone.length !== 14) {
+            Alert.alert('Phone Number Provided', 'Please type a phone number');
+            return false;
+            // await getConnectedStoreUrl();
+        }
+        if (!milesRadius || !minimunDeliveryAmount) {
+            Alert.alert('Minimun Delivery and Miles Radius are required');
+            return false;
+            // await getConnectedStoreUrl();
+        }
+        return true;
+    };
+
     if (loading) return <Loader />;
     return (
         <Screen>
@@ -94,7 +108,13 @@ const BusinessInformation = ({ navigation }: Props) => {
                 keyExtractor={(item) => item}
                 renderItem={() => <View />}
                 ListHeaderComponent={
-                    <>
+                    <View
+                        style={{
+                            maxWidth: 600,
+                            alignSelf: 'center',
+                            marginTop: 20
+                        }}
+                    >
                         <Header
                             onPressBack={() => navigation.goBack()}
                             title="Business' Info"
@@ -131,13 +151,58 @@ const BusinessInformation = ({ navigation }: Props) => {
                                         )
                                     }
                                 />
+                                <View style={{ width: '100%' }}>
+                                    <Row
+                                        horizontalAlign="space-between"
+                                        containerStyle={{ width: '100%' }}
+                                    >
+                                        <Text bold px_4>
+                                            Mininim Delivery Amount:
+                                        </Text>
+                                        <InputField
+                                            mainStyle={{ width: '30%' }}
+                                            placeholder="Ex . 10"
+                                            label="Amount"
+                                            contentStyle={{
+                                                textAlign: 'center'
+                                            }}
+                                            keyboardType="numeric"
+                                            maxLenght={2}
+                                            onChangeText={
+                                                setMinimunDeliveryAmount
+                                            }
+                                            value={minimunDeliveryAmount}
+                                        />
+                                    </Row>
+                                    <Row
+                                        horizontalAlign="space-between"
+                                        containerStyle={{ width: '100%' }}
+                                    >
+                                        <Text bold px_4>
+                                            Miles Radius Delivery:
+                                        </Text>
+                                        <InputField
+                                            mainStyle={{
+                                                width: '30%'
+                                            }}
+                                            contentStyle={{
+                                                textAlign: 'center'
+                                            }}
+                                            placeholder="Ex . 5"
+                                            label="Miles"
+                                            onChangeText={setMilesRadius}
+                                            value={milesRadius}
+                                        />
+                                    </Row>
+                                </View>
                             </View>
                         </KeyboardScreen>
-                    </>
+                    </View>
                 }
             />
 
             <TouchableOpacity
+                //disabled={!validateInputs()}
                 onPress={handleNext}
                 style={{
                     position: 'absolute',

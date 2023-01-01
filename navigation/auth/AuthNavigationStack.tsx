@@ -16,9 +16,9 @@ const AuthNavigationStack = () => {
             }}
         >
             <Screen name="Login" component={Login} />
-            <Screen name="Signup" component={Signup} options={{presentation:'fullScreenModal'}} />
-            <Screen name="BusinessSignup" component={BusinessSignUp} options={{presentation:'fullScreenModal'}} />
-            <Screen name="EmailVerification" component={EmailVerification} options={{presentation:'fullScreenModal'}} />
+            <Screen name="Signup" component={Signup} />
+            <Screen name="BusinessSignup" component={BusinessSignUp} />
+            <Screen name="EmailVerification" component={EmailVerification} />
         </Navigator>
     );
 };

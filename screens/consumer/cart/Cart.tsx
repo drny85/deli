@@ -16,6 +16,7 @@ import Header from '../../../components/Header';
 import { resetCart } from '../../../utils/saveCart';
 import Button from '../../../components/Button';
 import { FontAwesome } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 
 type Props = {};
 
@@ -23,9 +24,12 @@ const Cart = ({}: Props) => {
     const { items, quantity, total } = useAppSelector((state) => state.cart);
     const theme = useAppSelector((state) => state.theme);
     const dispatch = useAppDispatch();
+    const naviagation = useNavigation();
+
     const renderCartItems: ListRenderItem<CartItem> = ({ item, index }) => {
         return <CartListItem item={item} />;
     };
+    console.log(total);
 
     const handleDeleteCart = () => {
         dispatch(setCart({ quantity: 0, items: [], total: 0 }));
@@ -34,6 +38,11 @@ const Cart = ({}: Props) => {
     return (
         <Screen>
             <Header
+                onPressBack={() => {
+                    if (naviagation.canGoBack()) {
+                        naviagation.goBack();
+                    }
+                }}
                 title="Cart"
                 rightIcon={
                     total > 0 ? (
@@ -68,7 +77,7 @@ const Cart = ({}: Props) => {
                     renderItem={renderCartItems}
                 />
             </View>
-            {total > 0 && (
+            {quantity > 0 && (
                 <View
                     style={{
                         position: 'absolute',

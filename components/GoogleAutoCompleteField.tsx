@@ -46,10 +46,12 @@ const GoogleAutoComplete: FC<Props> = React.forwardRef(
                         textInput: {
                             color: theme.TEXT_COLOR,
                             backgroundColor: theme.BACKGROUND_COLOR,
-                            paddingHorizontal: SIZES.base * 1.5,
-                            paddingVertical: 14,
+                            paddingHorizontal: SIZES.base * 2,
+                            borderBottomWidth: 0.3,
+                            borderBottomColor: theme.SHADOW_COLOR,
+                            paddingVertical: 16,
                             borderRadius: SIZES.radius * 2,
-                            marginHorizontal: 6,
+
                             shadowOffset: { width: -4, height: -4 },
                             shadowColor: theme.SHADOW_COLOR,
                             shadowOpacity: 0.4,
@@ -77,7 +79,7 @@ const GoogleAutoComplete: FC<Props> = React.forwardRef(
                     onPress={onPress}
                     textInputProps={{
                         //InputComp: InputField,
-                        placeholderTextColor: theme.TEXT_COLOR,
+                        placeholderTextColor: theme.SHADOW_COLOR,
 
                         leftIcon: {
                             type: 'font-awesome',

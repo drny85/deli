@@ -15,13 +15,15 @@ import { AnimatePresence, MotiView } from 'moti';
 import { SIZES } from '../constants';
 import { useAppSelector } from '../redux/store';
 import Text from './Text';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 interface Props extends TextInputProps {
     label?: string;
+    nogap?: boolean;
     ref?: any;
     placeholder: string;
+    centerLabel?: boolean;
     value: string;
+    smallLabel?: boolean;
     onChangeText: (value: string) => void;
     leftIcon?: React.ReactNode | undefined;
     rightIcon?: React.ReactNode | undefined;
@@ -29,12 +31,12 @@ interface Props extends TextInputProps {
     contentStyle?: StyleProp<TextStyle>;
     keyboardType?: TextInput['props']['keyboardType'];
     maxLenght?: number;
-    containerStyle?: ViewStyle;
+    containerStyle?: StyleProp<ViewStyle>;
     errorStyle?: StyleProp<TextStyle>;
     multiline?: boolean;
     upper?: boolean;
     onFocus?: (e: NativeSyntheticEvent<TextInputFocusEventData>) => void;
-    mainStyle?: ViewStyle;
+    mainStyle?: StyleProp<ViewStyle>;
     onKeyPress?: (e: NativeSyntheticEvent<TextInputKeyPressEventData>) => void;
     secureTextEntry?: boolean;
     returnKeyLabel?: string;
@@ -54,6 +56,7 @@ const InputField: FC<Props> = React.forwardRef(
             contentStyle,
             leftIcon,
             rightIcon,
+            centerLabel,
             keyboardType,
             containerStyle,
             errorMessage,
@@ -65,7 +68,9 @@ const InputField: FC<Props> = React.forwardRef(
             onKeyPress,
             returnKeyType,
             maxLenght,
+            smallLabel,
             secureTextEntry,
+            nogap,
             p_y,
             errorStyle,
             upper,
@@ -78,18 +83,22 @@ const InputField: FC<Props> = React.forwardRef(
         return (
             <View style={[{ maxWidth: 600 }, mainStyle]}>
                 {/* LABEL */}
-                <View>
-                    <Text
-                        capitalize={!upper}
-                        lightText={textTheme === 'light'}
-                        darkText={textTheme === 'dark'}
-                        uppercase={upper}
-                        bold
-                        px_4
-                    >
-                        {label}
-                    </Text>
-                </View>
+                {label && (
+                    <View>
+                        <Text
+                            capitalize={!upper}
+                            lightText={textTheme === 'light'}
+                            darkText={textTheme === 'dark'}
+                            uppercase={upper}
+                            center={centerLabel}
+                            bold
+                            small={smallLabel}
+                        >
+                            {label}
+                        </Text>
+                    </View>
+                )}
+
                 {/* INPUT */}
                 <Animated.View
                     style={[
@@ -103,10 +112,13 @@ const InputField: FC<Props> = React.forwardRef(
                             //marginHorizontal: 10,
                             shadowOffset: { width: -4, height: -4 },
                             shadowColor: theme.SHADOW_COLOR,
+                            borderBottomWidth: 0.3,
+                            borderBottomColor: theme.SHADOW_COLOR,
 
                             shadowOpacity: 0.4,
                             shadowRadius: 3,
                             elevation: 5,
+                            marginVertical: nogap ? 2 : SIZES.padding,
 
                             width: '100%'
                         },
@@ -121,7 +133,8 @@ const InputField: FC<Props> = React.forwardRef(
                             {
                                 flex: 1,
                                 paddingHorizontal: SIZES.base,
-                                fontSize: SIZES.font,
+                                fontSize: 14,
+                                fontFamily: 'montserrat',
                                 paddingVertical: p_y ? p_y : 14,
                                 color:
                                     theme.mode === 'dark'
@@ -162,21 +175,23 @@ const InputField: FC<Props> = React.forwardRef(
                     </AnimatePresence>
                 </Animated.View>
                 {/* ERROR */}
-                <View>
-                    <Text
-                        style={[
-                            {
-                                color: '#d16f6f',
-                                textAlign: 'right',
-                                marginRight: SIZES.padding,
-                                paddingTop: 5
-                            },
-                            errorStyle
-                        ]}
-                    >
-                        {errorMessage}
-                    </Text>
-                </View>
+                {errorMessage && (
+                    <View>
+                        <Text
+                            style={[
+                                {
+                                    color: '#d16f6f',
+                                    textAlign: 'right',
+                                    marginRight: SIZES.padding,
+                                    paddingTop: 5
+                                },
+                                errorStyle
+                            ]}
+                        >
+                            {errorMessage}
+                        </Text>
+                    </View>
+                )}
             </View>
         );
     }

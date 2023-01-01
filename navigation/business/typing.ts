@@ -27,6 +27,7 @@ export type BusinessOnBoardingStackScreens = {
     EmailVerification: undefined;
     BusinessInformation: undefined;
     PrepareInfoScreen: undefined;
+    BusinessHoursScreen: undefined;
     BusinessStripeAccountCreation: {
         data: ConnectedAccountParams;
         url: string;

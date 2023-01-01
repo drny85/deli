@@ -71,11 +71,12 @@ const BusinessSignUp = ({ navigation }: Props) => {
                 address: null,
                 coors: null,
                 hasItems: false,
-                minimunDelivery: null,
+                minimumDelivery: null,
                 phone: null,
                 hours: null,
                 image: null,
-                charges_enabled: false
+                charges_enabled: false,
+                milesRadius: null
             };
             const userData: AppUser = {
                 id: user.uid,

@@ -20,5 +20,18 @@ export interface ConnectedAccountParams {
     address: string;
     name: string;
     lastName: string;
-    coors: Coors;
 }
+
+export interface BusinessDay {
+    [key: string]: { openAt: string; closeAt: string };
+}
+
+export const DAYS = [
+    'Sunday',
+    'Monday',
+    'Tuesday',
+    'Wednesday',
+    'Thursday',
+    'Friday',
+    'Saturday'
+];

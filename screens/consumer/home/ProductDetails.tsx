@@ -21,7 +21,11 @@ import { P_Size } from '../../../utils/sizes';
 import Button from '../../../components/Button';
 import Quantifier from '../../../components/Quantifier';
 import { AnimatePresence, MotiView } from 'moti';
-import { addToCart, CartItem } from '../../../redux/consumer/cartSlide';
+import {
+    addToCart,
+    CartItem,
+    setCart
+} from '../../../redux/consumer/cartSlide';
 import Loader from '../../../components/Loader';
 
 type Props = NativeStackScreenProps<ConsumerHomeStackScreens, 'ProductDetails'>;
@@ -42,24 +46,40 @@ const ProductDetails = ({
     } = useAppSelector((state) => state.cart);
     const [selected, setSelected] = React.useState<P_Size | null>(null);
     const [quantity, setQuatity] = React.useState<number>(1);
-    console.log(total, items, qty);
+    console.log(quantity);
 
-    const emptyCartAndAddNewProduct = () => {};
-
-    const handleAddToCart = async () => {
+    const emptyCartAndAddNewProduct = async () => {
         try {
+            dispatch(setCart({ quantity: 0, items: [], total: 0 }));
             const item: CartItem = {
                 ...product,
                 quantity: quantity,
                 size: selected
             };
-
-            dispatch(addToCart({ ...item }));
+            dispatch(addToCart(item));
             navigation.pop();
         } catch (error) {
             console.log(error);
         }
     };
+
+    const handleAddToCart = React.useCallback(
+        async (isSelected: P_Size | null, quantity: number) => {
+            try {
+                const item: CartItem = {
+                    ...product,
+                    quantity: quantity,
+                    size: isSelected
+                };
+
+                dispatch(addToCart({ ...item }));
+                navigation.pop();
+            } catch (error) {
+                console.log(error);
+            }
+        },
+        [selected]
+    );
 
     const checkIfItemIfFromCurrentStore = React.useCallback(async () => {
         if (items.length > 0) {
@@ -78,14 +98,12 @@ const ProductDetails = ({
                 );
                 return false;
             } else {
-                console.log('UP EHRE');
-                await handleAddToCart();
+                await handleAddToCart(selected, quantity);
             }
         } else {
-            console.log('HERE');
-            await handleAddToCart();
+            await handleAddToCart(selected, quantity);
         }
-    }, [items.length]);
+    }, [selected, quantity]);
 
     return (
         <View style={{ flex: 1, backgroundColor: theme.BACKGROUND_COLOR }}>
@@ -179,22 +197,45 @@ const ProductDetails = ({
                             {product.sizes &&
                                 product.sizes.length > 0 &&
                                 product.sizes.map((size, index) => (
-                                    <Row key={size.id}>
-                                        <Text
-                                            bold={selected === size}
-                                            capitalize
-                                            raleway
-                                            px_4
-                                        >
-                                            {size.size}
-                                        </Text>
-                                        <RadioButton
-                                            selected={selected === size}
-                                            onPress={() => {
-                                                setSelected(size);
-                                            }}
-                                        />
-                                    </Row>
+                                    <TouchableOpacity
+                                        style={{
+                                            borderRadius: 35,
+                                            borderWidth:
+                                                size === selected
+                                                    ? 0.5
+                                                    : undefined,
+                                            shadowColor: theme.SHADOW_COLOR,
+                                            padding: SIZES.base,
+                                            backgroundColor:
+                                                theme.BACKGROUND_COLOR,
+                                            shadowOffset: {
+                                                width: 1,
+                                                height: 1
+                                            },
+                                            shadowOpacity: 0.4
+                                        }}
+                                        onPress={() => {
+                                            setSelected(size);
+                                        }}
+                                        key={size.id}
+                                    >
+                                        <Row>
+                                            <Text
+                                                bold={selected === size}
+                                                capitalize
+                                                raleway
+                                                px_4
+                                            >
+                                                {size.size}
+                                            </Text>
+                                            <RadioButton
+                                                selected={selected === size}
+                                                onPress={() => {
+                                                    setSelected(size);
+                                                }}
+                                            />
+                                        </Row>
+                                    </TouchableOpacity>
                                 ))}
                         </Row>
                     </View>

@@ -1,13 +1,12 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { BusinessDay } from '../../types';
 import { createBusiness, getBusiness } from './businessActions';
 
 export interface Coors {
     lat: number;
     lng: number;
 }
-export interface hour {
-    [key: string]: string;
-}
+
 export interface Business {
     id?: string;
     name: string;
@@ -22,9 +21,10 @@ export interface Business {
     profileCompleted: boolean;
     hasItems: boolean;
     image: string | null;
-    hours: hour[] | null;
-    minimunDelivery: number | null;
+    hours: BusinessDay | null;
     charges_enabled: boolean;
+    milesRadius: number | null;
+    minimumDelivery: number | null;
 }
 interface IState {
     business: Business | null;
