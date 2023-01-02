@@ -20,13 +20,13 @@ import RadioButton from '../../../components/RadioButton';
 import { P_Size } from '../../../utils/sizes';
 import Button from '../../../components/Button';
 import Quantifier from '../../../components/Quantifier';
-import { AnimatePresence, MotiView } from 'moti';
+import { AnimatePresence } from 'moti';
+import { getBusiness } from '../../../redux/business/businessActions';
 import {
     addToCart,
     CartItem,
     setCart
 } from '../../../redux/consumer/cartSlide';
-import Loader from '../../../components/Loader';
 
 type Props = NativeStackScreenProps<ConsumerHomeStackScreens, 'ProductDetails'>;
 
@@ -44,9 +44,10 @@ const ProductDetails = ({
         items,
         quantity: qty
     } = useAppSelector((state) => state.cart);
+    const { business } = useAppSelector((state) => state.business);
     const [selected, setSelected] = React.useState<P_Size | null>(null);
     const [quantity, setQuatity] = React.useState<number>(1);
-    console.log(quantity);
+    console.log(business?.name);
 
     const emptyCartAndAddNewProduct = async () => {
         try {
@@ -88,7 +89,10 @@ const ProductDetails = ({
                     'Items in Cart',
                     'You are already shopping from another business, Switch business?',
                     [
-                        { text: 'Stay Here', style: 'cancel' },
+                        {
+                            text: 'Stay Here',
+                            style: 'cancel'
+                        },
                         {
                             text: 'Switch',
                             onPress: emptyCartAndAddNewProduct,

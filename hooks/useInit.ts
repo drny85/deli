@@ -1,7 +1,7 @@
 import 'expo-dev-client';
 import React, { useCallback, useEffect, useState } from 'react';
 import { darkTheme, lightTheme } from './../Theme';
-import { useAppDispatch } from './../redux/store';
+import { useAppDispatch, useAppSelector } from './../redux/store';
 
 import { useFonts } from 'expo-font';
 
@@ -18,11 +18,14 @@ import { loadCart } from '../utils/saveCart';
 import { setCart } from '../redux/consumer/cartSlide';
 import { AppUser } from '../redux/auth/authSlide';
 import { doc, getDoc } from 'firebase/firestore';
+import { useNavigation } from '@react-navigation/native';
 
 SplashScreen.preventAutoHideAsync();
 
 export default function useCachedResources() {
     const [isLoadingComplete, setLoadingComplete] = useState(false);
+    const { previousRoute } = useAppSelector((state) => state.settings);
+
     const [fontsLoaded, err] = useFonts({
         montserrat: require('../assets/fonts/Montserrat-Regular.ttf'),
         'montserrat-bold': require('../assets/fonts/Montserrat-Bold.ttf'),

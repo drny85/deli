@@ -38,11 +38,6 @@ const Cart = ({}: Props) => {
     return (
         <Screen>
             <Header
-                onPressBack={() => {
-                    if (naviagation.canGoBack()) {
-                        naviagation.goBack();
-                    }
-                }}
                 title="Cart"
                 rightIcon={
                     total > 0 ? (

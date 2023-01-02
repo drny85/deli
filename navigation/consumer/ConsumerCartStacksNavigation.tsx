@@ -15,11 +15,7 @@ const ConsumerCartStackNavigation = () => {
             }}
         >
             <Screen name="Cart" component={Cart} />
-            <Screen
-                name="OrderReview"
-                component={OrderReview}
-                options={{ presentation: 'fullScreenModal' }}
-            />
+            <Screen name="OrderReview" component={OrderReview} />
         </Navigator>
     );
 };

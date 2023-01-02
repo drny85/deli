@@ -339,6 +339,75 @@ exports.checkForStoreReady = functions.firestore
         }
     });
 
+exports.createPaymentIntent = functions.https.onCall(
+    async (
+        data: { connectedId: string; total: number },
+        context
+    ): Promise<{ success: boolean; result: any }> => {
+        try {
+            if (context.auth === undefined || context.auth.uid === undefined)
+                return { result: 'no autthorized', success: false };
+            const customer = await admin
+                .firestore()
+                .collection('stripe_customers')
+                .doc(context.auth.uid)
+                .get();
+            if (!customer.exists)
+                return { result: 'no customer', success: false };
+            const { customer_id } = customer.data() as { customer_id: string };
+            if (!customer_id)
+                return { result: 'no customer id', success: false };
+            const userData = await admin
+                .firestore()
+                .collection('users')
+                .doc(context.auth.uid)
+                .get();
+            const { email } = userData.data() as AppUser;
+            const ephemeralKey = await stripe.ephemeralKeys.create(
+                { customer: customer_id },
+                { apiVersion: '2022-11-15' }
+            );
+            console.log(
+                'AMOUNT',
+                data.total,
+                Math.round(data.total * 100),
+                customer_id,
+                data.connectedId
+            );
+            const paymentIntent = await stripe.paymentIntents.create({
+                amount: Math.round(data.total * 100),
+                currency: 'usd',
+                customer: customer_id,
+                receipt_email: email,
+                automatic_payment_methods: {
+                    enabled: true
+                },
+                transfer_data: {
+                    destination: data.connectedId
+                },
+                application_fee_amount: Math.round(data.total) * 0.08 * 100,
+                metadata: {
+                    userId: context.auth.uid,
+                    userEmail: email
+                }
+            });
+
+            return {
+                success: true,
+                result: {
+                    ephemeralKey: ephemeralKey.secret,
+                    paymentIntent: paymentIntent.client_secret,
+                    paymentIntentId: paymentIntent.id,
+                    customer: customer_id
+                }
+            };
+        } catch (error) {
+            const err = error as any;
+            return { success: false, result: err.message };
+        }
+    }
+);
+
 export async function isAuthorizedToGrantAccess(
     email: string
 ): Promise<boolean> {

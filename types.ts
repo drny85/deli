@@ -22,8 +22,12 @@ export interface ConnectedAccountParams {
     lastName: string;
 }
 
+interface Day {
+    openAt: string;
+    closeAt: string;
+}
 export interface BusinessDay {
-    [key: string]: { openAt: string; closeAt: string };
+    [key: string]: Day;
 }
 
 export const DAYS = [

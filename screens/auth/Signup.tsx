@@ -30,12 +30,16 @@ import { SIZES } from '../../constants';
 import { AnimatePresence, MotiView } from 'moti';
 import { AppUser } from '../../redux/auth/authSlide';
 import { createUser } from '../../redux/auth/authActions';
+import { setPreviosRoute } from '../../redux/consumer/settingSlide';
+import { useNavigation } from '@react-navigation/native';
 
 type Props = NativeStackScreenProps<AuthScreens, 'Signup'>;
 
 const Signup = ({ navigation }: Props) => {
     const dispatch = useAppDispatch();
+    const nav = useNavigation();
     const [notTyping, setNotTyping] = useState(true);
+    const { previousRoute } = useAppSelector((state) => state.settings);
     const theme = useAppSelector((state) => state.theme);
     const emailRef = useRef<TextInput>(null);
     const passwordRef = useRef<TextInput>(null);
@@ -65,13 +69,18 @@ const Signup = ({ navigation }: Props) => {
                 name,
                 type: 'consumer'
             };
-            await sendEmailVerification(user);
+
             await dispatch(createUser(data));
+            if (previousRoute) {
+                nav.navigate('ConsumerCart', { screen: 'OrderReview' });
+            }
         } catch (error) {
             const err = error as any;
 
             console.log('Error =>', err.message);
             Alert.alert('Error', FIREBASE_ERRORS[err.message] || err.message);
+        } finally {
+            dispatch(setPreviosRoute(null));
         }
     };
 

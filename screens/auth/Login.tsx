@@ -1,5 +1,5 @@
 import { Alert, TextInput, TouchableOpacity, View } from 'react-native';
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, version } from 'react';
 import Screen from '../../components/Screen';
 
 import Text from '../../components/Text';
@@ -20,13 +20,17 @@ import { SIZES } from '../../constants';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { autoLogin } from '../../redux/auth/authActions';
 import Loader from '../../components/Loader';
+import { setPreviosRoute } from '../../redux/consumer/settingSlide';
+import { useNavigation } from '@react-navigation/native';
 
 type Props = NativeStackScreenProps<AuthScreens, 'Login'>;
 
 const Login = ({ navigation }: Props) => {
     const dispatch = useAppDispatch();
+    const nav = useNavigation();
     const { user, loading } = useAppSelector((state) => state.auth);
     const theme = useAppSelector((state) => state.theme);
+    const { previousRoute } = useAppSelector((state) => state.settings);
     const scrollRef = useRef<KeyboardAwareScrollView>(null);
     const emailRef = useRef<TextInput>(null);
     const passwordRef = useRef<TextInput>(null);
@@ -46,20 +50,25 @@ const Login = ({ navigation }: Props) => {
             if (!user) {
                 return;
             }
-            const result = await user.getIdTokenResult();
-            const data = result.claims;
-            console.log('DATA from Login => ', data.type, user.email);
-            dispatch(
-                autoLogin({
-                    userId: user.uid,
-                    emailVerified: user.emailVerified
-                })
-            );
+
+            console.log('DATA from Login => ', user.email);
+
+            // if (previousRoute) {
+            //     nav.navigate('ConsumerCart', { screen: 'OrderReview' });
+            // }
+            // dispatch(
+            //     autoLogin({
+            //         userId: user.uid,
+            //         emailVerified: user.emailVerified
+            //     })
+            // );
         } catch (error) {
             const err = error as any;
 
             console.log('Error =>', err.message);
             Alert.alert('Error', FIREBASE_ERRORS[err.message] || err.message);
+        } finally {
+            console.log('PR +DOWUN', previousRoute);
         }
     };
 

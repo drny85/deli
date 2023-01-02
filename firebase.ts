@@ -35,6 +35,13 @@ interface Response {
     result: string;
 }
 
+interface PaymentIntentParams {
+    paymentIntentId: string;
+    paymentIntent: string;
+    ephemeralKey: string;
+    customer: string;
+}
+
 const createCollection = <T = DocumentData>(collectionName: string) => {
     return collection(db, collectionName) as CollectionReference<T>;
 };
@@ -50,6 +57,12 @@ export const connectedStore = (name: string) =>
 
 export const checkForConnectedAccount = (name: string) =>
     httpsCallable<{ accountId: string }, Response>(functions, name);
+
+export const fetchPaymentParams = (name: string) =>
+    httpsCallable<
+        { connectedId: string; total: number },
+        { success: boolean; result: PaymentIntentParams }
+    >(functions, name);
 
 // const quoteFunc = (name: string) =>
 //     httpsCallable<WirelessQuote, { success: boolean }>(functions, name);

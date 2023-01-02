@@ -49,6 +49,7 @@ export const updateBusiness = createAsyncThunk(
             const businessRef = doc(businessCollection, businessData.id);
             const data = await getDoc(businessRef);
             if (!data.exists()) return false;
+
             await updateDoc(businessRef, { ...businessData });
 
             getBusiness(businessData.id);

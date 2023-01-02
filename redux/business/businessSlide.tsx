@@ -28,10 +28,12 @@ export interface Business {
 }
 interface IState {
     business: Business | null;
+    businesses: Business[];
     loading: boolean;
 }
 const initialState: IState = {
     business: null,
+    businesses: [],
     loading: false
 };
 
@@ -41,6 +43,9 @@ const businessSlide = createSlice({
     reducers: {
         setBusiness: (state, { payload }: PayloadAction<Business | null>) => {
             state.business = payload;
+        },
+        setBusinesses: (state, { payload }: PayloadAction<Business[]>) => {
+            state.businesses = payload;
         }
     },
     extraReducers(builder) {
@@ -69,6 +74,6 @@ const businessSlide = createSlice({
             });
     }
 });
-export const { setBusiness } = businessSlide.actions;
+export const { setBusiness, setBusinesses } = businessSlide.actions;
 
 export default businessSlide.reducer;

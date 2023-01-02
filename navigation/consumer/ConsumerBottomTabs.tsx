@@ -1,5 +1,8 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
+import {
+    getFocusedRouteNameFromRoute,
+    useNavigation
+} from '@react-navigation/native';
 import { useAppSelector } from '../../redux/store';
 import { ConsumerBottomTabScreens } from './typing';
 
@@ -8,12 +11,22 @@ import ConsumerHomeStackNavigation from './ConsumerHomeStacksScreens';
 import ConsumerOrdersStackNavigation from './ConsumerOrdersStacksScreens';
 import ConsumerCartStackNavigation from './ConsumerCartStacksNavigation';
 import ConsumerProfileStackNavigation from './ConsumerProfileStacksNavigation';
+import { useEffect } from 'react';
 
 const { Navigator, Screen } =
     createBottomTabNavigator<ConsumerBottomTabScreens>();
 
 const ConsumerBottomTabs = () => {
     const theme = useAppSelector((state) => state.theme);
+    const { user } = useAppSelector((state) => state.auth);
+    const { previousRoute } = useAppSelector((state) => state.settings);
+    console.log('FROM NAV =>', previousRoute);
+    const nav = useNavigation();
+    useEffect(() => {
+        if (previousRoute && user) {
+            nav.navigate('ConsumerCart', { screen: 'OrderReview' });
+        }
+    }, [previousRoute, user]);
     return (
         <Navigator
             screenOptions={{
@@ -110,7 +123,7 @@ function TabBarIcon(props: {
 const tabBarVisibility = (route: any) => {
     const routeName = getFocusedRouteNameFromRoute(route);
 
-    const routes = ['BusinessPage'];
+    const routes = ['BusinessPage', 'OrderReview'];
 
     if (routes.findIndex((r) => r === routeName) !== -1) {
         return 'none';
