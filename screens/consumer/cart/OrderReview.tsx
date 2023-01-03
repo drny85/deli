@@ -21,6 +21,8 @@ import {
     getBusiness,
     getCurrentBusiness
 } from '../../../redux/business/businessActions';
+import { stripeFee } from '../../../utils/stripeFee';
+import Divider from '../../../components/Divider';
 
 type Props = {};
 
@@ -31,16 +33,13 @@ const OrderReview = ({}: Props) => {
     const [startPaymentt, setStartPayment] = useState(false);
     const { user } = useAppSelector((state) => state.auth);
     const { order } = useAppSelector((state) => state.orders);
+    const { previousRoute } = useAppSelector((state) => state.settings);
     const [paymentIntent, setPaymentIntent] = useState<string | null>(null);
     const theme = useAppSelector((state) => state.theme);
     const dispatch = useDispatch();
     const { items, quantity, total } = useAppSelector((state) => state.cart);
     const [deliveryInstructions, setDeliveryInstructions] = React.useState('');
     const { business } = useAppSelector((state) => state.business);
-    // console.log('BS =>', bs);
-    // const business = businesses.find(
-    //     (business) => business.id === items[0].businessId
-    // );
 
     const handleCheckout = async () => {
         try {
@@ -96,7 +95,13 @@ const OrderReview = ({}: Props) => {
         if (items.length === 0) return;
         //@ts-ignore
         dispatch(getCurrentBusiness(items[0].businessId));
-    }, [items.length]);
+        //remove previous rouite if any;
+        const state = navigation.getState();
+        console.log('state', state);
+        if (previousRoute) {
+            dispatch(setPreviosRoute(null));
+        }
+    }, [items.length, previousRoute]);
 
     if (!business) return <Loader />;
     return (
@@ -115,7 +120,7 @@ const OrderReview = ({}: Props) => {
                 />
 
                 <View>
-                    <Stack>
+                    <Stack px={4}>
                         <Text raleway_bold>{business?.name}</Text>
                         <Text raleway_italic>
                             {business?.address?.substring(
@@ -124,6 +129,7 @@ const OrderReview = ({}: Props) => {
                             )}
                         </Text>
                     </Stack>
+                    <Divider />
                     <ScrollView
                         contentContainerStyle={{
                             width: '100%',
@@ -131,7 +137,7 @@ const OrderReview = ({}: Props) => {
                             maxHeight: SIZES.height * 0.5
                         }}
                     >
-                        <Text raleway_bold medium px_6>
+                        <Text raleway_bold medium>
                             {quantity} Items
                         </Text>
                         {items.map((item, index) => (
@@ -175,7 +181,24 @@ const OrderReview = ({}: Props) => {
                                 </Row>
                             </Row>
                         ))}
+                        <View
+                            style={{
+                                alignSelf: 'flex-end',
+                                paddingTop: SIZES.base
+                            }}
+                        >
+                            <Row>
+                                <Text capitalize px_4>
+                                    service fee
+                                </Text>
+                                <Text>{stripeFee(total)}</Text>
+                            </Row>
+                            <Text right medium>
+                                Total ${(total + stripeFee(total)).toFixed(2)}
+                            </Text>
+                        </View>
                     </ScrollView>
+
                     <Stack>
                         <Text raleway_bold py_4>
                             Delivery Instructions
@@ -215,7 +238,7 @@ const OrderReview = ({}: Props) => {
                                 Total:
                                 <Text bold large>
                                     {' '}
-                                    ${total.toFixed(2)}
+                                    ${(total + stripeFee(total)).toFixed(2)}
                                 </Text>
                             </Text>
                         </View>

@@ -90,8 +90,6 @@ const BusinessSignUp = ({ navigation }: Props) => {
             console.log('BUS =>', business);
             await dispatch(createBusiness(business));
             await dispatch(createUser(userData));
-
-            navigation.navigate('Login');
         } catch (error) {
             const err = error as any;
 

@@ -38,6 +38,8 @@ const useNotifications = () => {
     const { user } = useAppSelector((state) => state.auth);
 
     useEffect(() => {
+        if (!user) return;
+
         registerForPushNotificationsAsync();
 
         notificationListener.current =
@@ -71,7 +73,7 @@ const useNotifications = () => {
                 responseListener.current
             );
         };
-    }, []);
+    }, [user]);
 
     const registerForPushNotificationsAsync = async () => {
         try {

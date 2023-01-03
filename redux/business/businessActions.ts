@@ -45,7 +45,6 @@ export const getCurrentBusiness = createAsyncThunk(
     'business/getCurrent',
     async (businessId: string, { dispatch }) => {
         try {
-            console.log('HERE', businessId);
             const businessRef = doc(businessCollection, businessId);
             const data = await getDoc(businessRef);
             if (!data.exists()) return;

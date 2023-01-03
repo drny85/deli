@@ -5,7 +5,7 @@ import Text from '../../../components/Text';
 import { useBusinessAvailable } from '../../../hooks/useBusinessAvailable';
 import Loader from '../../../components/Loader';
 import { Business, setBusiness } from '../../../redux/business/businessSlide';
-import { useAppDispatch } from '../../../redux/store';
+import { useAppDispatch, useAppSelector } from '../../../redux/store';
 
 import { useNavigation } from '@react-navigation/native';
 import BusinessCard from '../../../components/BusinessCard';
@@ -15,10 +15,24 @@ import { getMilesBetweenLatLon } from '../../../utils/getMilesBetwwen';
 type Props = {};
 
 const Businesses = ({}: Props) => {
-    const { businessAvailable, isLoading } = useBusinessAvailable();
-    const { location } = useLocation();
+    useLocation();
     const dispatch = useAppDispatch();
     const navigation = useNavigation();
+    const { businessAvailable, isLoading } = useBusinessAvailable();
+    const { previousRoute } = useAppSelector((state) => state.settings);
+    const { user } = useAppSelector((state) => state.auth);
+
+    useEffect(() => {
+        const sub = navigation.addListener('focus', () => {
+            console.log('focus', previousRoute);
+
+            if (user && previousRoute) {
+                navigation.navigate('ConsumerCart', { screen: 'OrderReview' });
+            }
+        });
+
+        return sub;
+    }, [user, previousRoute]);
 
     const renderBusinesses: ListRenderItem<Business> = ({ item }) => {
         return (

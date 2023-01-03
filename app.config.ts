@@ -13,7 +13,7 @@ const config: ExpoConfig = {
     splash: {
         image: './assets/splash.png',
         resizeMode: 'contain',
-        backgroundColor: '#212121'
+        backgroundColor: '#001d3d'
     },
     updates: {
         fallbackToCacheTimeout: 0

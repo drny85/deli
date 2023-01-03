@@ -56,12 +56,12 @@ const Login = ({ navigation }: Props) => {
             // if (previousRoute) {
             //     nav.navigate('ConsumerCart', { screen: 'OrderReview' });
             // }
-            // dispatch(
-            //     autoLogin({
-            //         userId: user.uid,
-            //         emailVerified: user.emailVerified
-            //     })
-            // );
+            dispatch(
+                autoLogin({
+                    userId: user.uid,
+                    emailVerified: user.emailVerified
+                })
+            );
         } catch (error) {
             const err = error as any;
 

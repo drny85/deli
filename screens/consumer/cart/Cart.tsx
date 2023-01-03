@@ -22,7 +22,7 @@ type Props = {};
 
 const Cart = ({}: Props) => {
     const { items, quantity, total } = useAppSelector((state) => state.cart);
-    console.log(items, quantity, total);
+
     const theme = useAppSelector((state) => state.theme);
     const dispatch = useAppDispatch();
     const naviagation = useNavigation();

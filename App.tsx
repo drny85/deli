@@ -16,6 +16,7 @@ import { LOCATION_TASK_NAME } from './hooks/useLocation';
 
 const App = () => {
     const { isLoadingComplete, onLayoutRootView } = useCachedResources();
+
     const theme = useAppSelector((state) => state.theme);
     const [processing, setProcessing] = useState(true);
     const { user, loading } = useAppSelector((state) => state.auth);

@@ -11,22 +11,15 @@ import ConsumerHomeStackNavigation from './ConsumerHomeStacksScreens';
 import ConsumerOrdersStackNavigation from './ConsumerOrdersStacksScreens';
 import ConsumerCartStackNavigation from './ConsumerCartStacksNavigation';
 import ConsumerProfileStackNavigation from './ConsumerProfileStacksNavigation';
-import { useEffect } from 'react';
+import { MotiView } from 'moti';
 
 const { Navigator, Screen } =
     createBottomTabNavigator<ConsumerBottomTabScreens>();
 
 const ConsumerBottomTabs = () => {
     const theme = useAppSelector((state) => state.theme);
-    const { user } = useAppSelector((state) => state.auth);
-    const { previousRoute } = useAppSelector((state) => state.settings);
-    console.log('FROM NAV =>', previousRoute);
-    const nav = useNavigation();
-    useEffect(() => {
-        if (previousRoute && user) {
-            nav.navigate('ConsumerCart', { screen: 'OrderReview' });
-        }
-    }, [previousRoute, user]);
+    const { quantity } = useAppSelector((state) => state.cart);
+
     return (
         <Navigator
             screenOptions={{
@@ -81,6 +74,14 @@ const ConsumerBottomTabs = () => {
                         borderTopWidth: 0,
                         elevation: 0
                     },
+                    tabBarBadge: quantity > 0 ? quantity : undefined,
+                    tabBarBadgeStyle:
+                        quantity > 0
+                            ? {
+                                  backgroundColor: theme.ASCENT,
+                                  color: theme.WHITE_COLOR
+                              }
+                            : undefined,
 
                     tabBarIcon: () => <TabBarIcon name="cart" />
                 })}

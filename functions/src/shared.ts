@@ -24,3 +24,11 @@ export const assignUserType = async (uid: string, type: string) => {
         );
     }
 };
+
+export const stripeFee = (amount: number) => {
+    if (!amount) return 0;
+    let t = amount;
+    const p = (amount * 2.9) / 100 + 0.3;
+
+    return +(t + p).toFixed(2) * 100;
+};

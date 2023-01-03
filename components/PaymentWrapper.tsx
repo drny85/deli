@@ -126,12 +126,14 @@ const PaymentWrapper = ({
             } else {
                 console.log('error A', error);
                 Alert.alert(`${error.code}`, error.message);
+                setPaymentSuccess(false);
                 return;
             }
         } catch (error) {
             console.log('error B', error);
         } finally {
             setLoading(false);
+            setPaymentSuccess(false);
         }
     }, [paymentSuccess]);
 
@@ -149,7 +151,7 @@ const PaymentWrapper = ({
                 const { payload } = await dispatch(
                     placeOrder({ ...order, paymentIntent: paymentId })
                 );
-                console.log('payload', payload);
+
                 if (!payload) return;
                 navigation.dispatch((state) => {
                     const routes = state.routes.filter(

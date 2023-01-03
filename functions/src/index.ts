@@ -7,7 +7,7 @@ admin.initializeApp();
 
 import Stripe from 'stripe';
 
-import { assignUserType } from './shared';
+import { assignUserType, stripeFee } from './shared';
 
 import { UserRecord } from 'firebase-functions/v1/auth';
 import { AppUser, Business } from './typing';
@@ -371,11 +371,11 @@ exports.createPaymentIntent = functions.https.onCall(
                 'AMOUNT',
                 data.total,
                 Math.round(data.total * 100),
-                customer_id,
-                data.connectedId
+                typeof stripeFee(data.total),
+                stripeFee(data.total)
             );
             const paymentIntent = await stripe.paymentIntents.create({
-                amount: Math.round(data.total * 100),
+                amount: stripeFee(data.total),
                 currency: 'usd',
                 customer: customer_id,
                 receipt_email: email,
@@ -385,7 +385,8 @@ exports.createPaymentIntent = functions.https.onCall(
                 transfer_data: {
                     destination: data.connectedId
                 },
-                application_fee_amount: Math.round(data.total) * 0.08 * 100,
+
+                application_fee_amount: +(data.total * 100 * 0.08).toFixed(0),
                 metadata: {
                     userId: context.auth.uid,
                     userEmail: email

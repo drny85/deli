@@ -18,13 +18,11 @@ import { loadCart } from '../utils/saveCart';
 import { setCart } from '../redux/consumer/cartSlide';
 import { AppUser } from '../redux/auth/authSlide';
 import { doc, getDoc } from 'firebase/firestore';
-import { useNavigation } from '@react-navigation/native';
 
 SplashScreen.preventAutoHideAsync();
 
 export default function useCachedResources() {
     const [isLoadingComplete, setLoadingComplete] = useState(false);
-    const { previousRoute } = useAppSelector((state) => state.settings);
 
     const [fontsLoaded, err] = useFonts({
         montserrat: require('../assets/fonts/Montserrat-Regular.ttf'),
@@ -61,7 +59,6 @@ export default function useCachedResources() {
                         dispatch(getBusiness(authState.uid));
                     }
 
-                    console.log('TYPE', data?.type);
                     dispatch(
                         autoLogin({
                             userId: authState.uid,
@@ -109,11 +106,6 @@ export default function useCachedResources() {
     const onLayoutRootView = useCallback(async () => {
         try {
             if (isLoadingComplete) {
-                // This tells the splash screen to hide immediately! If we call this after
-                // `setAppIsReady`, then we may see a blank screen while the app is
-                // loading its initial state and rendering its first pixels. So instead,
-                // we hide the splash screen once we know the root view has already
-                // performed layout.
                 await SplashScreen.hideAsync();
             }
         } catch (error) {
