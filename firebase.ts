@@ -13,6 +13,7 @@ import { Business } from './redux/business/businessSlide';
 import { ConnectedAccountParams } from './types';
 import { Product } from './redux/business/productsSlice';
 import { Category } from './redux/business/categoriesSlice';
+import { Order } from './redux/consumer/ordersSlide';
 
 const firebaseConfig = {
     apiKey: process.env.FIREBASE_APIKEY,
@@ -76,5 +77,6 @@ export const categoriessCollection = (businessId: string) =>
     createCollection<Category>(`categories/${businessId}/categories`);
 export const usersCollection = createCollection<AppUser>('users');
 export const businessCollection = createCollection<Business>('business');
+export const ordersCollection = createCollection<Order>('orders');
 
 export { db, auth, storage };

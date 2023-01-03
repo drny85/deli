@@ -1,11 +1,11 @@
 import { useNavigation } from '@react-navigation/native';
-import React, { useCallback, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Alert, ScrollView, StyleSheet, View } from 'react-native';
 import { useDispatch } from 'react-redux';
 import Button from '../../../components/Button';
 import Header from '../../../components/Header';
 import InputField from '../../../components/InputField';
-import KeyboardScreen from '../../../components/KeyboardScreen';
+
 import Row from '../../../components/Row';
 import Screen from '../../../components/Screen';
 import Stack from '../../../components/Stack';
@@ -13,115 +13,34 @@ import Text from '../../../components/Text';
 import { SIZES } from '../../../constants';
 import { setPreviosRoute } from '../../../redux/consumer/settingSlide';
 import { useAppSelector } from '../../../redux/store';
-import { StripeProvider, useStripe } from '@stripe/stripe-react-native';
-import { fetchPaymentParams } from '../../../firebase';
+
+import Loader from '../../../components/Loader';
+import PaymentWrapper from '../../../components/PaymentWrapper';
+import { Order, setOrder } from '../../../redux/consumer/ordersSlide';
+import {
+    getBusiness,
+    getCurrentBusiness
+} from '../../../redux/business/businessActions';
 
 type Props = {};
 
 const OrderReview = ({}: Props) => {
     const navigation = useNavigation();
-    const { initPaymentSheet, presentPaymentSheet } = useStripe();
+
     const [loading, setLoading] = useState(false);
+    const [startPaymentt, setStartPayment] = useState(false);
     const { user } = useAppSelector((state) => state.auth);
+    const { order } = useAppSelector((state) => state.orders);
     const [paymentIntent, setPaymentIntent] = useState<string | null>(null);
     const theme = useAppSelector((state) => state.theme);
     const dispatch = useDispatch();
     const { items, quantity, total } = useAppSelector((state) => state.cart);
     const [deliveryInstructions, setDeliveryInstructions] = React.useState('');
-    const { businesses } = useAppSelector((state) => state.business);
-    const business = businesses.find(
-        (business) => business.id === items[0].businessId
-    );
-
-    const fetchParams = useCallback(async () => {
-        try {
-            setLoading(true);
-
-            if (!business || !business?.stripeAccount) return;
-
-            const func = fetchPaymentParams('createPaymentIntent');
-            const {
-                data: { success, result }
-            } = await func({
-                connectedId: business.stripeAccount,
-                total: +total.toFixed(2)
-            });
-
-            console.log(success, result);
-            if (!success) return;
-            const { customer, ephemeralKey, paymentIntentId, paymentIntent } =
-                result;
-
-            setPaymentIntent(paymentIntentId);
-
-            return {
-                customer,
-                ephemeralKey,
-                paymentIntentId,
-                paymentIntent
-            };
-        } catch (error) {
-            console.log('error', error);
-        } finally {
-            setLoading(false);
-        }
-    }, [business?.stripeAccount, total]);
-
-    const startPayment = useCallback(async () => {
-        try {
-            const result = await fetchParams();
-            if (!result) return;
-
-            const { customer, ephemeralKey, paymentIntentId, paymentIntent } =
-                result!;
-
-            const { error } = await initPaymentSheet({
-                customerEphemeralKeySecret: ephemeralKey,
-                paymentIntentClientSecret: paymentIntent,
-                customerId: customer,
-                merchantDisplayName: business?.name!,
-                applePay: {
-                    merchantCountryCode: 'US'
-                },
-                googlePay: {
-                    merchantCountryCode: 'US',
-                    testEnv: true
-                },
-                defaultBillingDetails: {
-                    name: `${user?.name} ${user?.lastName}`,
-                    email: user?.email
-                }
-            });
-
-            if (!error) {
-                setLoading(true);
-                openPaymentSheet();
-            } else {
-                console.log('error A', error);
-                Alert.alert(`${error.code}`, error.message);
-                return;
-            }
-        } catch (error) {
-            console.log('error B', error);
-        } finally {
-            setLoading(false);
-        }
-    }, []);
-
-    const openPaymentSheet = useCallback(async () => {
-        try {
-            const { error } = await presentPaymentSheet();
-            if (error) {
-                console.log('error', error);
-                Alert.alert(`${error.code}`, error.message);
-                return;
-            } else {
-                console.log('openPaymentSheet SUCCESS');
-            }
-        } catch (error) {
-            console.log('error C', error);
-        }
-    }, []);
+    const { business } = useAppSelector((state) => state.business);
+    // console.log('BS =>', bs);
+    // const business = businesses.find(
+    //     (business) => business.id === items[0].businessId
+    // );
 
     const handleCheckout = async () => {
         try {
@@ -134,26 +53,64 @@ const OrderReview = ({}: Props) => {
                 });
                 return;
             } else {
-                startPayment();
+                if (
+                    business?.minimumDelivery &&
+                    business?.minimumDelivery > total
+                ) {
+                    Alert.alert(
+                        'Minimum Delivery Required',
+                        ` Please add $${(
+                            business.minimumDelivery - total
+                        ).toFixed(2)} to continue.   `
+                    );
+                    return;
+                }
+                //payment sucess to true
+
+                const newOrder: Order = {
+                    ...order,
+                    userId: user.id!,
+                    orderDate: new Date().toISOString(),
+                    items: items,
+                    total: +total.toFixed(2),
+                    paymentIntent: paymentIntent!,
+                    status: 'new',
+                    orderType: 'delivery',
+                    deliveryInstructions: deliveryInstructions,
+                    address: {
+                        street: '123 main st',
+                        apt: '1D',
+                        coors: { lat: 3, lng: 4 }
+                    }
+                };
+                dispatch(setOrder({ ...newOrder }));
+
+                setStartPayment(true);
             }
         } catch (error) {
             console.log('error D', error);
         }
     };
+
+    useEffect(() => {
+        if (items.length === 0) return;
+        //@ts-ignore
+        dispatch(getCurrentBusiness(items[0].businessId));
+    }, [items.length]);
+
+    if (!business) return <Loader />;
     return (
-        <StripeProvider
-            publishableKey={process.env.STRIPE_TEST_PK!}
-            merchantIdentifier="net.robertdev.deli.app"
-            threeDSecureParams={{
-                backgroundColor: theme.BACKGROUND_COLOR,
-                timeout: 8
-            }}
+        <PaymentWrapper
+            business={business}
+            paymentSuccess={startPaymentt}
+            setPaymentSuccess={setStartPayment}
+            loading={loading}
+            setLoading={setLoading}
+            setPaymentIntentId={setPaymentIntent}
         >
             <Screen>
                 <Header
-                    onPressBack={() =>
-                        navigation.navigate('ConsumerCart', { screen: 'Cart' })
-                    }
+                    onPressBack={() => navigation.goBack()}
                     title="Order Review"
                 />
 
@@ -209,9 +166,11 @@ const OrderReview = ({}: Props) => {
                                     </Text>
                                     <Text bold>
                                         $
-                                        {(item.size
-                                            ? item.size.price
-                                            : +item.price) * item.quantity}
+                                        {(
+                                            (item.size
+                                                ? item.size.price
+                                                : +item.price) * item.quantity
+                                        ).toFixed(2)}
                                     </Text>
                                 </Row>
                             </Row>
@@ -227,7 +186,15 @@ const OrderReview = ({}: Props) => {
                             multiline
                             placeholder="Note for the driver"
                             value={deliveryInstructions}
-                            onChangeText={setDeliveryInstructions}
+                            onChangeText={(text) => {
+                                setDeliveryInstructions(text);
+                                dispatch(
+                                    setOrder({
+                                        ...order!,
+                                        deliveryInstructions: text
+                                    })
+                                );
+                            }}
                         />
                     </Stack>
                 </View>
@@ -264,7 +231,7 @@ const OrderReview = ({}: Props) => {
                     </Row>
                 </View>
             </Screen>
-        </StripeProvider>
+        </PaymentWrapper>
     );
 };
 

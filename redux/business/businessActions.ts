@@ -1,7 +1,7 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import { businessCollection } from '../../firebase';
-import { Business } from './businessSlide';
+import { Business, setBusiness } from './businessSlide';
 
 export interface ReturnResponse {
     business: Business | null;
@@ -29,7 +29,7 @@ export const createBusiness = createAsyncThunk(
 
 export const getBusiness = createAsyncThunk(
     'business/getBusiness',
-    async (businessId: string): Promise<ReturnResponse> => {
+    async (businessId: string, _): Promise<ReturnResponse> => {
         try {
             const businessRef = doc(businessCollection, businessId);
             const data = await getDoc(businessRef);
@@ -37,6 +37,21 @@ export const getBusiness = createAsyncThunk(
             return { business: { id: data.id, ...data.data() } };
         } catch (error) {
             return { business: null };
+        }
+    }
+);
+
+export const getCurrentBusiness = createAsyncThunk(
+    'business/getCurrent',
+    async (businessId: string, { dispatch }) => {
+        try {
+            console.log('HERE', businessId);
+            const businessRef = doc(businessCollection, businessId);
+            const data = await getDoc(businessRef);
+            if (!data.exists()) return;
+            dispatch(setBusiness({ id: data.id, ...data.data() }));
+        } catch (error) {
+            dispatch(setBusiness(null));
         }
     }
 );

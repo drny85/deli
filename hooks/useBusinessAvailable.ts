@@ -4,9 +4,12 @@ import { businessCollection } from '../firebase';
 import { Business, setBusinesses } from '../redux/business/businessSlide';
 import { useAppDispatch } from '../redux/store';
 
+import { useLocation } from './useLocation';
+
 export const useBusinessAvailable = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [businessAvailable, setBusinessAvailable] = useState<Business[]>([]);
+
     const dispatch = useAppDispatch();
     useEffect(() => {
         const q = query(
@@ -15,7 +18,9 @@ export const useBusinessAvailable = () => {
         );
         const sub = onSnapshot(q, (snapshot) => {
             setBusinessAvailable(
-                snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }))
+                snapshot.docs.map((doc) => {
+                    return { id: doc.id, ...doc.data() };
+                })
             );
             dispatch(
                 setBusinesses(

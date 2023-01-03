@@ -76,7 +76,8 @@ const BusinessSignUp = ({ navigation }: Props) => {
                 hours: null,
                 image: null,
                 charges_enabled: false,
-                milesRadius: null
+                milesRadius: null,
+                isOpen: true
             };
             const userData: AppUser = {
                 id: user.uid,

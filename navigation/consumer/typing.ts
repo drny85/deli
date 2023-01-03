@@ -16,10 +16,11 @@ export type ConsumerHomeStackScreens = {
 };
 export type ConsumerOrdersStackScreens = {
     Orders: undefined;
+    OrderDetails: undefined;
 };
 export type ConsumerCartStackScreens = {
     Cart: undefined;
-    OrderReview:undefined;
+    OrderReview: undefined;
 };
 export type ConsumerProfileStackScreens = {
     Profile: undefined;

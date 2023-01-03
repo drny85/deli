@@ -39,3 +39,10 @@ export const DAYS = [
     'Friday',
     'Saturday'
 ];
+
+export enum NOTIFICATION_TYPE {
+    new_message = 'new message',
+    closed = 'closed',
+    new_referral = 'new_referral',
+    reminder = 'reminder'
+}

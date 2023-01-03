@@ -22,6 +22,7 @@ type Props = {};
 
 const Cart = ({}: Props) => {
     const { items, quantity, total } = useAppSelector((state) => state.cart);
+    console.log(items, quantity, total);
     const theme = useAppSelector((state) => state.theme);
     const dispatch = useAppDispatch();
     const naviagation = useNavigation();
@@ -29,7 +30,16 @@ const Cart = ({}: Props) => {
     const renderCartItems: ListRenderItem<CartItem> = ({ item, index }) => {
         return <CartListItem item={item} />;
     };
-    console.log(total);
+
+    const goToOrderReview = async () => {
+        try {
+            naviagation.navigate('ConsumerCart', {
+                screen: 'OrderReview'
+            });
+        } catch (error) {
+            console.log(error);
+        }
+    };
 
     const handleDeleteCart = () => {
         dispatch(setCart({ quantity: 0, items: [], total: 0 }));
@@ -83,11 +93,7 @@ const Cart = ({}: Props) => {
                 >
                     <Button
                         title={`View Order $${total.toFixed(2)}`}
-                        onPress={() => {
-                            naviagation.navigate('ConsumerCart', {
-                                screen: 'OrderReview'
-                            });
-                        }}
+                        onPress={goToOrderReview}
                     />
                 </View>
             )}

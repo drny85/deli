@@ -25,6 +25,8 @@ export interface Business {
     charges_enabled: boolean;
     milesRadius: number | null;
     minimumDelivery: number | null;
+    isOpen: boolean;
+    distance?: number | null;
 }
 interface IState {
     business: Business | null;

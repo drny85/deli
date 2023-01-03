@@ -10,14 +10,16 @@ import { useAppDispatch } from '../../../redux/store';
 import { useNavigation } from '@react-navigation/native';
 import BusinessCard from '../../../components/BusinessCard';
 import { useLocation } from '../../../hooks/useLocation';
+import { getMilesBetweenLatLon } from '../../../utils/getMilesBetwwen';
 
 type Props = {};
 
 const Businesses = ({}: Props) => {
     const { businessAvailable, isLoading } = useBusinessAvailable();
-    useLocation();
+    const { location } = useLocation();
     const dispatch = useAppDispatch();
     const navigation = useNavigation();
+
     const renderBusinesses: ListRenderItem<Business> = ({ item }) => {
         return (
             <BusinessCard

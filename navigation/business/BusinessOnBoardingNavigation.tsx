@@ -12,10 +12,7 @@ const { Navigator, Screen } =
 
 const BusinessOnBoardingNavigation = () => {
     return (
-        <Navigator
-            initialRouteName="BusinessHoursScreen"
-            screenOptions={{ headerShown: false }}
-        >
+        <Navigator screenOptions={{ headerShown: false }}>
             <Screen name="EmailVerification" component={EmailVerification} />
             <Screen name="PrepareInfoScreen" component={PrepareInfoScreen} />
             <Screen
