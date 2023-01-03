@@ -42,6 +42,7 @@ interface Props extends TextInputProps {
     returnKeyLabel?: string;
     textTheme?: 'light' | 'dark';
     p_y?: number;
+    textContainerStyle?: StyleProp<TextStyle>;
     returnKeyType?: TextInputProps['returnKeyType'];
     autoCapitalize?: TextInput['props']['autoCapitalize'];
 }
@@ -73,6 +74,7 @@ const InputField: FC<Props> = React.forwardRef(
             nogap,
             p_y,
             errorStyle,
+            textContainerStyle,
             upper,
             textTheme
         },
@@ -86,6 +88,7 @@ const InputField: FC<Props> = React.forwardRef(
                 {label && (
                     <View>
                         <Text
+                            style={textContainerStyle}
                             capitalize={!upper}
                             lightText={textTheme === 'light'}
                             darkText={textTheme === 'dark'}

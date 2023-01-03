@@ -1,5 +1,5 @@
 import { useNavigation } from '@react-navigation/native';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Alert, ScrollView, StyleSheet, View } from 'react-native';
 import { useDispatch } from 'react-redux';
 import Button from '../../../components/Button';
@@ -23,12 +23,26 @@ import {
 } from '../../../redux/business/businessActions';
 import { stripeFee } from '../../../utils/stripeFee';
 import Divider from '../../../components/Divider';
+import ProductListItem from '../../../components/ProductListItem';
+import { useLocation } from '../../../hooks/useLocation';
+import { AnimatePresence, MotiView } from 'moti';
+import GoogleAutoComplete from '../../../components/GoogleAutoCompleteField';
+import { Business } from '../../../redux/business/businessSlide';
+import {
+    GooglePlaceDetail,
+    GooglePlacesAutocompleteRef
+} from 'react-native-google-places-autocomplete';
 
 type Props = {};
 
 const OrderReview = ({}: Props) => {
     const navigation = useNavigation();
-
+    const googleRef = useRef<GooglePlacesAutocompleteRef>(null);
+    const { address, latitude, longitude } = useLocation();
+    const [deliveryAddress, setDeliveryAddress] = useState<Order['address']>();
+    const [changeAddress, setChangeAddress] = useState<boolean>(false);
+    const [showAddress, setShowAddress] = useState<boolean>(true);
+    const [apt, setApt] = useState<string>('');
     const [loading, setLoading] = useState(false);
     const [startPaymentt, setStartPayment] = useState(false);
     const { user } = useAppSelector((state) => state.auth);
@@ -43,9 +57,21 @@ const OrderReview = ({}: Props) => {
 
     const handleCheckout = async () => {
         try {
+            if (
+                business?.minimumDelivery &&
+                business?.minimumDelivery > total
+            ) {
+                Alert.alert(
+                    'Minimum Delivery Required',
+                    ` Please add $${(business.minimumDelivery - total).toFixed(
+                        2
+                    )} to continue.   `
+                );
+                return;
+            }
             if (!user) {
                 dispatch(setPreviosRoute('OrderReview'));
-                navigation.goBack();
+
                 navigation.navigate('ConsumerProfile', {
                     screen: 'Auth',
                     params: { screen: 'Login' }
@@ -65,10 +91,11 @@ const OrderReview = ({}: Props) => {
                     return;
                 }
                 //payment sucess to true
-
+                if (business?.id || user?.id) return;
                 const newOrder: Order = {
                     ...order,
                     userId: user.id!,
+                    businessId: business?.id!,
                     orderDate: new Date().toISOString(),
                     items: items,
                     total: +total.toFixed(2),
@@ -76,12 +103,10 @@ const OrderReview = ({}: Props) => {
                     status: 'new',
                     orderType: 'delivery',
                     deliveryInstructions: deliveryInstructions,
-                    address: {
-                        street: '123 main st',
-                        apt: '1D',
-                        coors: { lat: 3, lng: 4 }
-                    }
+                    address: deliveryAddress || null
                 };
+
+                if (!newOrder.address) return;
                 dispatch(setOrder({ ...newOrder }));
 
                 setStartPayment(true);
@@ -90,6 +115,16 @@ const OrderReview = ({}: Props) => {
             console.log('error D', error);
         }
     };
+
+    useEffect(() => {
+        if (!address || !longitude || !latitude || changeAddress) return;
+        const { street, streetNumber, city, subregion, postalCode } = address;
+        setDeliveryAddress({
+            ...deliveryAddress!,
+            street: `${streetNumber} ${street} , ${city}, ${subregion}, ${postalCode}`,
+            coors: { lat: latitude, lng: longitude }
+        });
+    }, [address, latitude, longitude, changeAddress]);
 
     useEffect(() => {
         if (items.length === 0) return;
@@ -115,21 +150,106 @@ const OrderReview = ({}: Props) => {
         >
             <Screen>
                 <Header
-                    onPressBack={() => navigation.goBack()}
+                    onPressBack={() =>
+                        navigation.navigate('ConsumerCart', { screen: 'Cart' })
+                    }
                     title="Order Review"
                 />
 
                 <View>
                     <Stack px={4}>
-                        <Text raleway_bold>{business?.name}</Text>
-                        <Text raleway_italic>
+                        <Text raleway_bold> From: {business?.name}</Text>
+                        <Text px_6 raleway>
                             {business?.address?.substring(
                                 0,
                                 business.address.length - 5
                             )}
                         </Text>
                     </Stack>
-                    <Divider />
+                    <Stack px={4}>
+                        <Text raleway_bold> To: You</Text>
+                        {deliveryAddress && (
+                            <Text px_6>{deliveryAddress.street}</Text>
+                        )}
+                        {!deliveryAddress && (
+                            <Text animation={'pulse'} px_6 raleway>
+                                getting current location
+                            </Text>
+                        )}
+
+                        <AnimatePresence>
+                            {showAddress && (
+                                <MotiView
+                                    style={{
+                                        alignSelf: 'center',
+                                        paddingVertical: SIZES.base
+                                    }}
+                                    from={{ opacity: 0, translateY: -20 }}
+                                    animate={{ opacity: 1, translateY: 0 }}
+                                >
+                                    <Button
+                                        outlined
+                                        title={'Change Address'}
+                                        onPress={() => {
+                                            setChangeAddress((prev) => {
+                                                if (prev) {
+                                                    googleRef.current?.clear();
+                                                    return false;
+                                                }
+                                                setShowAddress(false);
+                                                return !prev;
+                                            });
+                                        }}
+                                    />
+                                </MotiView>
+                            )}
+                        </AnimatePresence>
+
+                        <AnimatePresence>
+                            {changeAddress && !showAddress && (
+                                <MotiView
+                                    style={{ width: '100%' }}
+                                    from={{ opacity: 0, translateY: -20 }}
+                                    animate={{ opacity: 1, translateY: 0 }}
+                                    exit={{ opacity: 0, translateY: -20 }}
+                                    transition={{ type: 'timing' }}
+                                >
+                                    <GoogleAutoComplete
+                                        ref={googleRef}
+                                        placeholder="Delivery Address"
+                                        label="Delivery Address"
+                                        onPress={(
+                                            _: any,
+                                            details: GooglePlaceDetail
+                                        ) => {
+                                            setDeliveryAddress({
+                                                ...deliveryAddress!,
+                                                street: details.formatted_address,
+                                                coors: {
+                                                    ...details.geometry.location
+                                                }
+                                            });
+                                        }}
+                                    />
+                                    <View style={{ alignSelf: 'center' }}>
+                                        <Button
+                                            outlined
+                                            title="Update Address"
+                                            onPress={() => {
+                                                if (
+                                                    !googleRef.current?.getAddressText()
+                                                        .length
+                                                )
+                                                    return;
+                                                setShowAddress(true);
+                                            }}
+                                        />
+                                    </View>
+                                </MotiView>
+                            )}
+                        </AnimatePresence>
+                    </Stack>
+                    <Divider small />
                     <ScrollView
                         contentContainerStyle={{
                             width: '100%',
@@ -141,45 +261,11 @@ const OrderReview = ({}: Props) => {
                             {quantity} Items
                         </Text>
                         {items.map((item, index) => (
-                            <Row
-                                containerStyle={{
-                                    width: '100%',
-                                    marginVertical: SIZES.base
-                                }}
-                                horizontalAlign="space-between"
+                            <ProductListItem
                                 key={index.toString()}
-                            >
-                                <View>
-                                    <Text left>
-                                        {item.quantity} - {item.name}
-                                    </Text>
-                                </View>
-                                <Row
-                                    containerStyle={{
-                                        width: '60%'
-                                    }}
-                                    horizontalAlign="space-between"
-                                >
-                                    <Text capitalize px_6>
-                                        {item.size
-                                            ? item.size.size.substring(0, 1)
-                                            : ''}
-                                    </Text>
-                                    <Text center>
-                                        {item.size
-                                            ? item.size.price
-                                            : item.price}
-                                    </Text>
-                                    <Text bold>
-                                        $
-                                        {(
-                                            (item.size
-                                                ? item.size.price
-                                                : +item.price) * item.quantity
-                                        ).toFixed(2)}
-                                    </Text>
-                                </Row>
-                            </Row>
+                                item={item}
+                                index={index}
+                            />
                         ))}
                         <View
                             style={{
@@ -187,13 +273,12 @@ const OrderReview = ({}: Props) => {
                                 paddingTop: SIZES.base
                             }}
                         >
+                            <Text right>sub-total ${total.toFixed(2)}</Text>
                             <Row>
-                                <Text capitalize px_4>
-                                    service fee
-                                </Text>
-                                <Text>{stripeFee(total)}</Text>
+                                <Text px_4>service fee</Text>
+                                <Text>${stripeFee(total)}</Text>
                             </Row>
-                            <Text right medium>
+                            <Text right bold medium>
                                 Total ${(total + stripeFee(total)).toFixed(2)}
                             </Text>
                         </View>
@@ -234,17 +319,14 @@ const OrderReview = ({}: Props) => {
                                 }
                             ]}
                         >
-                            <Text bold medium>
-                                Total:
-                                <Text bold large>
-                                    {' '}
-                                    ${(total + stripeFee(total)).toFixed(2)}
-                                </Text>
+                            <Text bold large>
+                                ${(total + stripeFee(total)).toFixed(2)}
                             </Text>
                         </View>
                         <Button
                             disabled={loading}
                             isLoading={loading}
+                            outlined
                             containerStyle={{
                                 paddingVertical: SIZES.padding * 0.8
                             }}

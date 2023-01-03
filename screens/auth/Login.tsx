@@ -22,10 +22,12 @@ import { autoLogin } from '../../redux/auth/authActions';
 import Loader from '../../components/Loader';
 import { setPreviosRoute } from '../../redux/consumer/settingSlide';
 import { useNavigation } from '@react-navigation/native';
+import useNotifications from '../../hooks/useNotifications';
 
 type Props = NativeStackScreenProps<AuthScreens, 'Login'>;
 
 const Login = ({ navigation }: Props) => {
+    useNotifications();
     const dispatch = useAppDispatch();
     const nav = useNavigation();
     const { user, loading } = useAppSelector((state) => state.auth);

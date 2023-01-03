@@ -10,6 +10,7 @@ export interface AppUser {
     lastName: string;
     email: string;
     emailVerified: boolean;
+    phone: string | null;
     type: 'admin' | 'business' | 'consumer';
     preferences?: UserPreferences;
     pushToken?: string;

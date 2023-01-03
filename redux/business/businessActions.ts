@@ -1,6 +1,6 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
-import { businessCollection } from '../../firebase';
+import { businessCollection, usersCollection } from '../../firebase';
 import { Business, setBusiness } from './businessSlide';
 
 export interface ReturnResponse {
@@ -29,11 +29,12 @@ export const createBusiness = createAsyncThunk(
 
 export const getBusiness = createAsyncThunk(
     'business/getBusiness',
-    async (businessId: string, _): Promise<ReturnResponse> => {
+    async (businessId: string, { dispatch }): Promise<ReturnResponse> => {
         try {
             const businessRef = doc(businessCollection, businessId);
             const data = await getDoc(businessRef);
             if (!data.exists()) return { business: null };
+            dispatch(setBusiness({ id: data.id, ...data.data() }));
             return { business: { id: data.id, ...data.data() } };
         } catch (error) {
             return { business: null };
@@ -65,6 +66,10 @@ export const updateBusiness = createAsyncThunk(
             if (!data.exists()) return false;
 
             await updateDoc(businessRef, { ...businessData });
+            if (businessData.phone) {
+                const userRef = doc(usersCollection, businessData.id);
+                await updateDoc(userRef, { phone: businessData.phone });
+            }
 
             getBusiness(businessData.id);
             return true;

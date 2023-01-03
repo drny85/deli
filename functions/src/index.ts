@@ -122,7 +122,8 @@ exports.createConnectedBusinessAccount = functions.https.onCall(
 
             return { success: true, result: accountLink.url };
         } catch (error) {
-            console.log(error);
+            const err = error as any;
+            console.log('Error Creating Account Link', err.message);
             throw new functions.https.HttpsError(
                 'aborted',
                 'error creating connected account',
@@ -279,8 +280,8 @@ exports.addConnectedAccountToBusiness = functions.https.onCall(
                 result: 'account not connected'
             };
         } catch (error) {
-            console.log(error);
             const err = error as any;
+            console.log('Error connecting store', err.message);
             return { success: false, result: err.message };
         }
     }
@@ -330,7 +331,8 @@ exports.checkForStoreReady = functions.firestore
                     { merge: true }
                 );
         } catch (error) {
-            console.log(error);
+            const err = error as any;
+            console.log('Error checking for store', err.message);
             throw new functions.https.HttpsError(
                 'aborted',
                 'error creating connected account',
@@ -404,6 +406,8 @@ exports.createPaymentIntent = functions.https.onCall(
             };
         } catch (error) {
             const err = error as any;
+            console.log('Error creating payment intent', err);
+
             return { success: false, result: err.message };
         }
     }

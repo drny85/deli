@@ -36,7 +36,13 @@ export default function useCachedResources() {
     });
 
     const isDark = useColorScheme() === 'dark';
+
     const dispatch = useAppDispatch();
+    if (isDark) {
+        dispatch(switchTheme(darkTheme));
+    } else {
+        dispatch(switchTheme(lightTheme));
+    }
 
     const getUser = async (userId: string): Promise<AppUser | null> => {
         try {
@@ -87,12 +93,6 @@ export default function useCachedResources() {
                 if (cart) {
                     dispatch(setCart(cart));
                 }
-
-                isDark
-                    ? dispatch(switchTheme(darkTheme))
-                    : dispatch(switchTheme(lightTheme));
-
-                await new Promise((resolve) => setTimeout(resolve, 1000));
             } catch (error) {
                 console.log(error);
             } finally {

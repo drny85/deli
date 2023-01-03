@@ -29,6 +29,7 @@
       "expo-notifications": "~0.17.0",
       "expo-splash-screen": "~0.17.5",
       "expo-status-bar": "~1.4.2",
+      "expo-system-ui": "~2.0.1",
       "expo-task-manager": "~11.0.1",
       "firebase": "^9.15.0",
       "geolib": "^3.3.3",

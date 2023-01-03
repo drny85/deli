@@ -50,7 +50,7 @@ const Cart = ({}: Props) => {
             <Header
                 title="Cart"
                 rightIcon={
-                    total > 0 ? (
+                    items.length > 0 ? (
                         <TouchableOpacity
                             style={{ padding: 12 }}
                             onPress={() => {
@@ -82,7 +82,7 @@ const Cart = ({}: Props) => {
                     renderItem={renderCartItems}
                 />
             </View>
-            {quantity > 0 && (
+            {items.length > 0 && (
                 <View
                     style={{
                         position: 'absolute',

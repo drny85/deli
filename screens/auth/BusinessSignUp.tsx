@@ -27,10 +27,12 @@ import { Business } from '../../redux/business/businessSlide';
 import { AppUser } from '../../redux/auth/authSlide';
 import Loader from '../../components/Loader';
 import { createUser } from '../../redux/auth/authActions';
+import useNotifications from '../../hooks/useNotifications';
 
 type Props = NativeStackScreenProps<AuthScreens, 'BusinessSignup'>;
 
 const BusinessSignUp = ({ navigation }: Props) => {
+    useNotifications();
     const [loading, setLoading] = useState(false);
     const dispatch = useAppDispatch();
     const theme = useAppSelector((state) => state.theme);
@@ -84,6 +86,7 @@ const BusinessSignUp = ({ navigation }: Props) => {
                 name,
                 lastName,
                 email,
+                phone: null,
                 emailVerified: user.emailVerified,
                 type: 'business'
             };

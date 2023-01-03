@@ -9,6 +9,7 @@ export interface Order {
     paymentIntent: string;
     orderDate: string;
     userId: string;
+    businessId: string;
     orderType: 'pickup' | 'delivery';
     deliveryInstructions: string | null;
     address: { street: string; apt: string | null; coors: Coors } | null;

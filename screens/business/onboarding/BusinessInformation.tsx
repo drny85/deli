@@ -55,7 +55,7 @@ const BusinessInformation = ({ navigation }: Props) => {
             if (!isValid) {
                 return;
             }
-
+            console.log(address);
             const businessData: Business = {
                 ...business!,
                 address: address,
@@ -81,7 +81,7 @@ const BusinessInformation = ({ navigation }: Props) => {
     };
 
     const validateInputs = (): boolean => {
-        if (!address) {
+        if (address.length < 10) {
             Alert.alert('No Address Provided', 'Please type an address');
             addressRef.current?.focus();
             return false;
@@ -141,6 +141,7 @@ const BusinessInformation = ({ navigation }: Props) => {
                                         setPhone(formatPhone(text))
                                     }
                                     value={phone}
+                                    keyboardType="number-pad"
                                     rightIcon={
                                         phone.length === 14 && (
                                             <FontAwesome
@@ -166,7 +167,7 @@ const BusinessInformation = ({ navigation }: Props) => {
                                             contentStyle={{
                                                 textAlign: 'center'
                                             }}
-                                            keyboardType="numeric"
+                                            keyboardType="number-pad"
                                             maxLenght={2}
                                             onChangeText={
                                                 setMinimunDeliveryAmount
@@ -190,6 +191,8 @@ const BusinessInformation = ({ navigation }: Props) => {
                                             }}
                                             placeholder="Ex . 5"
                                             label="Miles"
+                                            keyboardType="number-pad"
+                                            maxLenght={2}
                                             onChangeText={setMilesRadius}
                                             value={milesRadius}
                                         />

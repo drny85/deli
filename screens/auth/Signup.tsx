@@ -32,10 +32,13 @@ import { AppUser } from '../../redux/auth/authSlide';
 import { createUser } from '../../redux/auth/authActions';
 import { setPreviosRoute } from '../../redux/consumer/settingSlide';
 import { useNavigation } from '@react-navigation/native';
+import useNotifications from '../../hooks/useNotifications';
+import { formatPhone } from '../../utils/formatPhone';
 
 type Props = NativeStackScreenProps<AuthScreens, 'Signup'>;
 
 const Signup = ({ navigation }: Props) => {
+    useNotifications();
     const dispatch = useAppDispatch();
     const nav = useNavigation();
     const [notTyping, setNotTyping] = useState(true);
@@ -45,6 +48,7 @@ const Signup = ({ navigation }: Props) => {
     const passwordRef = useRef<TextInput>(null);
     const [name, setName] = useState('');
     const [lastName, setlastName] = useState('');
+    const [phone, setPhone] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [comfirm, setComfirm] = useState('');
@@ -66,6 +70,7 @@ const Signup = ({ navigation }: Props) => {
                 email,
                 emailVerified: user.emailVerified,
                 lastName,
+                phone,
                 name,
                 type: 'consumer'
             };
@@ -85,7 +90,14 @@ const Signup = ({ navigation }: Props) => {
     };
 
     const validateInputs = (): boolean => {
-        if (!name || !lastName || !email || !password) return false;
+        if (!name || !lastName) {
+            Alert.alert('Error', 'Please enter a name and last name');
+            return false;
+        }
+        if (formatPhone(phone).length !== 14) {
+            Alert.alert('Error', 'Please enter a valid phone number');
+            return false;
+        }
         if (!email && !password) {
             emailRef.current?.focus();
             Alert.alert('Error', 'both fields are required');
@@ -155,11 +167,18 @@ const Signup = ({ navigation }: Props) => {
                             autoCapitalize="words"
                         />
                     </Row>
+                    <InputField
+                        label="Phone"
+                        value={phone}
+                        onChangeText={(text) => setPhone(formatPhone(text))}
+                        keyboardType="number-pad"
+                        placeholder="Ex.(123)-456-7890"
+                    />
 
                     <InputField
                         label="Email Address"
                         ref={emailRef}
-                        placeholder="Email Address"
+                        placeholder="john.smith@email.com"
                         onChangeText={setEmail}
                         keyboardType="email-address"
                         value={email}

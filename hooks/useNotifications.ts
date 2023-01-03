@@ -122,7 +122,8 @@ const useNotifications = () => {
                 }
             }
         } catch (error) {
-            console.log('Error from useNotifications hooks', error);
+            const err = error as any;
+            console.log('Error from useNotifications hooks', err.message);
         }
     };
 };

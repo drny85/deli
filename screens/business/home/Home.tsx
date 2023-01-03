@@ -7,10 +7,12 @@ import { useAppSelector } from '../../../redux/store';
 import Loader from '../../../components/Loader';
 import Button from '../../../components/Button';
 import { useNavigation } from '@react-navigation/native';
+import useNotifications from '../../../hooks/useNotifications';
 
 type Props = {};
 
 const Home = ({}: Props) => {
+    useNotifications();
     const { user } = useAppSelector((state) => state.auth);
     const { business } = useBusiness(user?.id!);
     const navigation = useNavigation();

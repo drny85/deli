@@ -25,7 +25,7 @@ const PaymentWrapper = ({
     loading,
     paymentSuccess,
     setPaymentSuccess,
-    setPaymentIntentId,
+
     business,
     children
 }: Props) => {
@@ -139,7 +139,7 @@ const PaymentWrapper = ({
 
     const openPaymentSheet = useCallback(async (paymentId: string) => {
         try {
-            const { error } = await presentPaymentSheet();
+            const { error, paymentOption } = await presentPaymentSheet();
             if (error) {
                 console.log('error', error);
                 Alert.alert(`${error.code}`, error.message);
@@ -148,10 +148,12 @@ const PaymentWrapper = ({
                 setPaymentSuccess(false);
 
                 if (!order) return;
+                console.log('PO', paymentOption);
                 const { payload } = await dispatch(
                     placeOrder({ ...order, paymentIntent: paymentId })
                 );
 
+                console.log('Order Placed', payload);
                 if (!payload) return;
                 navigation.dispatch((state) => {
                     const routes = state.routes.filter(

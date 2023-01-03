@@ -16,6 +16,7 @@ interface Props {
     primary?: boolean;
     secondary?: boolean;
     small?: boolean;
+    outlined?: boolean;
     large?: boolean;
     isLoading?: boolean;
     notRounded?: boolean;
@@ -36,6 +37,7 @@ const Button = ({
     small,
     notRounded,
     isLoading,
+    outlined,
     primary,
     onPress,
     disabled,
@@ -55,12 +57,21 @@ const Button = ({
                         ? theme.PRIMARY_BUTTON_COLOR
                         : secondary
                         ? theme.SECONDARY_BUTTON_COLOR
+                        : outlined
+                        ? theme.BACKGROUND_COLOR
                         : theme.ASCENT,
                     marginVertical: py_4 ? 8 : py_6 ? 12 : 2,
                     borderRadius: notRounded ? SIZES.radius : 35,
                     maxWidth: small ? SIZES.width * 0.33 : undefined,
                     minWidth: SIZES.width * 0.2,
-                    opacity: disabled ? 0.5 : 1
+                    opacity: disabled ? 0.5 : 1,
+                    borderColor:
+                        outlined && theme.mode === 'light'
+                            ? theme.ASCENT
+                            : outlined && theme.mode === 'dark'
+                            ? theme.SHADOW_COLOR
+                            : undefined,
+                    borderWidth: outlined ? 0.5 : undefined
                 },
                 containerStyle
             ]}
@@ -81,7 +92,12 @@ const Button = ({
             {isLoading ? (
                 <ActivityIndicator color={theme.CARD_BACKGROUND} size="small" />
             ) : (
-                <Text lightText center bold style={[styles.text, textStyle]}>
+                <Text
+                    lightText={!outlined}
+                    center
+                    bold
+                    style={[styles.text, textStyle]}
+                >
                     {title}
                 </Text>
             )}

@@ -1,11 +1,5 @@
-import {
-    KeyboardAvoidingView,
-    ScrollView,
-    TouchableWithoutFeedback,
-    Keyboard,
-    Platform
-} from 'react-native';
 import React from 'react';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
 type Props = {
     children: React.ReactNode;
@@ -13,19 +7,13 @@ type Props = {
 
 const KeyboardScreen = ({ children }: Props) => {
     return (
-        <KeyboardAvoidingView
-            behavior={Platform.OS === 'ios' ? 'height' : 'padding'}
-            contentContainerStyle={{ height: '100%', width: '100%' }}
+        <KeyboardAwareScrollView
+            keyboardShouldPersistTaps="handled"
+            extraHeight={10}
+            keyboardDismissMode="on-drag"
         >
-            <ScrollView
-                keyboardShouldPersistTaps="handled"
-                showsVerticalScrollIndicator={false}
-            >
-                <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
-                    <>{children}</>
-                </TouchableWithoutFeedback>
-            </ScrollView>
-        </KeyboardAvoidingView>
+            {children}
+        </KeyboardAwareScrollView>
     );
 };
 

@@ -9,9 +9,8 @@ export const useLocation = () => {
     const [location, setLocation] = useState<LocationObject | null>(null);
     const [longitude, setLongitude] = useState<number | null>(null);
     const [latitude, setLatitude] = useState<number | null>(null);
-    const [address, setAddress] = useState<
-        Location.LocationGeocodedAddress[] | null
-    >(null);
+    const [address, setAddress] =
+        useState<Location.LocationGeocodedAddress | null>(null);
 
     useEffect(() => {
         (async () => {
@@ -49,7 +48,7 @@ export const useLocation = () => {
                     longitude,
                     latitude
                 });
-                setAddress(address);
+                setAddress(address[0]);
 
                 setLocation(location);
             } catch (error) {

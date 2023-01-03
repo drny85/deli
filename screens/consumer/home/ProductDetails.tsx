@@ -21,12 +21,12 @@ import { P_Size } from '../../../utils/sizes';
 import Button from '../../../components/Button';
 import Quantifier from '../../../components/Quantifier';
 import { AnimatePresence } from 'moti';
-import { getBusiness } from '../../../redux/business/businessActions';
 import {
     addToCart,
     CartItem,
     setCart
 } from '../../../redux/consumer/cartSlide';
+import InputField from '../../../components/InputField';
 
 type Props = NativeStackScreenProps<ConsumerHomeStackScreens, 'ProductDetails'>;
 
@@ -47,7 +47,7 @@ const ProductDetails = ({
     const { business } = useAppSelector((state) => state.business);
     const [selected, setSelected] = React.useState<P_Size | null>(null);
     const [quantity, setQuatity] = React.useState<number>(1);
-    console.log(business?.name);
+    const [instructions, setInstructions] = React.useState<string>('');
 
     const emptyCartAndAddNewProduct = async () => {
         try {
@@ -55,7 +55,8 @@ const ProductDetails = ({
             const item: CartItem = {
                 ...product,
                 quantity: quantity,
-                size: selected
+                size: selected,
+                instructions: instructions
             };
             dispatch(addToCart(item));
             navigation.pop();
@@ -65,12 +66,17 @@ const ProductDetails = ({
     };
 
     const handleAddToCart = React.useCallback(
-        async (isSelected: P_Size | null, quantity: number) => {
+        async (
+            isSelected: P_Size | null,
+            quantity: number,
+            instructions: string
+        ) => {
             try {
                 const item: CartItem = {
                     ...product,
                     quantity: quantity,
-                    size: isSelected
+                    size: isSelected,
+                    instructions: instructions
                 };
 
                 dispatch(addToCart({ ...item }));
@@ -102,12 +108,12 @@ const ProductDetails = ({
                 );
                 return false;
             } else {
-                await handleAddToCart(selected, quantity);
+                await handleAddToCart(selected, quantity, instructions);
             }
         } else {
-            await handleAddToCart(selected, quantity);
+            await handleAddToCart(selected, quantity, instructions);
         }
-    }, [selected, quantity]);
+    }, [selected, quantity, instructions]);
 
     return (
         <View style={{ flex: 1, backgroundColor: theme.BACKGROUND_COLOR }}>
@@ -244,6 +250,17 @@ const ProductDetails = ({
                         </Row>
                     </View>
                 )}
+                <View>
+                    <InputField
+                        value={instructions}
+                        textContainerStyle={{ color: theme.SHADOW_COLOR }}
+                        label={'Special instructions'}
+                        containerStyle={{ borderRadius: SIZES.base }}
+                        multiline
+                        onChangeText={setInstructions}
+                        placeholder="Dressing on the side"
+                    />
+                </View>
             </ScrollView>
             <View style={[styles.btn]}>
                 <Row horizontalAlign="space-evenly">

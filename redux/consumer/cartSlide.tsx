@@ -6,6 +6,7 @@ import { Product } from '../business/productsSlice';
 export interface CartItem extends Product {
     quantity: number;
     size: P_Size | null;
+    instructions: string;
 }
 export interface IState {
     items: CartItem[];

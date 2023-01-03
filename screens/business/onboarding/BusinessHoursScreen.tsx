@@ -63,8 +63,9 @@ const BusinessHoursScreen = ({ navigation }: Props) => {
         try {
             const { payload } = await dispatch(updateBusiness(businessData));
             if (!payload) return;
-            setShowReview(false);
+
             await getConnectedStoreUrl();
+            setShowReview(false);
         } catch (error) {
             console.log(error);
         }
@@ -94,7 +95,7 @@ const BusinessHoursScreen = ({ navigation }: Props) => {
                 });
             }
         } catch (error) {
-            console.log(error);
+            console.log('Err ====>', error);
             setLoading(false);
         }
     };
@@ -108,7 +109,7 @@ const BusinessHoursScreen = ({ navigation }: Props) => {
                 {business?.name} Hours
             </Text>
             <Text center px_4 raleway>
-                Please verify each day and make chages accordingly
+                Please verify each day and make changes accordingly
             </Text>
             <Divider />
             <KeyboardScreen>
