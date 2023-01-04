@@ -17,18 +17,63 @@ import { resetCart } from '../../../utils/saveCart';
 import Button from '../../../components/Button';
 import { FontAwesome } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
+import { setPreviosRoute } from '../../../redux/consumer/settingSlide';
 
 type Props = {};
 
 const Cart = ({}: Props) => {
-    const { items, quantity, total } = useAppSelector((state) => state.cart);
-
+    const { items, total } = useAppSelector((state) => state.cart);
+    const { user } = useAppSelector((state) => state.auth);
+    const navigation = useNavigation();
+    const { business } = useAppSelector((state) => state.business);
     const theme = useAppSelector((state) => state.theme);
     const dispatch = useAppDispatch();
     const naviagation = useNavigation();
 
     const renderCartItems: ListRenderItem<CartItem> = ({ item, index }) => {
         return <CartListItem item={item} />;
+    };
+    const handlePress = async () => {
+        try {
+            if (
+                business?.minimumDelivery &&
+                business?.minimumDelivery > total
+            ) {
+                Alert.alert(
+                    'Minimum Delivery Required',
+                    ` Please add $${(business.minimumDelivery - total).toFixed(
+                        2
+                    )} to continue.   `
+                );
+                return;
+            }
+            if (!user) {
+                dispatch(setPreviosRoute('OrderReview'));
+
+                navigation.navigate('ConsumerProfile', {
+                    screen: 'Auth',
+                    params: { screen: 'Login' }
+                });
+                return;
+            } else {
+                if (
+                    business?.minimumDelivery &&
+                    business?.minimumDelivery > total
+                ) {
+                    Alert.alert(
+                        'Minimum Delivery Required',
+                        ` Please add $${(
+                            business.minimumDelivery - total
+                        ).toFixed(2)} to continue.   `
+                    );
+                    return;
+                }
+                //payment sucess to true
+                goToOrderReview();
+            }
+        } catch (error) {
+            console.log('error D', error);
+        }
     };
 
     const goToOrderReview = async () => {
@@ -93,7 +138,7 @@ const Cart = ({}: Props) => {
                 >
                     <Button
                         title={`View Order $${total.toFixed(2)}`}
-                        onPress={goToOrderReview}
+                        onPress={handlePress}
                     />
                 </View>
             )}

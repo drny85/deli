@@ -7,8 +7,9 @@ import { useAppSelector } from '../redux/store';
 import Text from './Text';
 
 interface Props {
-    label: string;
+    label?: string;
     onPress: any;
+    inputRadius?: number;
     ref?: any;
     errorMessage?: React.ReactElement | null;
     placeholder: string;
@@ -16,14 +17,19 @@ interface Props {
 }
 
 const GoogleAutoComplete: FC<Props> = React.forwardRef(
-    ({ label, onPress, errorMessage, rightButton, placeholder }, ref) => {
+    (
+        { label, onPress, errorMessage, rightButton, placeholder, inputRadius },
+        ref
+    ) => {
         const theme = useAppSelector((state) => state.theme);
 
         return (
             <View style={{ maxWidth: 612, width: '100%' }}>
-                <Text bold px_4 left>
-                    {label}
-                </Text>
+                {label && (
+                    <Text bold px_4 left>
+                        {label}
+                    </Text>
+                )}
                 <GooglePlacesAutocomplete
                     nearbyPlacesAPI="GooglePlacesSearch"
                     keyboardShouldPersistTaps="handled"
@@ -50,7 +56,9 @@ const GoogleAutoComplete: FC<Props> = React.forwardRef(
                             borderBottomWidth: 0.3,
                             borderBottomColor: theme.SHADOW_COLOR,
                             paddingVertical: 16,
-                            borderRadius: SIZES.radius * 2,
+                            borderRadius: inputRadius
+                                ? inputRadius
+                                : SIZES.radius * 2,
 
                             shadowOffset: { width: -4, height: -4 },
                             shadowColor: theme.SHADOW_COLOR,

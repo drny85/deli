@@ -26,11 +26,9 @@ const ConsumerBottomTabs = () => {
                 headerShown: false,
                 tabBarStyle: {
                     backgroundColor: theme.BACKGROUND_COLOR,
-                    borderTopWidth: 0,
-                    elevation: 0,
-                    borderColor: theme.BACKGROUND_COLOR
+                    borderWidth: 0,
+                    elevation: 0
                 },
-
                 tabBarActiveTintColor: theme.SECONDARY_BUTTON_COLOR,
                 tabBarShowLabel: false,
                 tabBarActiveBackgroundColor: '#13121228'

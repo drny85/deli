@@ -30,6 +30,9 @@ const config: ExpoConfig = {
             NSLocationWhenInUseUsageDescription:
                 'The Beep App uses your location to pick origins, destinations, and predict ride times',
 
+            NSLocationAlwaysAndWhenInUseUsageDescription:
+                'The Beep App uses your location to pick origins, destinations, and predict ride times',
+
             UIBackgroundModes: ['location', 'fetch']
         }
     },

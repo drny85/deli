@@ -70,10 +70,14 @@ const CartListItem = ({ item }: Props) => {
                                     containerStyle={{ flexGrow: 1 }}
                                     horizontalAlign="space-between"
                                 >
-                                    <Text px_4 bold>
+                                    {/* <Text px_4 bold>
                                         {item.quantity}
+                                    </Text> */}
+                                    <Text raleway_italic>
+                                        {item.quantity}
+                                        {' - '}
+                                        <Text raleway_italic>{item.name}</Text>
                                     </Text>
-                                    <Text raleway_bold>{item.name}</Text>
                                     <Text>
                                         {item.size
                                             ? item.size.price
@@ -105,7 +109,7 @@ const CartListItem = ({ item }: Props) => {
                                         }}
                                         quantity={item.quantity}
                                     />
-                                    <Text capitalize bold>
+                                    <Text capitalize>
                                         {' '}
                                         {item.size
                                             ? item.size.size.substring(
