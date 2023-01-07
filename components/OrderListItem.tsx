@@ -8,9 +8,8 @@ import { useAppSelector } from '../redux/store';
 import moment from 'moment';
 import Row from './Row';
 
-import { Business } from '../redux/business/businessSlide';
 import Button from './Button';
-import Stack from './Stack';
+
 import { stripeFee } from '../utils/stripeFee';
 
 type Props = {
@@ -57,8 +56,14 @@ const OrderListItem = ({ order, onPress }: Props) => {
                         {(order.total + stripeFee(order.total)).toFixed(2)}
                     </Text>
                     <Text capitalize>
-                        {moment(order.orderDate).format('MMM d')}-{' '}
-                        {order.status}
+                        {moment(order.orderDate).format('MMM d')} -{' '}
+                        {order.status === ORDER_STATUS.marked_ready_for_delivery
+                            ? 'Ready'
+                            : order.status === ORDER_STATUS.delivered
+                            ? 'Delivered'
+                            : order.status === ORDER_STATUS.cancelled
+                            ? 'Cencelled'
+                            : order.status}
                     </Text>
                 </View>
                 <View>

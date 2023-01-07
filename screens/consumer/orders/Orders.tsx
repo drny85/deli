@@ -13,12 +13,14 @@ import { useNavigation } from '@react-navigation/native';
 import Button from '../../../components/Button';
 
 import { getCurrentBusiness } from '../../../redux/business/businessActions';
+import { setPreviosRoute } from '../../../redux/consumer/settingSlide';
 
 type Props = {};
 
 const Orders = ({}: Props) => {
     const dispatch = useAppDispatch();
     const { business } = useAppSelector((state) => state.business);
+    const { previousRoute } = useAppSelector((state) => state.settings);
     const { orders, loading } = useOrders();
     const { user } = useAppSelector((state) => state.auth);
     const navigation = useNavigation();
@@ -38,11 +40,17 @@ const Orders = ({}: Props) => {
     };
 
     useEffect(() => {
-        if (!orders.length) return;
-        dispatch(getCurrentBusiness(orders[0].businessId));
+        if (orders.length > 0) {
+            dispatch(getCurrentBusiness(orders[0].businessId));
+        }
     }, [orders.length]);
 
-    if (loading || !business) return <Loader />;
+    useEffect(() => {
+        if (!previousRoute) return;
+        dispatch(setPreviosRoute(null));
+    }, [previousRoute]);
+
+    if (loading) return <Loader />;
     if (!user)
         return (
             <Screen center>
@@ -51,12 +59,13 @@ const Orders = ({}: Props) => {
                 </Text>
                 <Button
                     title="Sign In"
-                    onPress={() =>
+                    onPress={() => {
+                        dispatch(setPreviosRoute('Orders'));
                         navigation.navigate('ConsumerProfile', {
                             screen: 'Auth',
                             params: { screen: 'Login' }
-                        })
-                    }
+                        });
+                    }}
                 />
             </Screen>
         );
@@ -64,7 +73,7 @@ const Orders = ({}: Props) => {
         return (
             <Screen center>
                 <Text py_8 animation={'fadeInDown'} lobster medium>
-                    Please sign in to see your orders.
+                    You dont have any orders yet.
                 </Text>
                 <Button
                     title="Place First Order"

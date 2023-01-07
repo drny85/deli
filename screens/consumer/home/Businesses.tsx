@@ -27,7 +27,14 @@ const Businesses = ({}: Props) => {
             console.log('focus', previousRoute);
 
             if (user && previousRoute) {
-                navigation.navigate('ConsumerCart', { screen: 'OrderReview' });
+                if (previousRoute === 'OrderReview') {
+                    navigation.navigate('ConsumerCart', {
+                        screen: 'OrderReview'
+                    });
+                }
+                if (previousRoute === 'Orders') {
+                    navigation.navigate('ConsumerOrders', { screen: 'Orders' });
+                }
             }
         });
 

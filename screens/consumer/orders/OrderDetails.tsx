@@ -20,12 +20,21 @@ import MapView, { Marker } from 'react-native-maps';
 import MapViewDirections from 'react-native-maps-directions';
 import { useDispatch } from 'react-redux';
 import { getCurrentBusiness } from '../../../redux/business/businessActions';
-import BottomSheet from '@gorhom/bottom-sheet';
+import BottomSheet, {
+    BottomSheetScrollView,
+    BottomSheetView
+} from '@gorhom/bottom-sheet';
 import { Coors } from '../../../redux/business/businessSlide';
 import { FontAwesome } from '@expo/vector-icons';
 import AnimatedLottieView from 'lottie-react-native';
 import { ORDER_STATUS } from '../../../redux/consumer/ordersSlide';
 import { Image } from 'moti';
+import ProductListItem from '../../../components/ProductListItem';
+import Stack from '../../../components/Stack';
+import Divider from '../../../components/Divider';
+import moment from 'moment';
+import Row from '../../../components/Row';
+import { stripeFee } from '../../../utils/stripeFee';
 
 type Props = NativeStackScreenProps<ConsumerOrdersStackScreens, 'OrderDetails'>;
 
@@ -46,13 +55,14 @@ const OrderDetails = ({
     const theme = useAppSelector((state) => state.theme);
     const { loading, order } = useOrder(orderId);
     const [minutes, setMinutes] = useState<number | null>(null);
-    const snapPoints = useMemo(() => ['10%', '25%', '50%', '80%'], []);
+    const snapPoints = useMemo(() => ['10%', '50%', '80%'], []);
     const bottomSheetRef = useRef<BottomSheet>(null);
     const goToOrder = () => {
         navigation.navigate('ConsumerOrders', { screen: 'Orders' });
     };
 
     const mapRef = useRef<MapView>(null);
+    const lottieRef = useRef<AnimatedLottieView>(null);
 
     const handleSheetChanges = useCallback((index: number) => {
         console.log('handleSheetChanges', index);
@@ -94,6 +104,8 @@ const OrderDetails = ({
         // @ts-ignore
         dispatch(getCurrentBusiness(order.businessId!));
     }, [order?.businessId]);
+
+    console.log(order?.id);
 
     if (loading || !order || !business) return <Loader />;
 
@@ -182,112 +194,194 @@ const OrderDetails = ({
                             longitude: destination?.lng!
                         }}
                     ></MapViewDirections>
-
-                    <TouchableOpacity
-                        onPress={goToOrder}
-                        style={{
-                            position: 'absolute',
-                            top: 30,
-                            left: 20,
-                            height: 40,
-                            width: 40,
-                            borderRadius: 20,
-
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                            zIndex: 100
-                        }}
-                    >
-                        <FontAwesome
-                            name="chevron-left"
-                            size={20}
-                            color={'#212121'}
-                        />
-                    </TouchableOpacity>
                 </MapView>
                 {minutes && <Text>ETA {Math.round(minutes)} minutes</Text>}
+                <TouchableOpacity
+                    onPress={goToOrder}
+                    style={{
+                        position: 'absolute',
+                        top: SIZES.statusBarHeight,
+
+                        left: 10,
+                        height: 40,
+                        width: 40,
+                        borderRadius: 20,
+
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        zIndex: 100
+                    }}
+                >
+                    <FontAwesome
+                        name="chevron-left"
+                        size={28}
+                        color={theme.TEXT_COLOR}
+                    />
+                </TouchableOpacity>
             </View>
         );
     };
 
     const renderNewOrder = (): JSX.Element => {
         return (
-            <TouchableWithoutFeedback
-                onPress={() => {
-                    console.log('onPress');
-                    navigation.goBack();
+            <View
+                style={{
+                    flex: 1
                 }}
             >
-                <View style={{ flex: 1 }}>
-                    <>
-                        <AnimatedLottieView
-                            style={{ flex: 1 }}
-                            resizeMode="contain"
-                            autoPlay
-                            source={
-                                theme.mode === 'dark'
-                                    ? require('../../../assets/animations/preparing-dark.json')
-                                    : require('../../../assets/animations/preparing.json')
-                            }
-                        />
-                        <TouchableOpacity
-                            onPress={() => navigation.goBack()}
-                            style={{
-                                position: 'absolute',
-                                top: 30,
-                                left: 20,
-                                padding: SIZES.base,
-                                zIndex: 120
-                            }}
-                        >
-                            <FontAwesome
-                                name="chevron-left"
-                                size={24}
-                                color={theme.TEXT_COLOR}
-                            />
-                        </TouchableOpacity>
-                        <View
-                            style={{
-                                flex: 1,
-                                justifyContent: 'space-between',
-                                paddingVertical: SIZES.padding * 3
-                            }}
-                        >
-                            <View>
-                                <Text
-                                    large
-                                    lobster
-                                    py_8
-                                    center
-                                    animation={'fadeInDown'}
-                                >
-                                    {user?.name}, Thank you for your order
-                                </Text>
-                            </View>
-                        </View>
-                    </>
-                    <BottomSheet
-                        ref={bottomSheetRef}
-                        index={0}
-                        snapPoints={snapPoints}
-                        onChange={handleSheetChanges}
+                <>
+                    <AnimatedLottieView
+                        style={{ flex: 1 }}
+                        resizeMode="contain"
+                        autoPlay={true}
+                        source={
+                            theme.mode === 'dark'
+                                ? require('../../../assets/animations/preparing-dark.json')
+                                : require('../../../assets/animations/preparing.json')
+                        }
+                    />
+                    <TouchableOpacity
+                        onPress={() =>
+                            navigation.navigate('ConsumerOrders', {
+                                screen: 'Orders'
+                            })
+                        }
+                        style={{
+                            position: 'absolute',
+                            top: SIZES.statusBarHeight,
+                            left: 20,
+                            padding: SIZES.base,
+                            zIndex: 120
+                        }}
                     >
-                        <View>
-                            <Text lobster medium center darkText>
-                                {business.name} just got your order 🎉
+                        <FontAwesome
+                            name="chevron-left"
+                            size={24}
+                            color={theme.TEXT_COLOR}
+                        />
+                    </TouchableOpacity>
+                    <View
+                        style={{
+                            paddingVertical: SIZES.padding * 3
+                        }}
+                    >
+                        <View style={{ paddingVertical: SIZES.padding }}>
+                            <Text
+                                large
+                                lobster
+                                py_8
+                                center
+                                animation={'fadeInDown'}
+                            >
+                                {user?.name}, Thank you for your order
                             </Text>
                         </View>
-                    </BottomSheet>
-                </View>
-            </TouchableWithoutFeedback>
+                    </View>
+                </>
+            </View>
         );
     };
     return (
-        <Screen>
+        <View
+            style={{
+                flex: 1,
+                backgroundColor:
+                    theme.mode === 'light' ? '#f5ebe0' : theme.BACKGROUND_COLOR
+            }}
+        >
             {order.status === ORDER_STATUS.new && renderNewOrder()}
+            {order.status === ORDER_STATUS.in_progress && renderNewOrder()}
             {order.status === ORDER_STATUS.marked_ready_for_delivery &&
                 renderOrderMarkedForDelivery()}
-        </Screen>
+            <BottomSheet
+                ref={bottomSheetRef}
+                index={0}
+                snapPoints={snapPoints}
+                onChange={handleSheetChanges}
+            >
+                <BottomSheetScrollView>
+                    <Text darkText center lobster medium py_4>
+                        {order.status === ORDER_STATUS.new &&
+                            `${business.name} just got your order`}
+
+                        {order.status === ORDER_STATUS.in_progress &&
+                            `${business.name} started preparing your order`}
+                        {order.status ===
+                            ORDER_STATUS.marked_ready_for_delivery &&
+                            `Your order is ready for delivery`}
+                    </Text>
+                    <Stack>
+                        <Text darkText bold>
+                            From
+                        </Text>
+                        <Text darkText>{business.address?.split(', ')[0]}</Text>
+                        <View style={{ height: 10 }} />
+                        <Text darkText bold>
+                            To
+                        </Text>
+                        <Text darkText>
+                            {order.address?.street?.split(', ')[0]}
+                        </Text>
+                        <Text darkText py_4>
+                            Order Date: {moment(order.orderDate).format('lll')}
+                        </Text>
+                    </Stack>
+                    <Divider small />
+                    <View style={{ padding: SIZES.padding }}>
+                        <Text darkText center bold>
+                            Items
+                        </Text>
+                        {order.items.map((item, index) => (
+                            <ProductListItem
+                                themeTextColor
+                                key={index.toString()}
+                                item={item}
+                                index={index}
+                            />
+                        ))}
+                        <Stack>
+                            <Row
+                                containerStyle={{ width: '100%' }}
+                                horizontalAlign="space-between"
+                            >
+                                <Text darkText capitalize>
+                                    Sub Total
+                                </Text>
+                                <Text darkText capitalize>
+                                    &{order.total.toFixed(2)}
+                                </Text>
+                            </Row>
+                            <Row
+                                containerStyle={{ width: '100%' }}
+                                horizontalAlign="space-between"
+                            >
+                                <Text py_4 darkText capitalize>
+                                    Service Fee
+                                </Text>
+                                <Text darkText capitalize>
+                                    ${stripeFee(order.total).toFixed(2)}
+                                </Text>
+                            </Row>
+                            <Divider small />
+                            <Row
+                                containerStyle={{ width: '100%' }}
+                                horizontalAlign="space-between"
+                            >
+                                <Text py_4 darkText bold large capitalize>
+                                    Total
+                                </Text>
+                                <Text darkText bold large capitalize>
+                                    $
+                                    {(
+                                        order.total + stripeFee(order.total)
+                                    ).toFixed(2)}
+                                </Text>
+                            </Row>
+                        </Stack>
+                    </View>
+                </BottomSheetScrollView>
+            </BottomSheet>
+        </View>
     );
 };
 

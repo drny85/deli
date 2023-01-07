@@ -11,9 +11,10 @@ import Divider from './Divider';
 type Props = {
     item: CartItem;
     index: number;
+    themeTextColor?: boolean;
 };
 
-const ProductListItem = ({ item, index }: Props) => {
+const ProductListItem = ({ item, index, themeTextColor }: Props) => {
     return (
         <View>
             <Row
@@ -25,7 +26,7 @@ const ProductListItem = ({ item, index }: Props) => {
                 key={index.toString()}
             >
                 <View>
-                    <Text left>
+                    <Text darkText={themeTextColor} left>
                         {item.quantity} - {item.name}
                     </Text>
                 </View>
@@ -35,13 +36,13 @@ const ProductListItem = ({ item, index }: Props) => {
                     }}
                     horizontalAlign="space-between"
                 >
-                    <Text capitalize px_6>
+                    <Text darkText={themeTextColor} capitalize px_6>
                         {item.size ? item.size.size.substring(0, 1) : ''}
                     </Text>
-                    <Text center>
+                    <Text darkText={themeTextColor} center>
                         {item.size ? item.size.price : item.price}
                     </Text>
-                    <Text bold>
+                    <Text darkText={themeTextColor} bold>
                         $
                         {(
                             (item.size ? item.size.price : +item.price) *
@@ -51,7 +52,7 @@ const ProductListItem = ({ item, index }: Props) => {
                 </Row>
             </Row>
             {item.instructions && (
-                <Text small px_6>
+                <Text darkText={themeTextColor} small px_6>
                     -- {item.instructions}
                 </Text>
             )}

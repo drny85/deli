@@ -48,7 +48,17 @@ const ConsumerBottomTabs = () => {
                         elevation: 0
                     },
 
-                    tabBarIcon: () => <TabBarIcon name="home-outline" />
+                    tabBarIcon: ({ size, color }) => (
+                        <Image
+                            style={{
+                                height: 28,
+                                width: 28,
+                                tintColor: theme.TEXT_COLOR
+                            }}
+                            resizeMode="contain"
+                            source={require('../../restaurant.png')}
+                        />
+                    )
                 })}
             />
             <Screen
