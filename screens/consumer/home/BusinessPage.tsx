@@ -9,8 +9,8 @@ import { useAppDispatch, useAppSelector } from '../../../redux/store';
 
 import Loader from '../../../components/Loader';
 import { FontAwesome } from '@expo/vector-icons';
-import Header from '../../../components/Header';
-import { CommonActions, useNavigation } from '@react-navigation/native';
+
+import { useNavigation } from '@react-navigation/native';
 import { setCurrentProduct } from '../../../redux/business/productsSlice';
 import { AnimatePresence, MotiView } from 'moti';
 import Row from '../../../components/Row';
@@ -72,7 +72,8 @@ const BusinessPage = () => {
                                 ]}
                                 onPress={() => {
                                     navigation.navigate('ConsumerCart', {
-                                        screen: 'Cart'
+                                        screen: 'Cart',
+                                        params: { screen: 'Cart' }
                                     });
                                 }}
                             >

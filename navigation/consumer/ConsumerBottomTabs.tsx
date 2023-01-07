@@ -12,12 +12,15 @@ import ConsumerOrdersStackNavigation from './ConsumerOrdersStacksScreens';
 import ConsumerCartStackNavigation from './ConsumerCartStacksNavigation';
 import ConsumerProfileStackNavigation from './ConsumerProfileStacksNavigation';
 import { MotiView } from 'moti';
+import { Image } from 'react-native';
+import { Asset, useAssets } from 'expo-asset';
 
 const { Navigator, Screen } =
     createBottomTabNavigator<ConsumerBottomTabScreens>();
 
 const ConsumerBottomTabs = () => {
     const theme = useAppSelector((state) => state.theme);
+
     const { quantity } = useAppSelector((state) => state.cart);
 
     return (
@@ -56,10 +59,21 @@ const ConsumerBottomTabs = () => {
                         display: tabBarVisibility(route),
                         backgroundColor: theme.BACKGROUND_COLOR,
                         borderTopWidth: 0,
-                        elevation: 0
+                        elevation: 0,
+                        height: tabBarVisibility(route) === 'flex' ? 80 : 0
                     },
 
-                    tabBarIcon: () => <TabBarIcon name="aperture" />
+                    tabBarIcon: ({ size, color }) => (
+                        <Image
+                            style={{
+                                height: 28,
+                                width: 28,
+                                tintColor: theme.TEXT_COLOR
+                            }}
+                            resizeMode="contain"
+                            source={require('../../order.png')}
+                        />
+                    )
                 })}
             />
             <Screen
@@ -70,7 +84,8 @@ const ConsumerBottomTabs = () => {
                         display: tabBarVisibility(route),
                         backgroundColor: theme.BACKGROUND_COLOR,
                         borderTopWidth: 0,
-                        elevation: 0
+                        elevation: 0,
+                        height: tabBarVisibility(route) === 'flex' ? 80 : 0
                     },
                     tabBarBadge: quantity > 0 ? quantity : undefined,
                     tabBarBadgeStyle:
@@ -122,9 +137,10 @@ function TabBarIcon(props: {
 const tabBarVisibility = (route: any) => {
     const routeName = getFocusedRouteNameFromRoute(route);
 
-    const routes = ['BusinessPage', 'OrderReview', 'OrderDetails'];
+    const routes = ['BusinessPage', 'Checkout', 'OrderReview', 'OrderDetails'];
 
     if (routes.findIndex((r) => r === routeName) !== -1) {
+        console.log('none', routeName);
         return 'none';
     }
     return 'flex';

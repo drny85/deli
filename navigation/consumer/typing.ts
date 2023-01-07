@@ -16,7 +16,7 @@ export type ConsumerHomeStackScreens = {
 };
 export type ConsumerOrdersStackScreens = {
     Orders: undefined;
-    OrderDetails: undefined;
+    OrderDetails: { orderId: string };
 };
 export type ConsumerCartStackScreens = {
     Cart: undefined;

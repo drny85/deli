@@ -5,7 +5,6 @@ import { useDispatch } from 'react-redux';
 import Button from '../../../components/Button';
 import Header from '../../../components/Header';
 import InputField from '../../../components/InputField';
-import Geolocation from '@react-native-community/geolocation';
 import Row from '../../../components/Row';
 import Screen from '../../../components/Screen';
 import Stack from '../../../components/Stack';
@@ -15,16 +14,15 @@ import { setPreviosRoute } from '../../../redux/consumer/settingSlide';
 import { useAppSelector } from '../../../redux/store';
 
 import Loader from '../../../components/Loader';
-import PaymentWrapper from '../../../components/PaymentWrapper';
+
 import {
     Order,
+    ORDER_STATUS,
+    ORDER_TYPE,
     saveDeliveryAddress,
     setOrder
 } from '../../../redux/consumer/ordersSlide';
-import {
-    getBusiness,
-    getCurrentBusiness
-} from '../../../redux/business/businessActions';
+import { getCurrentBusiness } from '../../../redux/business/businessActions';
 import { stripeFee } from '../../../utils/stripeFee';
 import Divider from '../../../components/Divider';
 import ProductListItem from '../../../components/ProductListItem';
@@ -36,7 +34,6 @@ import {
     GooglePlaceDetail,
     GooglePlacesAutocompleteRef
 } from 'react-native-google-places-autocomplete';
-import { current } from '@reduxjs/toolkit';
 
 type Props = {};
 
@@ -45,14 +42,9 @@ const OrderReview = ({}: Props) => {
     const googleRef = useRef<GooglePlacesAutocompleteRef>(null);
     const { address, latitude, longitude } = useLocation();
     const [deliveryAddress, setDeliveryAddress] = useState<Order['address']>();
-
-    const [apt, setApt] = useState<string>('');
-    const [loading, setLoading] = useState(false);
-
     const { user } = useAppSelector((state) => state.auth);
     const { order, deliveryAdd } = useAppSelector((state) => state.orders);
     const { previousRoute } = useAppSelector((state) => state.settings);
-
     const theme = useAppSelector((state) => state.theme);
     const dispatch = useDispatch();
     const { items, quantity, total } = useAppSelector((state) => state.cart);
@@ -74,8 +66,8 @@ const OrderReview = ({}: Props) => {
                 },
                 total: +total.toFixed(2),
                 paymentIntent: '',
-                status: 'new',
-                orderType: 'delivery',
+                status: ORDER_STATUS.new,
+                orderType: ORDER_TYPE.delivery,
                 deliveryInstructions: deliveryInstructions,
                 address: deliveryAddress || null
             };
@@ -88,7 +80,10 @@ const OrderReview = ({}: Props) => {
                 return;
             }
             dispatch(setOrder({ ...newOrder }));
-            navigation.navigate('ConsumerCart', { screen: 'Checkout' });
+
+            navigation.navigate('ConsumerCart', {
+                screen: 'Checkout'
+            });
         } catch (error) {
             console.log(error);
         }
@@ -122,22 +117,20 @@ const OrderReview = ({}: Props) => {
         if (items.length === 0) return;
         //@ts-ignore
         dispatch(getCurrentBusiness(items[0].businessId));
-        //remove previous rouite if any;
-        // const state = navigation.getState();
-        // console.log('state', state);
+
         if (previousRoute) {
             dispatch(setPreviosRoute(null));
         }
     }, [items.length, previousRoute]);
-
-    console.log('Prev', previousRoute);
 
     if (!business) return <Loader />;
     return (
         <Screen>
             <Header
                 onPressBack={() =>
-                    navigation.navigate('ConsumerCart', { screen: 'Cart' })
+                    navigation.navigate('ConsumerCart', {
+                        screen: 'Cart'
+                    })
                 }
                 title="Order Review"
             />
@@ -231,6 +224,7 @@ const OrderReview = ({}: Props) => {
                         )}
                     </AnimatePresence>
                 </Stack>
+
                 <Divider small />
                 <ScrollView
                     contentContainerStyle={{
@@ -312,8 +306,6 @@ const OrderReview = ({}: Props) => {
                         </Text>
                     </View>
                     <Button
-                        disabled={loading}
-                        isLoading={loading}
                         outlined
                         containerStyle={{
                             paddingVertical: SIZES.padding * 0.8

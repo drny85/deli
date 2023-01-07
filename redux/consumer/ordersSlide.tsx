@@ -7,6 +7,20 @@ export interface ContactPerson {
     lastName: string;
     phone: string;
 }
+
+export enum ORDER_STATUS {
+    delivered = 'delivered',
+    in_progress = 'in_progress',
+    new = 'new',
+    marked_ready_for_delivery = 'marked_ready_for_delivery',
+    marked_ready_for_pickup = 'marked_ready_for_pickup',
+    cancelled = 'cancelled'
+}
+
+export enum ORDER_TYPE {
+    pickup = 'pickup',
+    delivery = 'delivery'
+}
 export interface Order {
     id?: string;
     total: number;
@@ -16,17 +30,10 @@ export interface Order {
     userId: string;
     businessId: string;
     contactPerson: ContactPerson;
-    orderType: 'pickup' | 'delivery';
+    orderType: ORDER_TYPE;
     deliveryInstructions: string | null;
     address: { street: string; apt: string | null; coors: Coors } | null;
-    status:
-        | 'delivered'
-        | 'picked_up'
-        | 'new'
-        | 'in_progress'
-        | 'cancelled'
-        | 'pending_pickup'
-        | 'pending_delivery';
+    status: ORDER_STATUS;
 }
 
 interface OrdersState {

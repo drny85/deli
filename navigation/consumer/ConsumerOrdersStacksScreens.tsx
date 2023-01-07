@@ -10,7 +10,11 @@ const ConsumerOrdersStackNavigation = () => {
     return (
         <Navigator screenOptions={{ headerShown: false }}>
             <Screen name="Orders" component={Orders} />
-            <Screen name="OrderDetails" component={OrderDetails} />
+            <Screen
+                name="OrderDetails"
+                component={OrderDetails}
+                options={{ presentation: 'fullScreenModal' }}
+            />
         </Navigator>
     );
 };

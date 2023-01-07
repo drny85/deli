@@ -11,6 +11,7 @@ export interface Product {
     description: string | null;
     sizes: P_Size[];
     businessId: string;
+    unitSold: number;
 }
 interface IState {
     productImage: string | null;

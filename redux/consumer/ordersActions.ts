@@ -7,17 +7,19 @@ import { Order } from './ordersSlide';
 
 export const placeOrder = createAsyncThunk(
     'orders/placeOrder',
-    async (order: Order, { dispatch }): Promise<boolean> => {
+    async (
+        order: Order,
+        { dispatch }
+    ): Promise<{ success: boolean; orderId: string | null }> => {
         try {
-            console.log(order);
-            if (!order.items.length) return false;
-            await addDoc(ordersCollection, { ...order });
+            if (!order.items.length) return { success: false, orderId: null };
+            const { id } = await addDoc(ordersCollection, { ...order });
             dispatch(setCart({ quantity: 0, items: [], total: 0 }));
             resetCart();
-            return true;
+            return { success: true, orderId: id };
         } catch (error) {
             console.log('Error placing Order', error);
-            return false;
+            return { success: false, orderId: null };
         }
     }
 );

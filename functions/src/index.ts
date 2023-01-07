@@ -10,7 +10,7 @@ import Stripe from 'stripe';
 import { assignUserType, stripeFee } from './shared';
 
 import { UserRecord } from 'firebase-functions/v1/auth';
-import { AppUser, Business } from './typing';
+import { AppUser, Business, CartItem } from './typing';
 
 const stripe = new Stripe(process.env.STRIPE_TEST_KEY!, {
     apiVersion: '2022-11-15'
@@ -412,6 +412,34 @@ exports.createPaymentIntent = functions.https.onCall(
         }
     }
 );
+
+exports.updateUnitSold = functions.firestore
+    .document('/orders/{orderId}')
+    .onCreate(async (snap, contex) => {
+        const items = snap.data().items;
+
+        items.forEach(async (item: CartItem) => {
+            try {
+                const productsRef = admin
+                    .firestore()
+                    .collection('products')
+                    .doc(item.businessId)
+                    .collection('products')
+                    .doc(item.id!);
+                const products = await productsRef.get();
+
+                // await sendNewOrderNotification(contex.params.orderId);
+                return productsRef.update({
+                    unitSold: parseInt(
+                        products.data()?.unitSold + item.quantity
+                    )
+                });
+            } catch (error) {
+                console.error('ERROR updating units sold', error);
+                return null;
+            }
+        });
+    });
 
 export async function isAuthorizedToGrantAccess(
     email: string

@@ -12,7 +12,10 @@ export const addProduct = createAsyncThunk(
                 business: { business }
             } = getState() as RootState;
             if (!business) return false;
-            await addDoc(productsCollection(business?.id!), { ...product });
+            await addDoc(productsCollection(business?.id!), {
+                ...product,
+                unitSold: 0
+            });
             if (!business.profileCompleted) {
                 const docRef = doc(businessCollection, business.id);
 
