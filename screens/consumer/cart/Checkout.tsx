@@ -33,6 +33,7 @@ const Checkout = ({}: Props) => {
     const { order } = useAppSelector((state) => state.orders);
     const { total, items, quantity } = useAppSelector((state) => state.cart);
     const { loading, startPayment } = usePayment();
+    console.log('KEY', process.env.STRIPE_TEST_PK!);
 
     if (loading) return <PaymentLoading />;
     return (

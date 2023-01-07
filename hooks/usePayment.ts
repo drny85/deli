@@ -45,6 +45,10 @@ export const usePayment = () => {
             };
         } catch (error) {
             console.log('error', error);
+            const err = error as any
+            Alert.alert(`${err.code}`, err.message);
+           
+            
         } finally {
             setLoading(false);
         }
@@ -106,6 +110,7 @@ export const usePayment = () => {
             const { error } = await initPaymentSheet({
                 customerEphemeralKeySecret: ephemeralKey,
                 paymentIntentClientSecret: paymentIntent,
+                
                 customerId: customer,
                 appearance: {
                     primaryButton: {

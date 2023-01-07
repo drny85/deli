@@ -85,6 +85,7 @@ const Cart = ({}: Props) => {
             console.log(error);
         }
     };
+    console.log(items.length);
 
     const handleDeleteCart = () => {
         dispatch(setCart({ quantity: 0, items: [], total: 0 }));
@@ -100,7 +101,10 @@ const Cart = ({}: Props) => {
                             style={{ padding: 12 }}
                             onPress={() => {
                                 Alert.alert('Deleting Cart', 'Are you sure?', [
-                                    { text: 'Cancel', style: 'cancel' },
+                                    {
+                                        text: 'Cancel',
+                                        style: 'cancel'
+                                    },
                                     {
                                         text: 'Yes, Delete',
                                         onPress: handleDeleteCart,
@@ -120,28 +124,56 @@ const Cart = ({}: Props) => {
                     )
                 }
             />
-            <View style={{ flex: 1 }}>
-                <FlatList
-                    data={items}
-                    keyExtractor={(item, index) => item.id! + index}
-                    renderItem={renderCartItems}
-                />
-            </View>
-            {items.length > 0 && (
-                <View
-                    style={{
-                        position: 'absolute',
-                        bottom: 20,
-                        alignSelf: 'center',
-                        width: '70%'
-                    }}
-                >
-                    <Button
-                        title={`View Order $${total.toFixed(2)}`}
-                        onPress={handlePress}
+            <View style={{ flex: 1, justifyContent: 'space-between' }}>
+                <View style={{ flex: 0.8 }}>
+                    <FlatList
+                        data={items}
+                        contentContainerStyle={{ flex: 1 }}
+                        keyExtractor={(item, index) => item.id! + index}
+                        renderItem={renderCartItems}
                     />
                 </View>
-            )}
+
+                <View style={{ flex: 0.1 }}>
+                    {items.length > 0 ? (
+                        <View
+                            style={{
+                                position: 'absolute',
+                                bottom: 10,
+                                alignSelf: 'center',
+                                width: '70%',
+                                zIndex: 100
+                            }}
+                        >
+                            <Button
+                                outlined
+                                notRounded
+                                title={`View Order $${total.toFixed(2)}`}
+                                onPress={handlePress}
+                            />
+                        </View>
+                    ) : (
+                        <View
+                            style={{
+                                position: 'absolute',
+                                bottom: 10,
+                                alignSelf: 'center',
+                                width: '70%',
+                                zIndex: 100
+                            }}
+                        >
+                            <Button
+                                title={'Start Shopping'}
+                                onPress={() =>
+                                    naviagation.navigate('ConsumerHome', {
+                                        screen: 'Businesses'
+                                    })
+                                }
+                            />
+                        </View>
+                    )}
+                </View>
+            </View>
         </Screen>
     );
 };

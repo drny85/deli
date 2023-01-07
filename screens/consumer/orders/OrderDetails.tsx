@@ -1,5 +1,11 @@
 import { TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
-import React, { useEffect, useRef, useState } from 'react';
+import React, {
+    useCallback,
+    useEffect,
+    useMemo,
+    useRef,
+    useState
+} from 'react';
 import Screen from '../../../components/Screen';
 import Text from '../../../components/Text';
 import Button from '../../../components/Button';
@@ -14,7 +20,7 @@ import MapView, { Marker } from 'react-native-maps';
 import MapViewDirections from 'react-native-maps-directions';
 import { useDispatch } from 'react-redux';
 import { getCurrentBusiness } from '../../../redux/business/businessActions';
-
+import BottomSheet from '@gorhom/bottom-sheet';
 import { Coors } from '../../../redux/business/businessSlide';
 import { FontAwesome } from '@expo/vector-icons';
 import AnimatedLottieView from 'lottie-react-native';
@@ -40,19 +46,47 @@ const OrderDetails = ({
     const theme = useAppSelector((state) => state.theme);
     const { loading, order } = useOrder(orderId);
     const [minutes, setMinutes] = useState<number | null>(null);
-
+    const snapPoints = useMemo(() => ['10%', '25%', '50%', '80%'], []);
+    const bottomSheetRef = useRef<BottomSheet>(null);
     const goToOrder = () => {
         navigation.navigate('ConsumerOrders', { screen: 'Orders' });
     };
 
     const mapRef = useRef<MapView>(null);
 
+    const handleSheetChanges = useCallback((index: number) => {
+        console.log('handleSheetChanges', index);
+    }, []);
+
     useEffect(() => {
-        mapRef.current?.fitToCoordinates();
         if (business?.coors) {
             setOrigin(business.coors);
         }
     }, [business?.coors]);
+
+    useEffect(() => {
+        mapRef.current?.fitToCoordinates(
+            [
+                {
+                    latitude: business?.coors?.lat!,
+                    longitude: business?.coors?.lng!
+                },
+                {
+                    latitude: order?.address?.coors.lat!,
+                    longitude: order?.address?.coors.lng!
+                }
+            ],
+            {
+                animated: true,
+                edgePadding: {
+                    right: SIZES.width / EGDE,
+                    bottom: SIZES.height / EGDE,
+                    left: SIZES.width / EGDE,
+                    top: SIZES.height / EGDE
+                }
+            }
+        );
+    }, [business?.coors, order?.address?.coors]);
 
     useEffect(() => {
         if (!order) return;
@@ -71,8 +105,8 @@ const OrderDetails = ({
                     initialRegion={{
                         latitude: order.address?.coors.lat!,
                         longitude: order.address?.coors.lng!,
-                        latitudeDelta: 0.0522,
-                        longitudeDelta: 0.04
+                        latitudeDelta: 0.7665,
+                        longitudeDelta: 0.6076
                     }}
                     style={{ flex: 1, borderRadius: SIZES.base }}
                 >
@@ -95,7 +129,7 @@ const OrderDetails = ({
                             style={{
                                 width: 40,
                                 height: 40,
-                                tintColor: 'white'
+                                tintColor: '#212121'
                             }}
                             resizeMode="contain"
                             source={require('../../../restaurant.png')}
@@ -150,7 +184,7 @@ const OrderDetails = ({
                     ></MapViewDirections>
 
                     <TouchableOpacity
-                        onPress={() => navigation.goBack()}
+                        onPress={goToOrder}
                         style={{
                             position: 'absolute',
                             top: 30,
@@ -230,33 +264,29 @@ const OrderDetails = ({
                                     {user?.name}, Thank you for your order
                                 </Text>
                             </View>
-                            <View>
-                                <Text
-                                    raleway_italic
-                                    py_8
-                                    large
-                                    center
-                                    animation={'fadeInUp'}
-                                    delay={800}
-                                >
-                                    {business.name} just received your order!
-                                </Text>
-                            </View>
                         </View>
                     </>
+                    <BottomSheet
+                        ref={bottomSheetRef}
+                        index={0}
+                        snapPoints={snapPoints}
+                        onChange={handleSheetChanges}
+                    >
+                        <View>
+                            <Text lobster medium center darkText>
+                                {business.name} just got your order 🎉
+                            </Text>
+                        </View>
+                    </BottomSheet>
                 </View>
             </TouchableWithoutFeedback>
         );
     };
     return (
         <Screen>
-            {/* {order.status === ORDER_STATUS.new &&
-                view === 'lottie' &&
-                renderNewOrder()}
+            {order.status === ORDER_STATUS.new && renderNewOrder()}
             {order.status === ORDER_STATUS.marked_ready_for_delivery &&
-                view === 'map' &&
-                renderNewOrder()} */}
-            {renderOrderMarkedForDelivery()}
+                renderOrderMarkedForDelivery()}
         </Screen>
     );
 };
