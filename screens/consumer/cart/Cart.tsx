@@ -18,6 +18,8 @@ import Button from '../../../components/Button';
 import { FontAwesome } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { setPreviosRoute } from '../../../redux/consumer/settingSlide';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { PREVIOUS_ROUTE } from '../../../constants';
 
 type Props = {};
 
@@ -49,6 +51,7 @@ const Cart = ({}: Props) => {
             }
             if (!user) {
                 dispatch(setPreviosRoute('OrderReview'));
+                await AsyncStorage.setItem(PREVIOUS_ROUTE, 'OrderReview');
 
                 navigation.navigate('ConsumerProfile', {
                     screen: 'Auth',
@@ -85,7 +88,6 @@ const Cart = ({}: Props) => {
             console.log(error);
         }
     };
-    console.log(items.length);
 
     const handleDeleteCart = () => {
         dispatch(setCart({ quantity: 0, items: [], total: 0 }));

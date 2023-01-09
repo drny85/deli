@@ -1,5 +1,5 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
-import { addDoc } from 'firebase/firestore';
+import { addDoc, doc, updateDoc } from 'firebase/firestore';
 import { ordersCollection } from '../../firebase';
 import { resetCart } from '../../utils/saveCart';
 import { setCart } from './cartSlide';
@@ -20,6 +20,21 @@ export const placeOrder = createAsyncThunk(
         } catch (error) {
             console.log('Error placing Order', error);
             return { success: false, orderId: null };
+        }
+    }
+);
+
+export const updateOrder = createAsyncThunk(
+    'orders/updateOrder',
+    async (order: Order, { dispatch }): Promise<boolean> => {
+        try {
+            if (!order) return false;
+            const docRef = doc(ordersCollection, order.id);
+            await updateDoc(docRef, { ...order });
+            return true;
+        } catch (error) {
+            console.log('Error updating Order', error);
+            return false;
         }
     }
 );

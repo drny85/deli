@@ -13,16 +13,19 @@ import BusinessBottomTabs from './navigation/business/BusinessBottomTabs';
 import BusinessOnBoardingNavigation from './navigation/business/BusinessOnBoardingNavigation';
 import ConsumerBottomTabs from './navigation/consumer/ConsumerBottomTabs';
 import { LOCATION_TASK_NAME } from './hooks/useLocation';
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Linking, Platform } from 'react-native';
+import CourierBottomTabs from './navigation/courier/CourierBottomTabs';
+const PERSISTENCE_KEY = 'NAVIGATION_STATE_V1';
 const App = () => {
     const { isLoadingComplete, onLayoutRootView } = useCachedResources();
-
     const theme = useAppSelector((state) => state.theme);
     const [processing, setProcessing] = useState(true);
     const { user, loading } = useAppSelector((state) => state.auth);
     const { business, loading: businessLoading } = useAppSelector(
         (state) => state.business
     );
+
     useEffect(() => {
         if (isLoadingComplete && !loading && !businessLoading) {
             onLayoutRootView();
@@ -58,6 +61,8 @@ const App = () => {
                   business &&
                   business.stripeAccount === null ? (
                     <BusinessOnBoardingNavigation />
+                ) : user && user.type === 'courier' ? (
+                    <CourierBottomTabs />
                 ) : (
                     <ConsumerBottomTabs />
                 )}

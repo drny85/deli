@@ -13,7 +13,10 @@ import { LogBox } from 'react-native';
 import { auth, usersCollection } from '../firebase';
 import { switchTheme } from '../redux/themeSlide';
 import { autoLogin } from '../redux/auth/authActions';
-import { getBusiness } from '../redux/business/businessActions';
+import {
+    getBusiness,
+    getCurrentBusiness
+} from '../redux/business/businessActions';
 import { loadCart } from '../utils/saveCart';
 import { setCart } from '../redux/consumer/cartSlide';
 import { AppUser } from '../redux/auth/authSlide';
@@ -62,7 +65,7 @@ export default function useCachedResources() {
                     const data = await getUser(authState.uid);
 
                     if (data?.type === 'business') {
-                        dispatch(getBusiness(authState.uid));
+                        dispatch(getCurrentBusiness(authState.uid));
                     }
 
                     dispatch(

@@ -1,4 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { AppUser } from '../auth/authSlide';
 import { Coors } from '../business/businessSlide';
 import { CartItem } from './cartSlide';
 
@@ -14,7 +15,10 @@ export enum ORDER_STATUS {
     new = 'new',
     marked_ready_for_delivery = 'marked_ready_for_delivery',
     marked_ready_for_pickup = 'marked_ready_for_pickup',
-    cancelled = 'cancelled'
+    cancelled = 'cancelled',
+    accepted_by_driver = 'accepted_by_driver',
+    all = 'all orders',
+    picked_up_by_driver = 'picked_up_by_driver'
 }
 
 export enum ORDER_TYPE {
@@ -23,6 +27,7 @@ export enum ORDER_TYPE {
 }
 export interface Order {
     id?: string;
+    orderNumber?: number;
     total: number;
     items: CartItem[];
     paymentIntent: string;
@@ -34,6 +39,9 @@ export interface Order {
     deliveryInstructions: string | null;
     address: { street: string; apt: string | null; coors: Coors } | null;
     status: ORDER_STATUS;
+    courier?: AppUser | null;
+    deliveredOn?: string | null;
+    deliveredBy?: AppUser | null;
 }
 
 interface OrdersState {

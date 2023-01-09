@@ -1,11 +1,5 @@
-import {
-    Alert,
-    Keyboard,
-    TextInput,
-    TouchableOpacity,
-    View
-} from 'react-native';
-import React, { useEffect, useRef, useState } from 'react';
+import { Alert, TextInput, TouchableOpacity, View } from 'react-native';
+import React, { useRef, useState } from 'react';
 import Screen from '../../components/Screen';
 
 import Text from '../../components/Text';
@@ -19,50 +13,46 @@ import { FontAwesome } from '@expo/vector-icons';
 import { isEmailValid } from '../../utils/isEmailValid';
 
 import KeyboardScreen from '../../components/KeyboardScreen';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
+import {
+    createUserWithEmailAndPassword,
+    sendEmailVerification
+} from 'firebase/auth';
 import { auth } from '../../firebase';
 import { FIREBASE_ERRORS } from '../../utils/errorMesssages';
 import Row from '../../components/Row';
 import { SIZES } from '../../constants';
-import { AnimatePresence, MotiView } from 'moti';
+import { createBusiness } from '../../redux/business/businessActions';
+import { Business } from '../../redux/business/businessSlide';
+
 import { AppUser } from '../../redux/auth/authSlide';
+import Loader from '../../components/Loader';
 import { createUser } from '../../redux/auth/authActions';
-import { setPreviosRoute } from '../../redux/consumer/settingSlide';
-import { useNavigation } from '@react-navigation/native';
 import useNotifications from '../../hooks/useNotifications';
 import { formatPhone } from '../../utils/formatPhone';
-import { isTherePreviousRoute } from '../../utils/checkForPreviousRoute';
 
-type Props = NativeStackScreenProps<AuthScreens, 'Signup'>;
+type Props = NativeStackScreenProps<AuthScreens, 'CourierSignup'>;
 
-const Signup = ({ navigation }: Props) => {
+const CourierSignUp = ({ navigation }: Props) => {
     useNotifications();
+    const [loading, setLoading] = useState(false);
     const dispatch = useAppDispatch();
-    const nav = useNavigation();
-    const [notTyping, setNotTyping] = useState(true);
-    const { previousRoute } = useAppSelector((state) => state.settings);
     const theme = useAppSelector((state) => state.theme);
     const emailRef = useRef<TextInput>(null);
+
     const passwordRef = useRef<TextInput>(null);
+
     const [name, setName] = useState('');
     const [lastName, setlastName] = useState('');
-    const [phone, setPhone] = useState('');
     const [email, setEmail] = useState('');
+    const [phone, setPhone] = useState('');
     const [password, setPassword] = useState('');
     const [comfirm, setComfirm] = useState('');
     const [showPassword, setShowPassword] = useState(false);
-
-    useEffect(() => {
-        (async () => {
-            const { success, route } = await isTherePreviousRoute();
-            console.log(success, route);
-        })();
-    }, []);
-
     const handleSignUp = async () => {
         try {
             const isValid = validateInputs();
             if (!isValid) return;
+            setLoading(true);
             const { user } = await createUserWithEmailAndPassword(
                 auth,
                 email,
@@ -71,51 +61,63 @@ const Signup = ({ navigation }: Props) => {
             if (!user) {
                 return;
             }
-            const data: AppUser = {
+            await sendEmailVerification(user);
+
+            const userData: AppUser = {
                 id: user.uid,
-                email,
-                emailVerified: user.emailVerified,
-                lastName,
-                phone,
                 name,
-                type: 'consumer'
+                lastName,
+                email,
+                phone,
+                emailVerified: user.emailVerified,
+                type: 'courier'
             };
 
-            await dispatch(createUser(data));
+            await dispatch(createUser(userData));
         } catch (error) {
             const err = error as any;
 
-            console.log('Error =>', err.message);
+            console.log('Error @signup fro business =>', err.message);
             Alert.alert('Error', FIREBASE_ERRORS[err.message] || err.message);
         } finally {
-            dispatch(setPreviosRoute(null));
+            setLoading(false);
         }
     };
 
     const validateInputs = (): boolean => {
-        if (!name || !lastName) {
-            Alert.alert('Error', 'Please enter a name and last name');
-            return false;
-        }
-        if (formatPhone(phone).length !== 14) {
-            Alert.alert('Error', 'Please enter a valid phone number');
-            return false;
-        }
+        if (!name || !lastName || !email || !password) return false;
         if (!email && !password) {
-            emailRef.current?.focus();
             Alert.alert('Error', 'both fields are required');
+            emailRef.current?.focus();
+            return false;
+        }
+
+        if (phone.length !== 14) {
+            Alert.alert('Error', 'Invalid phone');
+
             return false;
         }
 
         if (!isEmailValid(email)) {
-            emailRef.current?.focus();
             Alert.alert('Error', 'Invalid email');
+            emailRef.current?.focus();
             return false;
         }
 
         if (!password) {
-            passwordRef.current?.focus();
             Alert.alert('Error', 'please type your password');
+            passwordRef.current?.focus();
+            return false;
+        }
+        if (!comfirm) {
+            Alert.alert('Error', 'please type your password');
+
+            return false;
+        }
+
+        if (password !== comfirm) {
+            Alert.alert('Error', 'please type your password');
+
             return false;
         }
 
@@ -127,7 +129,6 @@ const Signup = ({ navigation }: Props) => {
             <KeyboardScreen>
                 <View
                     style={{
-                        flex: 1,
                         alignItems: 'center',
                         justifyContent: 'center',
                         maxWidth: 610,
@@ -135,9 +136,9 @@ const Signup = ({ navigation }: Props) => {
                     }}
                 >
                     <Text py_8 animation={'fadeInDown'} lobster large py_4>
-                        Sign Up{' '}
+                        Sign Up to Drive{' '}
                     </Text>
-
+                    <View style={{ height: 10 }} />
                     <Row>
                         <InputField
                             label="First Name"
@@ -167,7 +168,7 @@ const Signup = ({ navigation }: Props) => {
                     <InputField
                         label="Email Address"
                         ref={emailRef}
-                        placeholder="john.smith@email.com"
+                        placeholder="Email Address"
                         onChangeText={setEmail}
                         keyboardType="email-address"
                         value={email}
@@ -226,69 +227,44 @@ const Signup = ({ navigation }: Props) => {
                                 width: '100%'
                             }}
                             textStyle={{ width: '100%' }}
-                            isLoading={false}
+                            isLoading={loading}
+                            disabled={loading}
                             title="Sign Up"
                             onPress={handleSignUp}
                         />
                     </View>
                 </View>
-                <AnimatePresence>
-                    {notTyping && (
-                        <MotiView
-                            from={{ opacity: 0, scale: 0 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            transition={{ type: 'timing' }}
-                            exit={{ scale: 0, opacity: 0 }}
+                <View>
+                    <Row
+                        containerStyle={{ marginBottom: 20 }}
+                        horizontalAlign="center"
+                    >
+                        <Text px_6>Back to login</Text>
+
+                        <TouchableOpacity
+                            style={{ padding: SIZES.base }}
+                            onPress={() => navigation.navigate('Login')}
                         >
-                            <Row
-                                containerStyle={{ marginBottom: 20 }}
-                                horizontalAlign="center"
-                            >
-                                <Text px_6>Back to login</Text>
+                            <Text bold>Login</Text>
+                        </TouchableOpacity>
+                    </Row>
+                    <Row
+                        containerStyle={{ marginBottom: 20 }}
+                        horizontalAlign="center"
+                    >
+                        <Text px_6>Need a consumer account?</Text>
 
-                                <TouchableOpacity
-                                    style={{ padding: SIZES.base }}
-                                    onPress={() => navigation.goBack()}
-                                >
-                                    <Text bold>Login</Text>
-                                </TouchableOpacity>
-                            </Row>
-                            <Row
-                                containerStyle={{ marginBottom: 20 }}
-                                horizontalAlign="center"
-                            >
-                                <Text px_6>Need a business account?</Text>
-
-                                <TouchableOpacity
-                                    style={{ padding: SIZES.base }}
-                                    onPress={() =>
-                                        navigation.navigate('BusinessSignup')
-                                    }
-                                >
-                                    <Text bold>Sign Up</Text>
-                                </TouchableOpacity>
-                            </Row>
-                            <Row
-                                containerStyle={{ marginBottom: 20 }}
-                                horizontalAlign="center"
-                            >
-                                <Text px_6>Sign up to drive?</Text>
-
-                                <TouchableOpacity
-                                    style={{ padding: SIZES.base }}
-                                    onPress={() =>
-                                        navigation.navigate('CourierSignup')
-                                    }
-                                >
-                                    <Text bold>Become a Courier</Text>
-                                </TouchableOpacity>
-                            </Row>
-                        </MotiView>
-                    )}
-                </AnimatePresence>
+                        <TouchableOpacity
+                            style={{ padding: SIZES.base }}
+                            onPress={() => navigation.navigate('Signup')}
+                        >
+                            <Text bold>Sign Up</Text>
+                        </TouchableOpacity>
+                    </Row>
+                </View>
             </KeyboardScreen>
         </Screen>
     );
 };
 
-export default Signup;
+export default CourierSignUp;

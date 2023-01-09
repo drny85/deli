@@ -49,24 +49,32 @@ const OrderDetails = ({
     const dispatch = useDispatch();
     const { user } = useAppSelector((state) => state.auth);
     const { business } = useAppSelector((state) => state.business);
-    const [view, setView] = useState<'lottie' | 'details' | 'map'>('lottie');
+    const [distance, setDistance] = useState<number>(0);
+    const [duration, setDuration] = useState<number>(0);
     const [origin, setOrigin] = useState<Coors>();
     const [destination, setDestination] = useState<Coors>();
     const theme = useAppSelector((state) => state.theme);
     const { loading, order } = useOrder(orderId);
     const [minutes, setMinutes] = useState<number | null>(null);
-    const snapPoints = useMemo(() => ['10%', '50%', '80%'], []);
+    const snapPoints = useMemo(() => ['15%', '50%', '80%'], []);
     const bottomSheetRef = useRef<BottomSheet>(null);
     const goToOrder = () => {
         navigation.navigate('ConsumerOrders', { screen: 'Orders' });
     };
 
     const mapRef = useRef<MapView>(null);
-    const lottieRef = useRef<AnimatedLottieView>(null);
 
     const handleSheetChanges = useCallback((index: number) => {
         console.log('handleSheetChanges', index);
     }, []);
+
+    useEffect(() => {
+        if (!order?.courier?.coors) return;
+        setOrigin({
+            lat: order.courier.coors?.lat!,
+            lng: order.courier.coors?.lng!
+        });
+    }, [order?.courier?.coors]);
 
     useEffect(() => {
         if (business?.coors) {
@@ -105,18 +113,16 @@ const OrderDetails = ({
         dispatch(getCurrentBusiness(order.businessId!));
     }, [order?.businessId]);
 
-    console.log(order?.id);
-
     if (loading || !order || !business) return <Loader />;
 
     const renderOrderMarkedForDelivery = (): JSX.Element => {
         return (
-            <View style={{ height: SIZES.height * 0.5 }}>
+            <View style={{ height: SIZES.height * 0.88 }}>
                 <MapView
                     ref={mapRef}
                     initialRegion={{
-                        latitude: order.address?.coors.lat!,
-                        longitude: order.address?.coors.lng!,
+                        latitude: origin?.lat!,
+                        longitude: origin?.lng!,
                         latitudeDelta: 0.7665,
                         longitudeDelta: 0.6076
                     }}
@@ -129,13 +135,6 @@ const OrderDetails = ({
                         }}
                         title={business.name}
                         description={business?.address?.split(', ')[0]}
-                        // draggable
-                        // onDragEnd={(coors) => {
-                        //     setOrigin({
-                        //         lat: coors.nativeEvent.coordinate.latitude,
-                        //         lng: coors.nativeEvent.coordinate.longitude
-                        //     });
-                        // }}
                     >
                         <Image
                             style={{
@@ -164,15 +163,17 @@ const OrderDetails = ({
                         // }}
                     />
                     <MapViewDirections
+                        mode="BICYCLING"
                         apikey={process.env.GOOGLE_API!}
                         strokeColor={theme.ASCENT}
                         strokeWidth={5}
                         onError={(er) => console.log(er)}
                         optimizeWaypoints={true}
                         onReady={(result) => {
-                            const { duration, coordinates } = result;
+                            const { duration, distance } = result;
 
-                            setMinutes(duration);
+                            setDuration(duration);
+                            setDistance(distance);
                             mapRef.current?.fitToCoordinates(
                                 result.coordinates,
                                 {
@@ -218,6 +219,127 @@ const OrderDetails = ({
                         color={theme.TEXT_COLOR}
                     />
                 </TouchableOpacity>
+            </View>
+        );
+    };
+
+    const renderAcceptedByDriver = (): JSX.Element => {
+        return (
+            <View
+                style={{
+                    flex: 1
+                }}
+            >
+                <>
+                    <AnimatedLottieView
+                        style={{ flex: 1 }}
+                        resizeMode="contain"
+                        autoPlay={true}
+                        source={
+                            theme.mode === 'dark'
+                                ? require('../../../assets/animations/delivering_dark.json')
+                                : require('../../../assets/animations/delivering_light.json')
+                        }
+                    />
+                    <TouchableOpacity
+                        onPress={() =>
+                            navigation.navigate('ConsumerOrders', {
+                                screen: 'Orders'
+                            })
+                        }
+                        style={{
+                            position: 'absolute',
+                            top: SIZES.statusBarHeight,
+                            left: 20,
+                            padding: SIZES.base,
+                            zIndex: 120
+                        }}
+                    >
+                        <FontAwesome
+                            name="chevron-left"
+                            size={24}
+                            color={theme.TEXT_COLOR}
+                        />
+                    </TouchableOpacity>
+                    <View
+                        style={{
+                            paddingVertical: SIZES.padding * 3
+                        }}
+                    >
+                        <View style={{ paddingVertical: SIZES.padding }}>
+                            <Text
+                                large
+                                lobster
+                                py_8
+                                center
+                                animation={'fadeInDown'}
+                            >
+                                {order.courier?.name}, is on his way to pick up
+                                your order.
+                            </Text>
+                        </View>
+                    </View>
+                </>
+            </View>
+        );
+    };
+    const renderSearchingDriver = (): JSX.Element => {
+        return (
+            <View
+                style={{
+                    flex: 1
+                }}
+            >
+                <View>
+                    <AnimatedLottieView
+                        style={{ flex: 1 }}
+                        resizeMode="contain"
+                        autoPlay={true}
+                        source={
+                            theme.mode === 'dark'
+                                ? require('../../../assets/animations/searching_dark.json')
+                                : require('../../../assets/animations/searching_light.json')
+                        }
+                    />
+                    <TouchableOpacity
+                        onPress={() =>
+                            navigation.navigate('ConsumerOrders', {
+                                screen: 'Orders'
+                            })
+                        }
+                        style={{
+                            position: 'absolute',
+                            top: SIZES.statusBarHeight,
+                            left: 20,
+                            padding: SIZES.base,
+                            zIndex: 120
+                        }}
+                    >
+                        <FontAwesome
+                            name="chevron-left"
+                            size={24}
+                            color={theme.TEXT_COLOR}
+                        />
+                    </TouchableOpacity>
+                    <View
+                        style={{
+                            paddingVertical: SIZES.padding * 3
+                        }}
+                    >
+                        <View style={{ paddingVertical: SIZES.padding }}>
+                            <Text
+                                large
+                                lobster
+                                py_8
+                                center
+                                animation={'fadeInDown'}
+                            >
+                                We are looking for the best driver to diliver
+                                your order.
+                            </Text>
+                        </View>
+                    </View>
+                </View>
             </View>
         );
     };
@@ -292,6 +414,10 @@ const OrderDetails = ({
             {order.status === ORDER_STATUS.new && renderNewOrder()}
             {order.status === ORDER_STATUS.in_progress && renderNewOrder()}
             {order.status === ORDER_STATUS.marked_ready_for_delivery &&
+                renderSearchingDriver()}
+            {order.status === ORDER_STATUS.accepted_by_driver &&
+                renderAcceptedByDriver()}
+            {order.status === ORDER_STATUS.picked_up_by_driver &&
                 renderOrderMarkedForDelivery()}
             <BottomSheet
                 ref={bottomSheetRef}
@@ -299,7 +425,11 @@ const OrderDetails = ({
                 snapPoints={snapPoints}
                 onChange={handleSheetChanges}
             >
-                <BottomSheetScrollView>
+                <BottomSheetScrollView
+                    contentContainerStyle={{
+                        width: '100%'
+                    }}
+                >
                     <Text darkText center lobster medium py_4>
                         {order.status === ORDER_STATUS.new &&
                             `${business.name} just got your order`}
@@ -309,8 +439,42 @@ const OrderDetails = ({
                         {order.status ===
                             ORDER_STATUS.marked_ready_for_delivery &&
                             `Your order is ready for delivery`}
+
+                        {order.status === ORDER_STATUS.accepted_by_driver &&
+                            `${
+                                order.courier && order.courier.name
+                            } has accepted your order`}
                     </Text>
-                    <Stack>
+
+                    {order.status === ORDER_STATUS.picked_up_by_driver && (
+                        <>
+                            <Row
+                                containerStyle={{
+                                    alignSelf: 'center',
+                                    width: '100%',
+                                    maxWidth: 200
+                                }}
+                                horizontalAlign="space-around"
+                            >
+                                <Text darkText bold>
+                                    {duration.toFixed(0)} mins
+                                </Text>
+                                <FontAwesome
+                                    name="bicycle"
+                                    size={26}
+                                    color={'#212121'}
+                                />
+                                <Text bold darkText>
+                                    {(distance * 0.621371).toFixed(1)} miles
+                                </Text>
+                            </Row>
+                            <Text lobster medium center darkText>
+                                {order.courier?.name} just picked up your order
+                            </Text>
+                        </>
+                    )}
+
+                    <Stack containerStyle={{ marginTop: 30 }}>
                         <Text darkText bold>
                             From
                         </Text>
@@ -348,7 +512,7 @@ const OrderDetails = ({
                                     Sub Total
                                 </Text>
                                 <Text darkText capitalize>
-                                    &{order.total.toFixed(2)}
+                                    ${order.total.toFixed(2)}
                                 </Text>
                             </Row>
                             <Row

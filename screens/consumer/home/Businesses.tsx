@@ -1,5 +1,5 @@
 import { FlatList, ListRenderItem, TouchableOpacity, View } from 'react-native';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import Screen from '../../../components/Screen';
 import Text from '../../../components/Text';
 import { useBusinessAvailable } from '../../../hooks/useBusinessAvailable';
@@ -11,6 +11,7 @@ import { useNavigation } from '@react-navigation/native';
 import BusinessCard from '../../../components/BusinessCard';
 import { useLocation } from '../../../hooks/useLocation';
 import { getMilesBetweenLatLon } from '../../../utils/getMilesBetwwen';
+import { isTherePreviousRoute } from '../../../utils/checkForPreviousRoute';
 
 type Props = {};
 
@@ -18,28 +19,32 @@ const Businesses = ({}: Props) => {
     useLocation();
     const dispatch = useAppDispatch();
     const navigation = useNavigation();
+    const [route, setRoute] = useState<string>();
     const { businessAvailable, isLoading } = useBusinessAvailable();
-    const { previousRoute } = useAppSelector((state) => state.settings);
+
     const { user } = useAppSelector((state) => state.auth);
 
     useEffect(() => {
-        const sub = navigation.addListener('focus', () => {
-            console.log('focus', previousRoute);
+        const sub = navigation.addListener('focus', async () => {
+            const { success, route } = await isTherePreviousRoute();
 
-            if (user && previousRoute) {
-                if (previousRoute === 'OrderReview') {
+            setRoute(route);
+            console.log('focus', route);
+
+            if (user && success) {
+                if (route === 'OrderReview') {
                     navigation.navigate('ConsumerCart', {
                         screen: 'OrderReview'
                     });
                 }
-                if (previousRoute === 'Orders') {
+                if (route === 'Orders') {
                     navigation.navigate('ConsumerOrders', { screen: 'Orders' });
                 }
             }
         });
 
         return sub;
-    }, [user, previousRoute]);
+    }, [user]);
 
     const renderBusinesses: ListRenderItem<Business> = ({ item }) => {
         return (

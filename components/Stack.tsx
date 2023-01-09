@@ -1,11 +1,11 @@
-import { View, ViewStyle } from 'react-native';
+import { StyleProp, View, ViewStyle } from 'react-native';
 import React, { FC } from 'react';
 import { SIZES } from '../constants';
 
 interface Props {
     verticalAlign?: ViewStyle['alignItems'] | undefined;
     horizontalAlign?: ViewStyle['justifyContent'] | undefined;
-    containerStyle?: ViewStyle;
+    containerStyle?: StyleProp<ViewStyle>;
     children: React.ReactNode;
     px?: number;
     py?: number;

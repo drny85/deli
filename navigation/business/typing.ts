@@ -13,6 +13,7 @@ export type BusinessHomeStackScreens = {
 };
 export type BusinessOrdersStackScreens = {
     Orders: undefined;
+    BusinessOrderDetails: { orderId: string };
 };
 export type BusinessProductsStackScreens = {
     Products: undefined;

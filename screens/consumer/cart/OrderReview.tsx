@@ -9,7 +9,7 @@ import Row from '../../../components/Row';
 import Screen from '../../../components/Screen';
 import Stack from '../../../components/Stack';
 import Text from '../../../components/Text';
-import { SIZES } from '../../../constants';
+import { PREVIOUS_ROUTE, SIZES } from '../../../constants';
 import { setPreviosRoute } from '../../../redux/consumer/settingSlide';
 import { useAppSelector } from '../../../redux/store';
 
@@ -34,6 +34,7 @@ import {
     GooglePlaceDetail,
     GooglePlacesAutocompleteRef
 } from 'react-native-google-places-autocomplete';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 type Props = {};
 
@@ -93,14 +94,18 @@ const OrderReview = ({}: Props) => {
         if (!address || !longitude || !latitude) return;
         const { street, streetNumber, city, subregion, postalCode } = address;
         if (deliveryAdd) {
-            setDeliveryAddress(deliveryAdd);
-            googleRef.current?.setAddressText(deliveryAdd.street);
+            if (!googleRef.current?.isFocused()) {
+                setDeliveryAddress(deliveryAdd);
+                googleRef.current?.setAddressText(deliveryAdd.street);
+            }
         } else {
-            setDeliveryAddress({
-                ...deliveryAddress!,
-                street: `${streetNumber} ${street} , ${city}, ${subregion}, ${postalCode}`,
-                coors: { lat: latitude, lng: longitude }
-            });
+            if (!googleRef.current?.isFocused()) {
+                setDeliveryAddress({
+                    ...deliveryAddress!,
+                    street: `${streetNumber} ${street} , ${city}, ${subregion}, ${postalCode}`,
+                    coors: { lat: latitude, lng: longitude }
+                });
+            }
 
             //dispatch()
             dispatch(
@@ -113,15 +118,23 @@ const OrderReview = ({}: Props) => {
         }
     }, [address, deliveryAdd]);
 
+    const removePreviousRoute = async () => {
+        try {
+            const data = await AsyncStorage.getItem(PREVIOUS_ROUTE);
+            if (data === null) return;
+            await AsyncStorage.removeItem(PREVIOUS_ROUTE);
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
     useEffect(() => {
         if (items.length === 0) return;
         //@ts-ignore
         dispatch(getCurrentBusiness(items[0].businessId));
 
-        if (previousRoute) {
-            dispatch(setPreviosRoute(null));
-        }
-    }, [items.length, previousRoute]);
+        removePreviousRoute();
+    }, [items.length]);
 
     if (!business) return <Loader />;
     return (

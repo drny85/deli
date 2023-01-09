@@ -175,7 +175,7 @@ exports.webhook = functions.https.onRequest(
                         .object as Stripe.PaymentIntent;
                     // Then define and call a function to handle the event payment_intent.payment_failed
                     console.log(paymentIntentFailed);
-                    break;
+                    return res.status(200).send('Success');
                 case 'payment_intent.succeeded':
                     const paymentIntentSucceeded = event.data
                         .object as Stripe.PaymentIntent;
@@ -183,10 +183,10 @@ exports.webhook = functions.https.onRequest(
                     console.log('PAY', paymentIntentSucceeded);
 
                     // Then define and call a function to handle the event payment_intent.succeeded
-                    break;
+                    return res.status(200).send('Success');
                 // ... handle other event types
                 case 'account.updated':
-                    break;
+                    return res.status(200).send('Success');
 
                 case 'account.application.deauthorized':
                     const data = event.data.object;
@@ -200,7 +200,7 @@ exports.webhook = functions.https.onRequest(
                         .doc(id)
                         .update({ stripeAccount: null });
 
-                    break;
+                    return res.status(200).send('Success');
 
                 default:
                     console.log(`Unhandled event type ${event.type}`);
@@ -412,6 +412,61 @@ exports.createPaymentIntent = functions.https.onCall(
         }
     }
 );
+exports.createRefund = functions.https.onCall(
+    async (
+        data: { payment_intent: string },
+        context: functions.https.CallableContext
+    ) => {
+        try {
+            if (!context.auth) return;
+            const admin = await isAuthorizedToGrantAccess(
+                context.auth.token.email!
+            );
+            if (!admin) return;
+
+            const refund = await stripe.refunds.create({
+                payment_intent: data.payment_intent,
+                reverse_transfer: true,
+                refund_application_fee: true
+            });
+
+            console.log('REFUND_ID => ', refund.id);
+
+            return { refundId: refund.id, status: refund.status };
+        } catch (error) {
+            const err = error as any;
+            console.log('Refund Error', err.message);
+            throw new functions.https.HttpsError(
+                'aborted',
+                'error occurred in refund',
+                err.message
+            );
+        }
+    }
+);
+
+exports.generateOrderNumber = functions.firestore
+    .document('/orders/{orderId}')
+    .onCreate(async (snap, contex) => {
+        try {
+            const storeId = snap.data().businessId;
+
+            const restaurantOrdersTotal = (
+                await admin
+                    .firestore()
+                    .collection('orders')
+                    .where('businessId', '==', storeId)
+                    .get()
+            ).docs.length;
+            return await snap.ref.update({
+                orderNumber: restaurantOrdersTotal + 1
+            });
+        } catch (error) {
+            console.log(error);
+            const err = error as any;
+            throw new functions.https.HttpsError('aborted', err.message);
+        }
+    });
 
 exports.updateUnitSold = functions.firestore
     .document('/orders/{orderId}')

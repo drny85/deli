@@ -1,4 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { Coors } from '../business/businessSlide';
 import { logoutUser, autoLogin } from './authActions';
 
 export interface UserPreferences {
@@ -11,9 +12,10 @@ export interface AppUser {
     email: string;
     emailVerified: boolean;
     phone: string | null;
-    type: 'admin' | 'business' | 'consumer';
+    type: 'admin' | 'business' | 'consumer' | 'courier';
     preferences?: UserPreferences;
     pushToken?: string;
+    coors?: Coors;
 }
 interface IState {
     user: AppUser | null;
@@ -57,5 +59,6 @@ const authSlide = createSlice({
             });
     }
 });
+export const { setUserData } = authSlide.actions;
 
 export default authSlide.reducer;

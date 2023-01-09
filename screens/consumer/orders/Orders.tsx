@@ -3,7 +3,7 @@ import React, { useEffect } from 'react';
 import Screen from '../../../components/Screen';
 import Text from '../../../components/Text';
 
-import { SIZES } from '../../../constants';
+import { PREVIOUS_ROUTE, SIZES } from '../../../constants';
 import { useAppDispatch, useAppSelector } from '../../../redux/store';
 import { useOrders } from '../../../hooks/useOrders';
 import Loader from '../../../components/Loader';
@@ -14,6 +14,9 @@ import Button from '../../../components/Button';
 
 import { getCurrentBusiness } from '../../../redux/business/businessActions';
 import { setPreviosRoute } from '../../../redux/consumer/settingSlide';
+import moment from 'moment';
+import { isTherePreviousRoute } from '../../../utils/checkForPreviousRoute';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 type Props = {};
 
@@ -45,10 +48,19 @@ const Orders = ({}: Props) => {
         }
     }, [orders.length]);
 
+    const isPrevious = async () => {
+        try {
+            const { success } = await isTherePreviousRoute();
+            if (!success) return;
+            await AsyncStorage.removeItem(PREVIOUS_ROUTE);
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
     useEffect(() => {
-        if (!previousRoute) return;
-        dispatch(setPreviosRoute(null));
-    }, [previousRoute]);
+        isPrevious();
+    }, []);
 
     if (loading) return <Loader />;
     if (!user)
@@ -59,8 +71,8 @@ const Orders = ({}: Props) => {
                 </Text>
                 <Button
                     title="Sign In"
-                    onPress={() => {
-                        dispatch(setPreviosRoute('Orders'));
+                    onPress={async () => {
+                        await AsyncStorage.setItem(PREVIOUS_ROUTE, 'Orders');
                         navigation.navigate('ConsumerProfile', {
                             screen: 'Auth',
                             params: { screen: 'Login' }
@@ -91,8 +103,11 @@ const Orders = ({}: Props) => {
                 My orders ({orders.length})
             </Text>
             <FlatList
+                showsVerticalScrollIndicator={false}
                 contentContainerStyle={{ width: '100%' }}
-                data={orders}
+                data={orders.sort((a, b) =>
+                    moment(a.orderDate).isBefore(b.orderDate) ? 1 : -1
+                )}
                 keyExtractor={(item) => item.id!}
                 renderItem={renderOrders}
             />

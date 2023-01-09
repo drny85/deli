@@ -2,14 +2,17 @@ import { createAsyncThunk } from '@reduxjs/toolkit';
 import { signOut } from 'firebase/auth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { auth, usersCollection } from '../../firebase';
-import { AppUser } from './authSlide';
+import { AppUser, setUserData } from './authSlide';
 
 export const autoLogin = createAsyncThunk(
     'auth/login',
-    async (data: {
-        userId: string;
-        emailVerified: boolean;
-    }): Promise<AppUser | null> => {
+    async (
+        data: {
+            userId: string;
+            emailVerified: boolean;
+        },
+        { dispatch }
+    ): Promise<AppUser | null> => {
         try {
             if (!data.userId) return null;
             const userRef = doc(usersCollection, data.userId);
@@ -18,6 +21,7 @@ export const autoLogin = createAsyncThunk(
                 return null;
             }
             const response = { id: userData.id, ...userData.data() };
+
             return {
                 ...response,
                 emailVerified: data.emailVerified,
