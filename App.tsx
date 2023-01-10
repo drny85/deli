@@ -16,6 +16,7 @@ import { LOCATION_TASK_NAME } from './hooks/useLocation';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Linking, Platform } from 'react-native';
 import CourierBottomTabs from './navigation/courier/CourierBottomTabs';
+import CourierHomeStack from './navigation/courier/CourierHomeStack';
 const PERSISTENCE_KEY = 'NAVIGATION_STATE_V1';
 const App = () => {
     const { isLoadingComplete, onLayoutRootView } = useCachedResources();
@@ -62,7 +63,7 @@ const App = () => {
                   business.stripeAccount === null ? (
                     <BusinessOnBoardingNavigation />
                 ) : user && user.type === 'courier' ? (
-                    <CourierBottomTabs />
+                    <CourierHomeStack />
                 ) : (
                     <ConsumerBottomTabs />
                 )}

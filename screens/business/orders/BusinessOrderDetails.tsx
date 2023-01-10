@@ -19,6 +19,8 @@ import { Order, ORDER_STATUS } from '../../../redux/consumer/ordersSlide';
 import { FontAwesome } from '@expo/vector-icons';
 import RadioButton from '../../../components/RadioButton';
 import { updateOrder } from '../../../redux/consumer/ordersActions';
+import { AnimatePresence, MotiView } from 'moti';
+import Communications from 'react-native-communications';
 
 type Props = NativeStackScreenProps<
     BusinessOrdersStackScreens,
@@ -38,6 +40,14 @@ const BusinessOrderDetails = ({
     const [updating, setUpdating] = React.useState(false);
     const [newStatus, setNewStatus] = React.useState<ORDER_STATUS>();
     const qty = order?.items?.reduce((acc, item) => acc + item.quantity, 0);
+
+    const makeCall = async (phone: string) => {
+        try {
+            Communications.phonecall(phone.replace(/-/g, ''), true);
+        } catch (error) {
+            console.log(error);
+        }
+    };
 
     const confirmStatusChange = async () => {
         try {
@@ -127,6 +137,28 @@ const BusinessOrderDetails = ({
                     </View>
                 </Row>
             </Stack>
+            <AnimatePresence>
+                {order.courier && (
+                    <MotiView
+                        from={{ opacity: 0, translateY: -20 }}
+                        animate={{ opacity: 1, translateY: 0 }}
+                    >
+                        <Stack>
+                            <Text bold>Courier</Text>
+                            <Text py_4>
+                                {order.courier.name} {order.courier.lastName}
+                            </Text>
+                            <TouchableOpacity
+                                onPress={() => makeCall(order.courier?.phone!)}
+                            >
+                                <Text style={{ color: 'blue' }}>
+                                    {order.courier.phone}
+                                </Text>
+                            </TouchableOpacity>
+                        </Stack>
+                    </MotiView>
+                )}
+            </AnimatePresence>
             <View
                 style={{
                     alignSelf: 'center',

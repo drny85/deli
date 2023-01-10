@@ -1,13 +1,4 @@
-import {
-    Alert,
-    FlatList,
-    Image,
-    ListRenderItem,
-    ScrollView,
-    StatusBar,
-    TouchableOpacity,
-    View
-} from 'react-native';
+import { Alert, Image, StatusBar, TouchableOpacity, View } from 'react-native';
 import React, {
     useCallback,
     useEffect,
@@ -15,10 +6,11 @@ import React, {
     useRef,
     useState
 } from 'react';
-import Screen from '../../components/Screen';
+import Communications from 'react-native-communications';
+
 import Text from '../../components/Text';
 import { businessCollection, ordersCollection } from '../../firebase';
-import { doc, onSnapshot, query, where } from 'firebase/firestore';
+import { doc, onSnapshot } from 'firebase/firestore';
 import { useLocation } from '../../hooks/useLocation';
 import { useAppDispatch, useAppSelector } from '../../redux/store';
 import { Order, ORDER_STATUS } from '../../redux/consumer/ordersSlide';
@@ -28,22 +20,27 @@ import Loader from '../../components/Loader';
 import * as Location from 'expo-location';
 import { Business, Coors } from '../../redux/business/businessSlide';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { CourierHomeStackScreens } from '../../navigation/courier/typing';
+
 import MapView, { Marker } from 'react-native-maps';
 import MapViewDirections from 'react-native-maps-directions';
 import { SIZES } from '../../constants';
 import { FontAwesome } from '@expo/vector-icons';
-import BottomSheet, {
-    BottomSheetFooter,
-    BottomSheetScrollView
-} from '@gorhom/bottom-sheet';
+import BottomSheet, { BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import Row from '../../components/Row';
 import Header from '../../components/Header';
 import Button from '../../components/Button';
 import AnimatedLottieView from 'lottie-react-native';
 
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { CourierStackScreens } from '../../navigation/courier/typing';
+
+let b: NodeJS.Timeout;
+let a: NodeJS.Timeout;
+let c: NodeJS.Timeout;
+const ACCEPTED_TIME = 'ACCEPTED_TIME';
+
 const EGDE = 10;
-type Props = NativeStackScreenProps<CourierHomeStackScreens, 'DeliveryView'>;
+type Props = NativeStackScreenProps<CourierStackScreens, 'DeliveryView'>;
 
 const DeliveryView = ({
     navigation,
@@ -54,6 +51,7 @@ const DeliveryView = ({
     const { user } = useAppSelector((state) => state.auth);
     const { location } = useLocation();
     const [isCloseToDestination, setIsCloseToDestination] = useState(false);
+    const [accepted, setAccepted] = useState(false);
     const theme = useAppSelector((state) => state.theme);
     const [order, setOrder] = useState<Order>();
     const [origin, setOrigin] = useState<Coors>();
@@ -65,7 +63,25 @@ const DeliveryView = ({
     const snapPoints = useMemo(() => ['10%', '80%'], []);
     const [business, setBusiness] = React.useState<Business>();
     const dispatch = useAppDispatch();
-    console.log(isCloseToDestination);
+
+    const makeCall = async (phone: string) => {
+        try {
+            Communications.phonecall(phone.replace(/-/g, ''), true);
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
+    const saveAcceptedTimeStamp = useCallback(async () => {
+        try {
+            await AsyncStorage.setItem(
+                ACCEPTED_TIME,
+                JSON.stringify(new Date().toISOString())
+            );
+        } catch (error) {
+            console.log(error);
+        }
+    }, []);
 
     const handlePressActionButton = async () => {
         try {
@@ -76,6 +92,7 @@ const DeliveryView = ({
                     updateOrder({
                         ...order,
                         status: ORDER_STATUS.accepted_by_driver,
+                        acceptedOn: new Date().toISOString(),
                         courier: {
                             ...user,
                             coors: { lat: origin?.lat!, lng: origin?.lng! }
@@ -106,6 +123,7 @@ const DeliveryView = ({
                     updateOrder({
                         ...order,
                         status: ORDER_STATUS.picked_up_by_driver,
+                        pickedUpOn: new Date().toISOString(),
                         courier: {
                             ...user,
                             coors: { lat: origin?.lat!, lng: origin?.lng! }
@@ -142,6 +160,7 @@ const DeliveryView = ({
                 );
                 if (payload) {
                     sheetRef.current?.snapToIndex(0);
+                    setAccepted(false);
                     navigation.navigate('MyDeliveries');
 
                     // mapViewRef.current?.animateToRegion({
@@ -168,27 +187,117 @@ const DeliveryView = ({
                 lat: order.address?.coors.lat!,
                 lng: order.address?.coors.lng!
             });
+
+            a = setTimeout(() => {
+                mapViewRef.current?.fitToSuppliedMarkers(
+                    ['origin', 'business'],
+                    {
+                        edgePadding: {
+                            left: 200,
+                            right: 200,
+                            top: 200,
+                            bottom: 200
+                        }
+                    }
+                );
+            }, 1000);
+
+            b = setTimeout(() => {
+                mapViewRef.current?.fitToSuppliedMarkers(
+                    ['business', 'destination'],
+                    {
+                        edgePadding: {
+                            left: 200,
+                            right: 200,
+                            top: 200,
+                            bottom: 200
+                        }
+                    }
+                );
+            }, 4000);
+            c = setTimeout(() => {
+                mapViewRef.current?.fitToSuppliedMarkers(
+                    ['origin', 'business', 'destination'],
+                    {
+                        edgePadding: {
+                            left: 50,
+                            right: 50,
+                            top: 50,
+                            bottom: 50
+                        }
+                    }
+                );
+            }, 5000);
         }
         if (order.status === ORDER_STATUS.accepted_by_driver) {
             setDestination({
                 lat: business?.coors?.lat!,
                 lng: business?.coors?.lng!
             });
+
+            mapViewRef.current?.animateToRegion({
+                latitude: business?.coors?.lat!,
+                longitude: business?.coors?.lng!,
+                latitudeDelta: 0.02,
+                longitudeDelta: 0.02
+            });
+            a = setTimeout(() => {
+                mapViewRef.current?.fitToSuppliedMarkers(
+                    ['origin', 'business'],
+                    {
+                        edgePadding: {
+                            left: 100,
+                            right: 100,
+                            top: 100,
+                            bottom: 100
+                        }
+                    }
+                );
+            }, 2000);
         }
         if (order.status === ORDER_STATUS.picked_up_by_driver) {
             setDestination({
                 lat: order.address?.coors?.lat!,
                 lng: order.address?.coors?.lng!
             });
+            mapViewRef.current?.animateToRegion({
+                latitude: business?.coors?.lat!,
+                longitude: business?.coors?.lng!,
+                latitudeDelta: 0.02,
+                longitudeDelta: 0.02
+            });
+            a = setTimeout(() => {
+                mapViewRef.current?.fitToSuppliedMarkers(
+                    ['business', 'destination'],
+                    {
+                        edgePadding: {
+                            left: 100,
+                            right: 100,
+                            top: 100,
+                            bottom: 100
+                        }
+                    }
+                );
+            }, 2000);
         }
+
+        return () => {
+            clearTimeout(a);
+            clearTimeout(b);
+            clearTimeout(c);
+        };
     }, [order?.status, location]);
 
     useEffect(() => {
         let sub: Location.LocationSubscription;
         (async () => {
             if (!order) return;
-            if (order?.status === ORDER_STATUS.marked_ready_for_delivery)
+            if (
+                !accepted ||
+                order.status === ORDER_STATUS.marked_ready_for_delivery
+            )
                 return;
+
             console.log('UPDATING 1');
             sub = await Location.watchPositionAsync(
                 {
@@ -211,13 +320,6 @@ const DeliveryView = ({
                             })
                         );
                     }
-
-                    mapViewRef.current?.animateToRegion({
-                        latitude: result.coords.latitude!,
-                        longitude: result.coords.longitude!,
-                        latitudeDelta: 0.1,
-                        longitudeDelta: 0.1
-                    });
                 }
             );
         })();
@@ -227,7 +329,17 @@ const DeliveryView = ({
                 sub.remove();
             }
         };
-    }, [location, order]);
+    }, [location, order, accepted]);
+
+    useEffect(() => {
+        if (
+            order?.status === ORDER_STATUS.cancelled ||
+            order?.status === ORDER_STATUS.in_progress ||
+            order?.status === ORDER_STATUS.new
+        ) {
+            navigation.replace('CourierHome');
+        }
+    }, [order?.status]);
 
     useEffect(() => {
         if (!orderId) return;
@@ -258,17 +370,22 @@ const DeliveryView = ({
             lng: order.courier.coors?.lng!
         });
         if (order.status === ORDER_STATUS.accepted_by_driver) {
+            setAccepted(true);
             setDestination({
                 lat: business?.coors?.lat!,
                 lng: business?.coors?.lng!
             });
 
-            mapViewRef.current?.animateToRegion({
-                latitude: business?.coors?.lat!,
-                longitude: business?.coors?.lng!,
-                latitudeDelta: 0.1,
-                longitudeDelta: 0.1
+            mapViewRef.current?.fitToSuppliedMarkers(['origin', 'business'], {
+                edgePadding: {
+                    left: 100,
+                    right: 100,
+                    top: 100,
+                    bottom: 100
+                },
+                animated: true
             });
+            saveAcceptedTimeStamp();
         }
         if (order.status === ORDER_STATUS.picked_up_by_driver) {
             setDestination({
@@ -276,12 +393,17 @@ const DeliveryView = ({
                 lng: order.address?.coors.lng!
             });
 
-            mapViewRef.current?.animateToRegion({
-                latitude: order.address?.coors.lat!,
-                longitude: order.address?.coors.lat!,
-                latitudeDelta: 0.1,
-                longitudeDelta: 0.1
-            });
+            mapViewRef.current?.fitToSuppliedMarkers(
+                ['business', 'destination'],
+                {
+                    edgePadding: {
+                        left: 100,
+                        right: 100,
+                        top: 100,
+                        bottom: 100
+                    }
+                }
+            );
         }
     }, [order?.courier, order?.status]);
     if (!location) {
@@ -315,14 +437,26 @@ const DeliveryView = ({
                 }}
             >
                 <Header
+                    titleColor="#212121"
                     iconColor="#212121"
                     title="Delivery View"
-                    onPressBack={() => navigation.goBack()}
+                    onPressBack={() => {
+                        if (
+                            order?.status ===
+                            ORDER_STATUS.marked_ready_for_delivery
+                        ) {
+                            navigation.goBack();
+                        } else {
+                            navigation.navigate('CourierDeliveries');
+                        }
+                    }}
                 />
             </View>
             <MapView
                 showsUserLocation
                 followsUserLocation
+                provider="google"
+                mapType="standard"
                 zoomEnabled
                 zoomControlEnabled
                 ref={mapViewRef}
@@ -336,6 +470,7 @@ const DeliveryView = ({
             >
                 <Marker
                     title={business?.name}
+                    identifier="business"
                     description={business?.address?.split(', ')[0]}
                     coordinate={{
                         latitude: business?.coors?.lat!,
@@ -355,6 +490,7 @@ const DeliveryView = ({
 
                 <Marker
                     title="Me"
+                    identifier="origin"
                     coordinate={{
                         latitude: origin.lat!,
                         longitude: origin?.lng!
@@ -363,6 +499,7 @@ const DeliveryView = ({
 
                 <Marker
                     title={order?.contactPerson.name}
+                    identifier="destination"
                     description={order?.address?.street.split(', ')[0]}
                     coordinate={{
                         latitude: order?.address?.coors.lat!,
@@ -376,7 +513,9 @@ const DeliveryView = ({
                     apikey={process.env.GOOGLE_API!}
                     strokeColor={'#212121'}
                     strokeWidth={5}
-                    mode="BICYCLING"
+                    mode={
+                        user?.transportation ? user.transportation : 'BICYCLING'
+                    }
                     optimizeWaypoints={true}
                     waypoints={
                         order?.status === ORDER_STATUS.marked_ready_for_delivery
@@ -441,18 +580,42 @@ const DeliveryView = ({
                                     {order?.contactPerson.lastName}
                                 </Text>
                             </Row>
-                            <Text darkText bold>
-                                {order?.contactPerson.phone}
-                            </Text>
+                            <Row>
+                                <Text darkText bold>
+                                    {order?.contactPerson.phone}
+                                </Text>
+                                <TouchableOpacity
+                                    onPress={() =>
+                                        makeCall(order?.contactPerson.phone!)
+                                    }
+                                    style={{
+                                        marginLeft: 30,
+                                        flexDirection: 'row',
+                                        justifyContent: 'center',
+                                        alignItems: 'center',
+                                        borderColor: theme.ASCENT,
+                                        borderWidth: 0.5,
+                                        padding: 6,
+                                        borderRadius: 10
+                                    }}
+                                >
+                                    <FontAwesome name="phone" size={24} />
+                                    <Text bold darkText px_4>
+                                        Call
+                                    </Text>
+                                </TouchableOpacity>
+                            </Row>
                         </Stack>
                         <Stack>
                             <Text bold py_4 darkText>
                                 Pick Up At
                             </Text>
+                            <Text bold>{business?.name}</Text>
                             <Text darkText>{business?.address}</Text>
                             <Text darkText bold py_4>
                                 Drof Off At
                             </Text>
+
                             <Text darkText>{order?.address?.street}</Text>
                             {order?.address?.apt && (
                                 <Text py_4 darkText bold>

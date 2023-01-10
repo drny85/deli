@@ -4,15 +4,16 @@ import Screen from '../../components/Screen';
 import Text from '../../components/Text';
 import Header from '../../components/Header';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { CourierHomeStackScreens } from '../../navigation/courier/typing';
+
 import { ordersCollection } from '../../firebase';
 import { onSnapshot, query, where } from 'firebase/firestore';
 import { Order, ORDER_STATUS } from '../../redux/consumer/ordersSlide';
 import Stack from '../../components/Stack';
 import Loader from '../../components/Loader';
 import { useAppSelector } from '../../redux/store';
+import { CourierStackScreens } from '../../navigation/courier/typing';
 
-type Props = NativeStackScreenProps<CourierHomeStackScreens, 'MyDeliveries'>;
+type Props = NativeStackScreenProps<CourierStackScreens, 'MyDeliveries'>;
 
 const MyDeliveries = ({ navigation }: Props) => {
     const { user } = useAppSelector((state) => state.auth);

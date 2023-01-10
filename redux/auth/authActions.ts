@@ -2,6 +2,7 @@ import { createAsyncThunk } from '@reduxjs/toolkit';
 import { signOut } from 'firebase/auth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { auth, usersCollection } from '../../firebase';
+import { Courier } from '../../types';
 import { AppUser, setUserData } from './authSlide';
 
 export const autoLogin = createAsyncThunk(
@@ -37,7 +38,7 @@ export const autoLogin = createAsyncThunk(
 
 export const createUser = createAsyncThunk(
     'auth/create',
-    async (userData: AppUser, { dispatch }) => {
+    async (userData: AppUser | Courier, { dispatch }) => {
         try {
             if (!userData || !userData.id) return;
             const userRef = doc(usersCollection, userData.id);

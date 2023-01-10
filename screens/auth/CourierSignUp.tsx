@@ -1,4 +1,4 @@
-import { Alert, TextInput, TouchableOpacity, View } from 'react-native';
+import { Alert, Modal, TextInput, TouchableOpacity, View } from 'react-native';
 import React, { useRef, useState } from 'react';
 import Screen from '../../components/Screen';
 
@@ -21,14 +21,13 @@ import { auth } from '../../firebase';
 import { FIREBASE_ERRORS } from '../../utils/errorMesssages';
 import Row from '../../components/Row';
 import { SIZES } from '../../constants';
-import { createBusiness } from '../../redux/business/businessActions';
-import { Business } from '../../redux/business/businessSlide';
-
-import { AppUser } from '../../redux/auth/authSlide';
-import Loader from '../../components/Loader';
 import { createUser } from '../../redux/auth/authActions';
 import useNotifications from '../../hooks/useNotifications';
 import { formatPhone } from '../../utils/formatPhone';
+import { Courier } from '../../types';
+import { AnimatePresence, MotiView } from 'moti';
+import Header from '../../components/Header';
+import Stack from '../../components/Stack';
 
 type Props = NativeStackScreenProps<AuthScreens, 'CourierSignup'>;
 
@@ -40,7 +39,8 @@ const CourierSignUp = ({ navigation }: Props) => {
     const emailRef = useRef<TextInput>(null);
 
     const passwordRef = useRef<TextInput>(null);
-
+    const [transportation, setTransportation] =
+        useState<Courier['transportation']>();
     const [name, setName] = useState('');
     const [lastName, setlastName] = useState('');
     const [email, setEmail] = useState('');
@@ -48,10 +48,14 @@ const CourierSignUp = ({ navigation }: Props) => {
     const [password, setPassword] = useState('');
     const [comfirm, setComfirm] = useState('');
     const [showPassword, setShowPassword] = useState(false);
+    const [showTransportation, setShowTransportation] = useState(false);
     const handleSignUp = async () => {
         try {
             const isValid = validateInputs();
-            if (!isValid) return;
+            if (!isValid) {
+                Alert.alert("Error, 'Please fill in all required fields");
+                return;
+            }
             setLoading(true);
             const { user } = await createUserWithEmailAndPassword(
                 auth,
@@ -63,14 +67,15 @@ const CourierSignUp = ({ navigation }: Props) => {
             }
             await sendEmailVerification(user);
 
-            const userData: AppUser = {
+            const userData: Courier = {
                 id: user.uid,
                 name,
                 lastName,
                 email,
                 phone,
                 emailVerified: user.emailVerified,
-                type: 'courier'
+                type: 'courier',
+                transportation: transportation
             };
 
             await dispatch(createUser(userData));
@@ -182,38 +187,82 @@ const CourierSignUp = ({ navigation }: Props) => {
                             )
                         }
                     />
-                    <InputField
-                        label="Password"
-                        ref={passwordRef}
-                        placeholder="Password"
-                        onChangeText={setPassword}
-                        value={password}
-                        secureTextEntry={!showPassword}
-                        rightIcon={
-                            <FontAwesome
-                                onPress={() => setShowPassword((prev) => !prev)}
-                                name={showPassword ? 'eye' : 'eye-slash'}
-                                size={20}
-                                color={theme.TEXT_COLOR}
-                            />
+                    <Button
+                        title={
+                            transportation
+                                ? `${transportation}`
+                                : 'Pick your Transportation'
                         }
+                        onPress={() => {
+                            setShowTransportation(true);
+                        }}
                     />
-                    <InputField
-                        label="Confirm Password"
-                        ref={passwordRef}
-                        placeholder="ConfirmPassword"
-                        onChangeText={setComfirm}
-                        value={comfirm}
-                        secureTextEntry={!showPassword}
-                        rightIcon={
-                            <FontAwesome
-                                onPress={() => setShowPassword((prev) => !prev)}
-                                name={showPassword ? 'eye' : 'eye-slash'}
-                                size={20}
-                                color={theme.TEXT_COLOR}
-                            />
-                        }
-                    />
+                    <AnimatePresence>
+                        {transportation && (
+                            <MotiView
+                                style={{ width: '100%' }}
+                                from={{ opacity: 0, translateY: -20 }}
+                                animate={{
+                                    opacity: 1,
+                                    translateY: 0,
+                                    width: '100%'
+                                }}
+                            >
+                                <InputField
+                                    label="Password"
+                                    mainStyle={{
+                                        width: SIZES.width * 0.95,
+                                        maxWidth: 600
+                                    }}
+                                    ref={passwordRef}
+                                    placeholder="Password"
+                                    onChangeText={setPassword}
+                                    value={password}
+                                    secureTextEntry={!showPassword}
+                                    rightIcon={
+                                        <FontAwesome
+                                            onPress={() =>
+                                                setShowPassword((prev) => !prev)
+                                            }
+                                            name={
+                                                showPassword
+                                                    ? 'eye'
+                                                    : 'eye-slash'
+                                            }
+                                            size={20}
+                                            color={theme.TEXT_COLOR}
+                                        />
+                                    }
+                                />
+                                <InputField
+                                    mainStyle={{
+                                        width: SIZES.width * 0.95,
+                                        maxWidth: 600
+                                    }}
+                                    label="Confirm Password"
+                                    ref={passwordRef}
+                                    placeholder="ConfirmPassword"
+                                    onChangeText={setComfirm}
+                                    value={comfirm}
+                                    secureTextEntry={!showPassword}
+                                    rightIcon={
+                                        <FontAwesome
+                                            onPress={() =>
+                                                setShowPassword((prev) => !prev)
+                                            }
+                                            name={
+                                                showPassword
+                                                    ? 'eye'
+                                                    : 'eye-slash'
+                                            }
+                                            size={20}
+                                            color={theme.TEXT_COLOR}
+                                        />
+                                    }
+                                />
+                            </MotiView>
+                        )}
+                    </AnimatePresence>
 
                     <View
                         style={{
@@ -263,6 +312,122 @@ const CourierSignUp = ({ navigation }: Props) => {
                     </Row>
                 </View>
             </KeyboardScreen>
+            <Modal
+                visible={showTransportation}
+                animationType="slide"
+                presentationStyle="formSheet"
+            >
+                <View
+                    style={{
+                        flex: 1,
+                        backgroundColor: theme.BACKGROUND_COLOR,
+                        paddingTop: 20
+                    }}
+                >
+                    <Header
+                        title="Pick One"
+                        onPressBack={() => setShowTransportation(false)}
+                    />
+                    <View
+                        style={{
+                            justifyContent: 'center',
+                            flex: 1,
+                            alignItems: 'center'
+                        }}
+                    >
+                        <Stack>
+                            <Row
+                                containerStyle={{
+                                    width: '100%'
+                                }}
+                                horizontalAlign="space-evenly"
+                            >
+                                <MotiView
+                                    style={{
+                                        alignItems: 'center',
+                                        padding: SIZES.base,
+                                        borderRadius: SIZES.radius
+                                    }}
+                                    animate={{
+                                        // borderWidth: 1,
+                                        borderWidth:
+                                            transportation == 'DRIVING' ? 1 : 0,
+                                        borderColor:
+                                            transportation === 'DRIVING'
+                                                ? theme.TEXT_COLOR
+                                                : undefined,
+                                        scale:
+                                            transportation === 'DRIVING'
+                                                ? [1, 1.2, 1.1]
+                                                : 1
+                                    }}
+                                >
+                                    <TouchableOpacity
+                                        style={{ flexGrow: 1 }}
+                                        onPress={() =>
+                                            setTransportation('DRIVING')
+                                        }
+                                    >
+                                        <FontAwesome
+                                            name="car"
+                                            size={36}
+                                            color={theme.TEXT_COLOR}
+                                        />
+                                    </TouchableOpacity>
+                                    <Text
+                                        bold={transportation === 'DRIVING'}
+                                        py_4
+                                        center
+                                    >
+                                        DRIVING
+                                    </Text>
+                                </MotiView>
+                                <MotiView
+                                    style={{
+                                        alignItems: 'center',
+                                        padding: SIZES.base,
+                                        borderRadius: SIZES.radius
+                                    }}
+                                    animate={{
+                                        borderWidth:
+                                            transportation == 'BICYCLING'
+                                                ? 1
+                                                : 0,
+                                        borderColor:
+                                            transportation === 'BICYCLING'
+                                                ? theme.TEXT_COLOR
+                                                : undefined,
+                                        scale:
+                                            transportation === 'BICYCLING'
+                                                ? [1, 1.2, 1.1]
+                                                : 1
+                                    }}
+                                >
+                                    <TouchableOpacity
+                                        style={{ flexGrow: 1 }}
+                                        onPress={() =>
+                                            setTransportation('BICYCLING')
+                                        }
+                                    >
+                                        <FontAwesome
+                                            name="bicycle"
+                                            size={36}
+                                            color={theme.TEXT_COLOR}
+                                        />
+                                    </TouchableOpacity>
+                                    <Text
+                                        bold={transportation === 'BICYCLING'}
+                                        py_4
+                                        center
+                                    >
+                                        BICYCLING
+                                    </Text>
+                                </MotiView>
+                            </Row>
+                        </Stack>
+                    </View>
+                </View>
+            </Modal>
         </Screen>
     );
 };

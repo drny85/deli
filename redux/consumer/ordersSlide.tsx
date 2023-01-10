@@ -1,4 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { Courier } from '../../types';
 import { AppUser } from '../auth/authSlide';
 import { Coors } from '../business/businessSlide';
 import { CartItem } from './cartSlide';
@@ -39,9 +40,11 @@ export interface Order {
     deliveryInstructions: string | null;
     address: { street: string; apt: string | null; coors: Coors } | null;
     status: ORDER_STATUS;
-    courier?: AppUser | null;
+    courier?: Courier | null;
     deliveredOn?: string | null;
     deliveredBy?: AppUser | null;
+    pickedUpOn?: string | null;
+    acceptedOn?: string | null;
 }
 
 interface OrdersState {

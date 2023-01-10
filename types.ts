@@ -1,4 +1,6 @@
-import { Coors } from './redux/business/businessSlide';
+import { AppUser } from './redux/auth/authSlide';
+
+import { MapViewDirectionsMode } from 'react-native-maps-directions';
 
 export interface Theme {
     mode: 'dark' | 'light';
@@ -28,6 +30,10 @@ interface Day {
 }
 export interface BusinessDay {
     [key: string]: Day;
+}
+
+export interface Courier extends AppUser {
+    transportation?: MapViewDirectionsMode;
 }
 
 export const DAYS = [

@@ -22,6 +22,7 @@ const config: ExpoConfig = {
     assetBundlePatterns: ['**/*'],
     ios: {
         supportsTablet: true,
+
         bundleIdentifier: 'net.robertdev.deli.app',
 
         infoPlist: {

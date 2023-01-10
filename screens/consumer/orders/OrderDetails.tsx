@@ -1,4 +1,4 @@
-import { TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
+import { TouchableOpacity, View } from 'react-native';
 import React, {
     useCallback,
     useEffect,
@@ -6,9 +6,9 @@ import React, {
     useRef,
     useState
 } from 'react';
-import Screen from '../../../components/Screen';
+
 import Text from '../../../components/Text';
-import Button from '../../../components/Button';
+
 import { useNavigation } from '@react-navigation/native';
 import { useOrder } from '../../../hooks/useOrder';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -20,10 +20,7 @@ import MapView, { Marker } from 'react-native-maps';
 import MapViewDirections from 'react-native-maps-directions';
 import { useDispatch } from 'react-redux';
 import { getCurrentBusiness } from '../../../redux/business/businessActions';
-import BottomSheet, {
-    BottomSheetScrollView,
-    BottomSheetView
-} from '@gorhom/bottom-sheet';
+import BottomSheet, { BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { Coors } from '../../../redux/business/businessSlide';
 import { FontAwesome } from '@expo/vector-icons';
 import AnimatedLottieView from 'lottie-react-native';
@@ -35,6 +32,8 @@ import Divider from '../../../components/Divider';
 import moment from 'moment';
 import Row from '../../../components/Row';
 import { stripeFee } from '../../../utils/stripeFee';
+import Button from '../../../components/Button';
+import Header from '../../../components/Header';
 
 type Props = NativeStackScreenProps<ConsumerOrdersStackScreens, 'OrderDetails'>;
 
@@ -56,7 +55,7 @@ const OrderDetails = ({
     const theme = useAppSelector((state) => state.theme);
     const { loading, order } = useOrder(orderId);
     const [minutes, setMinutes] = useState<number | null>(null);
-    const snapPoints = useMemo(() => ['15%', '50%', '80%'], []);
+    const snapPoints = useMemo(() => ['12%', '50%', '90%'], []);
     const bottomSheetRef = useRef<BottomSheet>(null);
     const goToOrder = () => {
         navigation.navigate('ConsumerOrders', { screen: 'Orders' });
@@ -163,7 +162,11 @@ const OrderDetails = ({
                         // }}
                     />
                     <MapViewDirections
-                        mode="BICYCLING"
+                        mode={
+                            order.courier && order.courier.transportation
+                                ? order.courier.transportation
+                                : 'BICYCLING'
+                        }
                         apikey={process.env.GOOGLE_API!}
                         strokeColor={theme.ASCENT}
                         strokeWidth={5}
@@ -241,39 +244,14 @@ const OrderDetails = ({
                                 : require('../../../assets/animations/delivering_light.json')
                         }
                     />
-                    <TouchableOpacity
-                        onPress={() =>
-                            navigation.navigate('ConsumerOrders', {
-                                screen: 'Orders'
-                            })
-                        }
-                        style={{
-                            position: 'absolute',
-                            top: SIZES.statusBarHeight,
-                            left: 20,
-                            padding: SIZES.base,
-                            zIndex: 120
-                        }}
-                    >
-                        <FontAwesome
-                            name="chevron-left"
-                            size={24}
-                            color={theme.TEXT_COLOR}
-                        />
-                    </TouchableOpacity>
+
                     <View
                         style={{
                             paddingVertical: SIZES.padding * 3
                         }}
                     >
                         <View style={{ paddingVertical: SIZES.padding }}>
-                            <Text
-                                large
-                                lobster
-                                py_8
-                                center
-                                animation={'fadeInDown'}
-                            >
+                            <Text large lobster center animation={'fadeInDown'}>
                                 {order.courier?.name}, is on his way to pick up
                                 your order.
                             </Text>
@@ -290,9 +268,13 @@ const OrderDetails = ({
                     flex: 1
                 }}
             >
-                <View>
+                <View style={{ flex: 1 }}>
                     <AnimatedLottieView
-                        style={{ flex: 1 }}
+                        style={{
+                            flex: 1,
+                            justifyContent: 'center',
+                            alignItems: 'center'
+                        }}
                         resizeMode="contain"
                         autoPlay={true}
                         source={
@@ -301,26 +283,7 @@ const OrderDetails = ({
                                 : require('../../../assets/animations/searching_light.json')
                         }
                     />
-                    <TouchableOpacity
-                        onPress={() =>
-                            navigation.navigate('ConsumerOrders', {
-                                screen: 'Orders'
-                            })
-                        }
-                        style={{
-                            position: 'absolute',
-                            top: SIZES.statusBarHeight,
-                            left: 20,
-                            padding: SIZES.base,
-                            zIndex: 120
-                        }}
-                    >
-                        <FontAwesome
-                            name="chevron-left"
-                            size={24}
-                            color={theme.TEXT_COLOR}
-                        />
-                    </TouchableOpacity>
+
                     <View
                         style={{
                             paddingVertical: SIZES.padding * 3
@@ -344,6 +307,37 @@ const OrderDetails = ({
         );
     };
 
+    const renderDeliveredOrder = (): JSX.Element => {
+        return (
+            <View style={{ flex: 1, justifyContent: 'center' }}>
+                <Stack center>
+                    <Text lobster medium animation={'fadeInDown'}>
+                        Thank you for doing business with us
+                    </Text>
+                    <Text
+                        lobster
+                        medium
+                        py_8
+                        animation={'fadeInUp'}
+                        delay={600}
+                    >
+                        Have a wonderful day {user?.name}
+                    </Text>
+                    <Text py_8 raleway animation={'fadeInLeft'} delay={800}>
+                        Your order was delivery on{' '}
+                        {moment(order.deliveredOn).format('lll')}
+                    </Text>
+                </Stack>
+                <Stack center>
+                    <Text bold> It was delivered by</Text>
+                    <Text py_6 lobster medium>
+                        {order.deliveredBy?.name}
+                    </Text>
+                </Stack>
+            </View>
+        );
+    };
+
     const renderNewOrder = (): JSX.Element => {
         return (
             <View
@@ -362,26 +356,7 @@ const OrderDetails = ({
                                 : require('../../../assets/animations/preparing.json')
                         }
                     />
-                    <TouchableOpacity
-                        onPress={() =>
-                            navigation.navigate('ConsumerOrders', {
-                                screen: 'Orders'
-                            })
-                        }
-                        style={{
-                            position: 'absolute',
-                            top: SIZES.statusBarHeight,
-                            left: 20,
-                            padding: SIZES.base,
-                            zIndex: 120
-                        }}
-                    >
-                        <FontAwesome
-                            name="chevron-left"
-                            size={24}
-                            color={theme.TEXT_COLOR}
-                        />
-                    </TouchableOpacity>
+
                     <View
                         style={{
                             paddingVertical: SIZES.padding * 3
@@ -411,7 +386,23 @@ const OrderDetails = ({
                     theme.mode === 'light' ? '#f5ebe0' : theme.BACKGROUND_COLOR
             }}
         >
+            <View
+                style={{
+                    marginTop: SIZES.statusBarHeight,
+                    paddingHorizontal: 10
+                }}
+            >
+                <Header
+                    onPressBack={() => {
+                        navigation.navigate('ConsumerOrders', {
+                            screen: 'Orders'
+                        });
+                    }}
+                    title="Order Details"
+                />
+            </View>
             {order.status === ORDER_STATUS.new && renderNewOrder()}
+            {order.status === ORDER_STATUS.delivered && renderDeliveredOrder()}
             {order.status === ORDER_STATUS.in_progress && renderNewOrder()}
             {order.status === ORDER_STATUS.marked_ready_for_delivery &&
                 renderSearchingDriver()}
@@ -430,6 +421,11 @@ const OrderDetails = ({
                         width: '100%'
                     }}
                 >
+                    {order.status === ORDER_STATUS.delivered && (
+                        <Stack center py={2}>
+                            <Button title="Re-Order" onPress={() => {}} />
+                        </Stack>
+                    )}
                     <Text darkText center lobster medium py_4>
                         {order.status === ORDER_STATUS.new &&
                             `${business.name} just got your order`}

@@ -1,6 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { Coors } from '../business/businessSlide';
 import { logoutUser, autoLogin } from './authActions';
+import { MapViewDirectionsMode } from 'react-native-maps-directions';
 
 export interface UserPreferences {
     shippingAddress: string[];
@@ -16,6 +17,7 @@ export interface AppUser {
     preferences?: UserPreferences;
     pushToken?: string;
     coors?: Coors;
+    transportation?: MapViewDirectionsMode;
 }
 interface IState {
     user: AppUser | null;

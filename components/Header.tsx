@@ -11,10 +11,17 @@ type Props = {
     title?: string;
     onPressBack?: () => void;
     iconColor?: string;
+    titleColor?: string;
     rightIcon?: React.ReactNode;
 };
 
-const Header = ({ onPressBack, title, iconColor, rightIcon }: Props) => {
+const Header = ({
+    onPressBack,
+    title,
+    iconColor,
+    rightIcon,
+    titleColor
+}: Props) => {
     const theme = useAppSelector((state) => state.theme);
     return (
         <MotiView
@@ -38,7 +45,12 @@ const Header = ({ onPressBack, title, iconColor, rightIcon }: Props) => {
                     <View />
                 )}
                 {title ? (
-                    <Text lobster large center>
+                    <Text
+                        style={{ color: titleColor || theme.TEXT_COLOR }}
+                        lobster
+                        large
+                        center
+                    >
                         {title}
                     </Text>
                 ) : (

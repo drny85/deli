@@ -18,60 +18,49 @@ import { updateOrder } from '../../redux/consumer/ordersActions';
 import Loader from '../../components/Loader';
 import * as Location from 'expo-location';
 import { Business } from '../../redux/business/businessSlide';
-import {
-    CourierDeliveriesStackScreens,
-    CourierHomeStackScreens
-} from '../../navigation/courier/typing';
+import DeliveryCard from '../../components/courier/DeliveryCard';
+import { useBusinessAvailable } from '../../hooks/useBusinessAvailable';
+import { CourierStackScreens } from '../../navigation/courier/typing';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 
-const CourerDeliveries = () => {
+type Props = NativeStackScreenProps<CourierStackScreens, 'CourierDeliveries'>;
+const CourierDeliveries = ({ navigation }: Props) => {
     const { location } = useLocation();
     const { user } = useAppSelector((state) => state.auth);
     const [orders, setOrders] = React.useState<Order[]>([]);
     const [businesss, setBusinesses] = React.useState<Business[]>([]);
     const dispatch = useAppDispatch();
-    console.log(orders);
 
-    const renderOrders: ListRenderItem<Order> = ({ item, index }) => {
+    const { businessAvailable, isLoading } = useBusinessAvailable();
+
+    const renderOrders: ListRenderItem<Order> = ({ item }) => {
         return (
-            <TouchableOpacity onPress={() => handleOnPress(item)}>
-                <Stack>
-                    <Text>{item.businessId}</Text>
-                </Stack>
-            </TouchableOpacity>
+            <DeliveryCard
+                order={item}
+                business={
+                    businessAvailable.find((b) => b.id === item.businessId)!
+                }
+                onPress={() => handleOnPress(item)}
+            />
         );
     };
 
     const handleOnPress = async (order: Order) => {
         try {
+            navigation.navigate('DeliveryView', { orderId: order.id! });
         } catch (error) {
             console.log(error);
         }
     };
 
-    // useEffect(() => {
-    //     if (orders.length > 0) return;
-    //     const q = query(
-    //         businessCollection,
-    //         where(
-    //             'id',
-    //             'in',
-    //             orders.map((o) => o.businessId)
-    //         )
-    //     );
-    //     const sub = onSnapshot(q, (snapshot) => {
-    //         setBusinesses(
-    //             snapshot.docs.map((b) => ({ id: b.id, ...b.data() }))
-    //         );
-    //     });
-
-    //     return sub;
-    // }, [orders.length]);
-
     useEffect(() => {
         const q = query(
             ordersCollection,
-            where('status', '==', ORDER_STATUS.accepted_by_driver)
+            where('status', 'in', [
+                ORDER_STATUS.accepted_by_driver,
+                ORDER_STATUS.picked_up_by_driver
+            ]),
+            where('courier.id', '==', user?.id)
         );
         const sub = onSnapshot(q, (snap) => {
             setOrders(snap.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
@@ -80,9 +69,12 @@ const CourerDeliveries = () => {
         return sub;
     }, []);
 
-    if (!location) return <Loader />;
+    if (!location || isLoading) return <Loader />;
     return (
         <Screen center>
+            <Text center lobster large py_4>
+                Pending Deliveries
+            </Text>
             <FlatList
                 data={orders}
                 keyExtractor={(item) => item.id!}
@@ -92,4 +84,4 @@ const CourerDeliveries = () => {
     );
 };
 
-export default CourerDeliveries;
+export default CourierDeliveries;
