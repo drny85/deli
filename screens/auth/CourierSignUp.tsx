@@ -53,7 +53,7 @@ const CourierSignUp = ({ navigation }: Props) => {
         try {
             const isValid = validateInputs();
             if (!isValid) {
-                Alert.alert("Error, 'Please fill in all required fields");
+                Alert.alert('Error', 'Please fill in all required fields');
                 return;
             }
             setLoading(true);

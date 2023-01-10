@@ -464,7 +464,14 @@ const OrderDetails = ({
                                     {(distance * 0.621371).toFixed(1)} miles
                                 </Text>
                             </Row>
-                            <Text lobster medium center darkText>
+                            <Text
+                                py_4
+                                capitalize
+                                lobster
+                                medium
+                                center
+                                darkText
+                            >
                                 {order.courier?.name} just picked up your order
                             </Text>
                         </>

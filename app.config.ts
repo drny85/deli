@@ -45,7 +45,8 @@ const config: ExpoConfig = {
             backgroundColor: '#FFFFFF'
         },
         permissions: ['ACCESS_BACKGROUND_LOCATION'],
-        versionCode: 1
+        versionCode: 1,
+        package: 'net.robertdev.deli.app'
     },
     plugins: [
         [
@@ -65,7 +66,12 @@ const config: ExpoConfig = {
                 enableGooglePay: true
             }
         ]
-    ]
+    ],
+    extra: {
+        eas: {
+            projectId: 'c24913ab-c7a8-44e4-8a67-9a6bc200570f'
+        }
+    }
 };
 
 export default config;

@@ -22,6 +22,7 @@ import DeliveryCard from '../../components/courier/DeliveryCard';
 import { useBusinessAvailable } from '../../hooks/useBusinessAvailable';
 import { CourierStackScreens } from '../../navigation/courier/typing';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import Header from '../../components/Header';
 
 type Props = NativeStackScreenProps<CourierStackScreens, 'CourierDeliveries'>;
 const CourierDeliveries = ({ navigation }: Props) => {
@@ -71,10 +72,13 @@ const CourierDeliveries = ({ navigation }: Props) => {
 
     if (!location || isLoading) return <Loader />;
     return (
-        <Screen center>
-            <Text center lobster large py_4>
-                Pending Deliveries
-            </Text>
+        <Screen>
+            <Header
+                title="Pending Orders"
+                onPressBack={() => {
+                    navigation.navigate('CourierHome');
+                }}
+            />
             <FlatList
                 data={orders}
                 keyExtractor={(item) => item.id!}

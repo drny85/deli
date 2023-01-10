@@ -1,4 +1,10 @@
-import { ScrollView, TouchableOpacity, View } from 'react-native';
+import {
+    ScrollView,
+    TouchableOpacity,
+    View,
+    ListRenderItem,
+    FlatList
+} from 'react-native';
 import React, { useEffect } from 'react';
 import Screen from '../../components/Screen';
 import Text from '../../components/Text';
@@ -12,6 +18,8 @@ import Stack from '../../components/Stack';
 import Loader from '../../components/Loader';
 import { useAppSelector } from '../../redux/store';
 import { CourierStackScreens } from '../../navigation/courier/typing';
+import DeliveryCard from '../../components/courier/DeliveryCard';
+import { useBusinessAvailable } from '../../hooks/useBusinessAvailable';
 
 type Props = NativeStackScreenProps<CourierStackScreens, 'MyDeliveries'>;
 
@@ -19,6 +27,23 @@ const MyDeliveries = ({ navigation }: Props) => {
     const { user } = useAppSelector((state) => state.auth);
     const [orders, setOrders] = React.useState<Order[]>([]);
     const [loading, setLoading] = React.useState(true);
+    const { businessAvailable } = useBusinessAvailable();
+
+    const handleOnPress = (order: Order) => {
+        console.log('Go To Order Details with ID', order.id);
+    };
+
+    const renderOrders: ListRenderItem<Order> = ({ item }) => {
+        return (
+            <DeliveryCard
+                order={item}
+                business={
+                    businessAvailable.find((b) => b.id === item.businessId)!
+                }
+                onPress={() => handleOnPress(item)}
+            />
+        );
+    };
     useEffect(() => {
         const q = query(
             ordersCollection,
@@ -39,29 +64,31 @@ const MyDeliveries = ({ navigation }: Props) => {
         <Screen>
             <Header
                 onPressBack={() => {
-                    navigation.goBack();
+                    navigation.navigate('CourierHome');
                 }}
                 title="My Deliveries"
             />
 
-            <ScrollView>
-                {orders.map((order) => {
-                    return (
-                        <TouchableOpacity
-                            onPress={() => {
-                                navigation.navigate('DeliveryView', {
-                                    orderId: order.id!
-                                });
-                            }}
-                            key={order.id}
-                        >
-                            <Stack>
-                                <Text>{order.total}</Text>
-                            </Stack>
-                        </TouchableOpacity>
-                    );
-                })}
-            </ScrollView>
+            {orders.length > 0 ? (
+                <FlatList
+                    data={orders}
+                    keyExtractor={(item) => item.id!}
+                    renderItem={renderOrders}
+                />
+            ) : (
+                <View
+                    style={{
+                        flex: 1,
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        marginBottom: 20
+                    }}
+                >
+                    <Stack center>
+                        <Text bold>No Orders Available</Text>
+                    </Stack>
+                </View>
+            )}
         </Screen>
     );
 };

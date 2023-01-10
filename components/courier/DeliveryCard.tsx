@@ -42,7 +42,10 @@ const DeliveryCard = ({ order, business, onPress }: Props) => {
                             : false
                 }}
             >
-                <Stack center>
+                <Stack
+                    containerStyle={{ backgroundColor: theme.CARD_BACKGROUND }}
+                    center
+                >
                     <Text>
                         {moment(order.orderDate).format('MMM DD, hh:mm a')}
                     </Text>
@@ -65,9 +68,10 @@ export default DeliveryCard;
 const styles = StyleSheet.create({
     view: {
         shadowOffset: { width: 3, height: 3 },
-        elevation: 5,
+        elevation: 10,
         shadowOpacity: 0.5,
-        shadowRadius: 6,
+        overflow: 'hidden',
+        shadowRadius: 8,
         borderRadius: SIZES.padding
     }
 });

@@ -7,9 +7,10 @@ import React, {
     useState
 } from 'react';
 import Communications from 'react-native-communications';
+import { runTransaction } from 'firebase/firestore';
 
 import Text from '../../components/Text';
-import { businessCollection, ordersCollection } from '../../firebase';
+import { businessCollection, db, ordersCollection } from '../../firebase';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { useLocation } from '../../hooks/useLocation';
 import { useAppDispatch, useAppSelector } from '../../redux/store';
@@ -83,31 +84,52 @@ const DeliveryView = ({
         }
     }, []);
 
+    const performeBath = async (order: Order) => {
+        try {
+            await runTransaction(db, async (transaction) => {
+                const docRf = doc(ordersCollection, order.id);
+                const orderRef = await transaction.get(docRf);
+                if (!orderRef.exists()) {
+                    throw 'Document does not exist!';
+                }
+
+                transaction.update(docRf, {
+                    status: ORDER_STATUS.accepted_by_driver,
+                    acceptedOn: new Date().toISOString(),
+                    courier: {
+                        ...user,
+                        coors: { lat: origin?.lat!, lng: origin?.lng! }
+                    }
+                });
+            });
+            console.log('Transaction successfully committed!');
+        } catch (e) {
+            console.log('Transaction failed: ', e);
+        }
+    };
+
+    const checkIfCourierCanAceeptAnotherDelivery = (): boolean => {
+        if (order?.courier && order.courier.id !== user?.id) {
+            return true;
+        }
+        return false;
+    };
+
     const handlePressActionButton = async () => {
         try {
             if (order?.status === ORDER_STATUS.marked_ready_for_delivery) {
                 if (!user) return;
+                //TO DO: CHECK IF COURIER HAS PENDING ORDER BEFORE TAKIONG A NEW ONE
 
-                const { payload } = await dispatch(
-                    updateOrder({
-                        ...order,
-                        status: ORDER_STATUS.accepted_by_driver,
-                        acceptedOn: new Date().toISOString(),
-                        courier: {
-                            ...user,
-                            coors: { lat: origin?.lat!, lng: origin?.lng! }
-                        }
-                    })
-                );
-                if (payload) {
-                    sheetRef.current?.snapToIndex(0);
-                    mapViewRef.current?.animateToRegion({
-                        latitude: origin?.lat!,
-                        longitude: origin?.lng!,
-                        latitudeDelta: 0.2,
-                        longitudeDelta: 0.2
-                    });
-                }
+                await performeBath(order);
+
+                sheetRef.current?.snapToIndex(0);
+                mapViewRef.current?.animateToRegion({
+                    latitude: origin?.lat!,
+                    longitude: origin?.lng!,
+                    latitudeDelta: 0.2,
+                    longitudeDelta: 0.2
+                });
             }
 
             if (order?.status === ORDER_STATUS.accepted_by_driver) {
@@ -339,6 +361,14 @@ const DeliveryView = ({
         ) {
             navigation.replace('CourierHome');
         }
+        if (
+            order?.status === ORDER_STATUS.accepted_by_driver &&
+            order.courier &&
+            order.courier.id !== user?.id
+        ) {
+            Alert.alert('Sorry', 'This delivery was already taken');
+            navigation.goBack();
+        }
     }, [order?.status]);
 
     useEffect(() => {
@@ -549,8 +579,8 @@ const DeliveryView = ({
                     <Row
                         containerStyle={{
                             alignSelf: 'center',
-                            width: '50%',
-                            maxWidth: 200
+                            width: '60%',
+                            maxWidth: 400
                         }}
                         horizontalAlign="space-around"
                     >
@@ -558,7 +588,11 @@ const DeliveryView = ({
                             {duration.toFixed(0)} mins
                         </Text>
                         <FontAwesome
-                            name="bicycle"
+                            name={
+                                user?.transportation === 'BICYCLING'
+                                    ? 'bicycle'
+                                    : 'car'
+                            }
                             size={26}
                             color={'#212121'}
                         />
