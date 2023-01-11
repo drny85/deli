@@ -112,6 +112,7 @@ const cartSlide = createSlice({
             }
         },
         setCart: (state, { payload }: PayloadAction<IState>) => {
+            saveCart(payload);
             return payload;
         }
     }

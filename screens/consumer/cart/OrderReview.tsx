@@ -45,7 +45,7 @@ const OrderReview = ({}: Props) => {
     const [deliveryAddress, setDeliveryAddress] = useState<Order['address']>();
     const { user } = useAppSelector((state) => state.auth);
     const { order, deliveryAdd } = useAppSelector((state) => state.orders);
-    const { previousRoute } = useAppSelector((state) => state.settings);
+
     const theme = useAppSelector((state) => state.theme);
     const dispatch = useDispatch();
     const { items, quantity, total } = useAppSelector((state) => state.cart);

@@ -1,10 +1,10 @@
-import { Image, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Alert, Image, StyleSheet, TouchableOpacity, View } from 'react-native';
 import React from 'react';
 
 import Text from './Text';
 import { Order, ORDER_STATUS } from '../redux/consumer/ordersSlide';
 import { IMAGE_PLACEHOLDER, SIZES } from '../constants';
-import { useAppSelector } from '../redux/store';
+import { useAppDispatch, useAppSelector } from '../redux/store';
 import moment from 'moment';
 import Row from './Row';
 
@@ -14,8 +14,11 @@ import { stripeFee } from '../utils/stripeFee';
 
 import { useNavigation } from '@react-navigation/native';
 import { useBusinessAvailable } from '../hooks/useBusinessAvailable';
-import Loader from './Loader';
+
 import { STATUS_NAME } from '../utils/orderStatus';
+import Loader from './Loader';
+import { resetCart } from '../utils/saveCart';
+import { setCart } from '../redux/consumer/cartSlide';
 
 type Props = {
     order: Order;
@@ -24,16 +27,49 @@ type Props = {
 
 const OrderListItem = ({ order, onPress }: Props) => {
     const theme = useAppSelector((state) => state.theme);
+    const dispatch = useAppDispatch();
     const navigation = useNavigation();
-    const { businessAvailable } = useBusinessAvailable();
-    console.log(order.status);
+    const { businessAvailable, isLoading } = useBusinessAvailable();
+    const { items } = useAppSelector((state) => state.cart);
 
     const qty = order.items.reduce((sum, item) => sum + item.quantity, 0);
     const business = businessAvailable.find(
         (business) => business.id === order.businessId
     );
 
-    if (!businessAvailable.length) return <Loader />;
+    const reOrder = (order: Order) => {
+        if (items.length > 0) {
+            Alert.alert(
+                'Items In Cart',
+                'You have some items in the cart, Do you want to replace them with this order?',
+                [
+                    { text: 'No', style: 'cancel' },
+                    {
+                        text: 'Yes, Replace',
+                        style: 'destructive',
+                        onPress: () => AddNewItemsToCart(order)
+                    }
+                ]
+            );
+        } else {
+            AddNewItemsToCart(order);
+        }
+    };
+
+    const AddNewItemsToCart = async (order: Order) => {
+        try {
+            if (!order) return;
+            const { items, total } = order;
+            await resetCart();
+            dispatch(setCart({ items: items, quantity: qty, total: total }));
+            navigation.navigate('ConsumerCart', { screen: 'OrderReview' });
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
+    //if (!businessAvailable.length) return <Loader />;
+    if (isLoading) return <Loader />;
 
     return (
         <TouchableOpacity
@@ -94,6 +130,10 @@ const OrderListItem = ({ order, onPress }: Props) => {
                                         screen: 'OrderDetails',
                                         params: { orderId: order.id! }
                                     });
+                                } else if (
+                                    order.status === ORDER_STATUS.delivered
+                                ) {
+                                    reOrder(order);
                                 }
                             }}
                         />

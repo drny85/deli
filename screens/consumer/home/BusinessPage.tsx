@@ -1,20 +1,16 @@
-import { StyleSheet, TouchableOpacity, View } from 'react-native';
-import React, { useEffect, useState } from 'react';
-import Screen from '../../../components/Screen';
+import { View } from 'react-native';
+import React, { useEffect } from 'react';
 import Text from '../../../components/Text';
 import ProductsList from '../../../components/ProductsList';
 import { useCategoriesAndProducts } from '../../../hooks/useCategoriesAndProducts';
-
 import { useAppDispatch, useAppSelector } from '../../../redux/store';
-
 import Loader from '../../../components/Loader';
-import { FontAwesome } from '@expo/vector-icons';
-
 import { useNavigation } from '@react-navigation/native';
 import { setCurrentProduct } from '../../../redux/business/productsSlice';
-import { AnimatePresence, MotiView } from 'moti';
-import Row from '../../../components/Row';
 import { SIZES } from '../../../constants';
+import BusinessHeader from '../../../components/BusinessHeader';
+import MostPopularProducts from '../../../components/MostPopularProducts';
+import { MotiView } from 'moti';
 
 const BusinessPage = () => {
     const {
@@ -25,124 +21,60 @@ const BusinessPage = () => {
 
     const theme = useAppSelector((state) => state.theme);
     const { loading, business } = useAppSelector((state) => state.business);
-    const { quantity } = useAppSelector((state) => state.cart);
+
     const dispatch = useAppDispatch();
     const navigation = useNavigation();
 
-    if (loading || loadingCP) return <Loader />;
+    if (loading || loadingCP || !business) return <Loader />;
 
     return (
-        <Screen>
-            <Row
-                containerStyle={{ marginHorizontal: SIZES.padding }}
-                horizontalAlign="space-between"
+        <View style={{ flex: 1, backgroundColor: theme.BACKGROUND_COLOR }}>
+            <BusinessHeader business={business} />
+            <MotiView
+                from={{ opacity: 0, translateY: -40 }}
+                animate={{ opacity: 1, translateY: 0 }}
+                transition={{ type: 'timing', duration: 800 }}
+                style={{ height: SIZES.height * 0.12, width: '100%' }}
             >
-                <TouchableOpacity
-                    style={{ padding: SIZES.base }}
-                    onPress={() => navigation.goBack()}
-                >
-                    <FontAwesome
-                        name="chevron-left"
-                        size={24}
-                        color={theme.TEXT_COLOR}
-                    />
-                </TouchableOpacity>
-                <Text
-                    medium={SIZES.isSmallDevice}
-                    large={!SIZES.isSmallDevice}
-                    lobster
-                >
-                    {business?.name}
+                <Text animation={'fadeInLeft'} delay={800} px_4 lobster large>
+                    Most Popular
                 </Text>
-                <AnimatePresence>
-                    {quantity > 0 && (
-                        <MotiView
-                            from={{ opacity: 0, scale: 0 }}
-                            animate={{ opacity: 1, scale: [1, 1.1, 1] }}
-                            exit={{ opacity: 0, scale: 0 }}
-                            transition={{ type: 'timing' }}
-                        >
-                            <TouchableOpacity
-                                style={[
-                                    styles.rightIcon,
-                                    {
-                                        backgroundColor: theme.BACKGROUND_COLOR,
-                                        shadowColor: theme.SHADOW_COLOR
-                                    }
-                                ]}
-                                onPress={() => {
-                                    navigation.navigate('ConsumerCart', {
-                                        screen: 'Cart',
-                                        params: { screen: 'Cart' }
-                                    });
-                                }}
-                            >
-                                <FontAwesome
-                                    name="shopping-cart"
-                                    size={24}
-                                    color={theme.TEXT_COLOR}
-                                />
-                                <MotiView
-                                    transition={{
-                                        type: 'timing',
-                                        duration: 800,
-                                        delay: 1000
-                                    }}
-                                    animate={{
-                                        scale: quantity > 0 ? [1, 1.1, 1] : 1
-                                    }}
-                                    style={[
-                                        styles.qty,
-                                        { backgroundColor: theme.ASCENT }
-                                    ]}
-                                >
-                                    <Text lightText bold>
-                                        {quantity}
-                                    </Text>
-                                </MotiView>
-                            </TouchableOpacity>
-                        </MotiView>
-                    )}
-                </AnimatePresence>
-                {quantity === 0 && <View />}
-            </Row>
-            <ProductsList
-                categories={categories}
-                products={products}
-                onPressProduct={(product) => {
-                    dispatch(setCurrentProduct(product));
-                    navigation.navigate('ConsumerHome', {
-                        screen: 'ProductDetails',
-                        params: { product: product }
-                    });
-                }}
-            />
-        </Screen>
+                <MostPopularProducts
+                    products={products
+                        .filter((p) => p.unitSold > 0)
+                        .sort((a, b) => (a.unitSold < b.unitSold ? 1 : -1))
+                        .slice(0, 10)}
+                    onPress={(product) => {
+                        dispatch(setCurrentProduct(product));
+                        navigation.navigate('ConsumerHome', {
+                            screen: 'ProductDetails',
+                            params: { product: product }
+                        });
+                    }}
+                />
+            </MotiView>
+            <Text animation={'fadeInLeft'} delay={800} px_4 lobster large>
+                Menu
+            </Text>
+            <MotiView
+                from={{ opacity: 0, translateY: 100 }}
+                animate={{ opacity: 1, translateY: 0 }}
+                transition={{ type: 'timing', duration: 800 }}
+            >
+                <ProductsList
+                    categories={categories}
+                    products={products}
+                    onPressProduct={(product) => {
+                        dispatch(setCurrentProduct(product));
+                        navigation.navigate('ConsumerHome', {
+                            screen: 'ProductDetails',
+                            params: { product: product }
+                        });
+                    }}
+                />
+            </MotiView>
+        </View>
     );
 };
 
 export default BusinessPage;
-const styles = StyleSheet.create({
-    rightIcon: {
-        height: 50,
-        width: 50,
-        borderRadius: 25,
-        justifyContent: 'center',
-        alignItems: 'center',
-        shadowOffset: { width: 3, height: 3 },
-        elevation: 4,
-        shadowOpacity: 0.3,
-        shadowRadius: 4
-    },
-    qty: {
-        width: 20,
-        height: 20,
-        borderRadius: 10,
-        justifyContent: 'center',
-        alignItems: 'center',
-        position: 'absolute',
-        top: -2,
-        right: -2,
-        zIndex: 10
-    }
-});

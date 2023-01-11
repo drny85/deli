@@ -16,7 +16,7 @@ import Header from '../../../components/Header';
 import { resetCart } from '../../../utils/saveCart';
 import Button from '../../../components/Button';
 import { FontAwesome } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
+import { CommonActions, useNavigation } from '@react-navigation/native';
 import { setPreviosRoute } from '../../../redux/consumer/settingSlide';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { PREVIOUS_ROUTE } from '../../../constants';
@@ -92,6 +92,16 @@ const Cart = ({}: Props) => {
     const handleDeleteCart = () => {
         dispatch(setCart({ quantity: 0, items: [], total: 0 }));
         resetCart();
+        naviagation.dispatch((state) => {
+            const routes = state.routes.filter(
+                (r) => r.name === ('Cart' as string)
+            );
+            return CommonActions.reset({
+                ...state,
+                routes,
+                index: 0
+            });
+        });
     };
     return (
         <Screen>

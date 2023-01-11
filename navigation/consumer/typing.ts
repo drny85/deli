@@ -13,20 +13,20 @@ export type ConsumerHomeStackScreens = {
     Businesses: undefined;
     BusinessPage: undefined;
     ProductDetails: { product: Product };
+    DeliveryAddressSelection: undefined;
 };
 export type ConsumerOrdersStackScreens = {
     Orders: undefined;
     OrderDetails: { orderId: string };
 };
 
-
 export type ConsumerCartStackScreens = {
     Cart: undefined;
     OrderReview: undefined;
     Checkout: undefined;
-    OrderSuccess: {orderId: string};
-    Auth:NavigatorScreenParams<AuthScreens>
-    OrdersScreen:NavigatorScreenParams<ConsumerOrdersStackScreens>
+    OrderSuccess: { orderId: string };
+    Auth: NavigatorScreenParams<AuthScreens>;
+    OrdersScreen: NavigatorScreenParams<ConsumerOrdersStackScreens>;
 };
 export type ConsumerProfileStackScreens = {
     Profile: undefined;

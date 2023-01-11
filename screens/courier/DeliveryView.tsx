@@ -34,13 +34,13 @@ import AnimatedLottieView from 'lottie-react-native';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { CourierStackScreens } from '../../navigation/courier/typing';
+import { useReadyForDeliveryOrders } from '../../hooks/useReadyForDeliveryOrders';
 
 let b: NodeJS.Timeout;
 let a: NodeJS.Timeout;
 let c: NodeJS.Timeout;
 const ACCEPTED_TIME = 'ACCEPTED_TIME';
 
-const EGDE = 10;
 type Props = NativeStackScreenProps<CourierStackScreens, 'DeliveryView'>;
 
 const DeliveryView = ({
@@ -55,6 +55,7 @@ const DeliveryView = ({
     const [accepted, setAccepted] = useState(false);
     const theme = useAppSelector((state) => state.theme);
     const [order, setOrder] = useState<Order>();
+    const { orders, loading } = useReadyForDeliveryOrders();
     const [origin, setOrigin] = useState<Coors>();
     const [distance, setDistance] = useState<number>(0);
     const [duration, setDuration] = useState<number>(0);
@@ -109,9 +110,9 @@ const DeliveryView = ({
     };
 
     const checkIfCourierCanAceeptAnotherDelivery = (): boolean => {
-        if (order?.courier && order.courier.id !== user?.id) {
-            return true;
-        }
+        console.log(orders.length);
+        if (orders.length > 0) return true;
+
         return false;
     };
 
@@ -120,7 +121,17 @@ const DeliveryView = ({
             if (order?.status === ORDER_STATUS.marked_ready_for_delivery) {
                 if (!user) return;
                 //TO DO: CHECK IF COURIER HAS PENDING ORDER BEFORE TAKIONG A NEW ONE
-
+                const canNotTakeMoreOrder =
+                    checkIfCourierCanAceeptAnotherDelivery();
+                if (canNotTakeMoreOrder) {
+                    Alert.alert(
+                        'Pending Order',
+                        'Please complete your pending order first'
+                    );
+                    sheetRef.current?.close();
+                    navigation.navigate('CourierDeliveries');
+                    return;
+                }
                 await performeBath(order);
 
                 sheetRef.current?.snapToIndex(0);
@@ -197,6 +208,9 @@ const DeliveryView = ({
             console.log(error);
         }
     };
+    useEffect(() => {
+        sheetRef.current?.snapToIndex(0);
+    }, []);
 
     useEffect(() => {
         if (!order || !location) return;
@@ -453,7 +467,7 @@ const DeliveryView = ({
         );
     }
 
-    if (!origin || !destination) return <Loader />;
+    if (!origin || !destination || loading) return <Loader />;
     return (
         <View style={{ flex: 1, backgroundColor: theme.BACKGROUND_COLOR }}>
             <StatusBar barStyle={'dark-content'} />
@@ -536,7 +550,11 @@ const DeliveryView = ({
                         longitude: order?.address?.coors?.lng!
                     }}
                 >
-                    <FontAwesome name="user" color={'#212121'} size={26} />
+                    <FontAwesome
+                        name="user"
+                        color={theme.TEXT_COLOR}
+                        size={26}
+                    />
                 </Marker>
 
                 <MapViewDirections
@@ -574,7 +592,15 @@ const DeliveryView = ({
                     }}
                 />
             </MapView>
-            <BottomSheet index={0} ref={sheetRef} snapPoints={snapPoints}>
+            <BottomSheet
+                index={0}
+                ref={sheetRef}
+                handleIndicatorStyle={{ backgroundColor: theme.TEXT_COLOR }}
+                backgroundStyle={{
+                    backgroundColor: theme.SECONDARY_BUTTON_COLOR
+                }}
+                snapPoints={snapPoints}
+            >
                 <BottomSheetScrollView>
                     <Row
                         containerStyle={{
@@ -584,9 +610,7 @@ const DeliveryView = ({
                         }}
                         horizontalAlign="space-around"
                     >
-                        <Text darkText bold>
-                            {duration.toFixed(0)} mins
-                        </Text>
+                        <Text bold>{duration.toFixed(0)} mins</Text>
                         <FontAwesome
                             name={
                                 user?.transportation === 'BICYCLING'
@@ -594,30 +618,26 @@ const DeliveryView = ({
                                     : 'car'
                             }
                             size={26}
-                            color={'#212121'}
+                            color={theme.TEXT_COLOR}
                         />
-                        <Text bold darkText>
+                        <Text bold>
                             {(distance * 0.621371).toFixed(1)} miles
                         </Text>
                     </Row>
 
                     <View style={{ marginTop: 30 }}>
                         <Stack>
-                            <Text darkText bold py_4>
+                            <Text bold py_4>
                                 Delivery Contact
                             </Text>
                             <Row>
-                                <Text darkText>
-                                    {order?.contactPerson.name}
-                                </Text>
-                                <Text px_4 darkText>
+                                <Text>{order?.contactPerson.name}</Text>
+                                <Text px_4>
                                     {order?.contactPerson.lastName}
                                 </Text>
                             </Row>
                             <Row>
-                                <Text darkText bold>
-                                    {order?.contactPerson.phone}
-                                </Text>
+                                <Text bold>{order?.contactPerson.phone}</Text>
                                 <TouchableOpacity
                                     onPress={() =>
                                         makeCall(order?.contactPerson.phone!)
@@ -627,32 +647,36 @@ const DeliveryView = ({
                                         flexDirection: 'row',
                                         justifyContent: 'center',
                                         alignItems: 'center',
-                                        borderColor: theme.ASCENT,
+                                        borderColor: theme.TEXT_COLOR,
                                         borderWidth: 0.5,
                                         padding: 6,
                                         borderRadius: 10
                                     }}
                                 >
-                                    <FontAwesome name="phone" size={24} />
-                                    <Text bold darkText px_4>
+                                    <FontAwesome
+                                        name="phone"
+                                        size={24}
+                                        color={theme.TEXT_COLOR}
+                                    />
+                                    <Text bold px_4>
                                         Call
                                     </Text>
                                 </TouchableOpacity>
                             </Row>
                         </Stack>
                         <Stack>
-                            <Text bold py_4 darkText>
+                            <Text bold py_4>
                                 Pick Up At
                             </Text>
                             <Text bold>{business?.name}</Text>
-                            <Text darkText>{business?.address}</Text>
-                            <Text darkText bold py_4>
+                            <Text>{business?.address}</Text>
+                            <Text bold py_4>
                                 Drof Off At
                             </Text>
 
-                            <Text darkText>{order?.address?.street}</Text>
+                            <Text>{order?.address?.street}</Text>
                             {order?.address?.apt && (
-                                <Text py_4 darkText bold>
+                                <Text py_4 bold>
                                     APT: {order.address.apt}
                                 </Text>
                             )}
@@ -660,12 +684,8 @@ const DeliveryView = ({
                         <Stack>
                             {order?.deliveryInstructions && (
                                 <>
-                                    <Text bold darkText>
-                                        Delivery Instructions
-                                    </Text>
-                                    <Text darkText>
-                                        {order.deliveryInstructions}
-                                    </Text>
+                                    <Text bold>Delivery Instructions</Text>
+                                    <Text>{order.deliveryInstructions}</Text>
                                 </>
                             )}
                         </Stack>

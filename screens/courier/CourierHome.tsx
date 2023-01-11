@@ -79,13 +79,14 @@ const CourierHome = ({ navigation }: Props) => {
         }
     };
 
-    useFocusEffect(() => {
-        if (bottomSheetRef.current) {
-            if (!isOpen) {
-                bottomSheetRef.current.close();
-            }
-        }
-    });
+    useEffect(() => {
+        const sub = navigation.addListener('focus', () => {
+            console.log('FFF');
+            bottomSheetRef.current?.close();
+        });
+
+        return sub;
+    }, []);
 
     useEffect(() => {
         setLoading(true);
@@ -151,17 +152,20 @@ const CourierHome = ({ navigation }: Props) => {
                 ref={bottomSheetRef}
                 snapPoints={snapPoints}
                 onChange={handleSheetChange}
+                backgroundStyle={{
+                    backgroundColor: theme.SECONDARY_BUTTON_COLOR
+                }}
                 index={0}
             >
                 <BottomSheetScrollView
-                    style={{
-                        flex: 1,
-                        backgroundColor:
-                            theme.mode === 'light'
-                                ? '#edede9'
-                                : theme.BACKGROUND_COLOR,
-                        borderRadius: SIZES.radius * 2
-                    }}
+                // style={{
+                //     flex: 1,
+                //     backgroundColor:
+                //         theme.mode === 'light'
+                //             ? '#edede9'
+                //             : theme.BACKGROUND_COLOR,
+                //     borderRadius: SIZES.radius * 2
+                // }}
                 >
                     <View style={{ flex: 1, justifyContent: 'space-between' }}>
                         <View style={{ flexGrow: 1 }}>
@@ -180,11 +184,13 @@ const CourierHome = ({ navigation }: Props) => {
                                         }}
                                     />
                                     <Button
-                                        title="My Deliveries"
+                                        title="Pending"
                                         notRounded
                                         outlined
                                         onPress={() =>
-                                            navigation.navigate('MyDeliveries')
+                                            navigation.navigate(
+                                                'CourierDeliveries'
+                                            )
                                         }
                                     />
                                 </Row>

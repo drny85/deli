@@ -64,27 +64,28 @@ const ConsumerBottomTabs = () => {
             <Screen
                 name="ConsumerOrders"
                 component={ConsumerOrdersStackNavigation}
-                options={({ route }) => ({
-                    tabBarStyle: {
-                        display: tabBarVisibility(route),
-                        backgroundColor: theme.BACKGROUND_COLOR,
-                        borderTopWidth: 0,
-                        elevation: 0,
-                        height: tabBarVisibility(route) === 'flex' ? 80 : 0
-                    },
+                options={({ route }) => {
+                    return {
+                        tabBarStyle: {
+                            display: tabBarVisibility(route),
+                            backgroundColor: theme.BACKGROUND_COLOR,
+                            borderTopWidth: 0,
+                            elevation: 0
+                        },
 
-                    tabBarIcon: ({ size, color }) => (
-                        <Image
-                            style={{
-                                height: 28,
-                                width: 28,
-                                tintColor: theme.TEXT_COLOR
-                            }}
-                            resizeMode="contain"
-                            source={require('../../order.png')}
-                        />
-                    )
-                })}
+                        tabBarIcon: ({ size, color }) => (
+                            <Image
+                                style={{
+                                    height: 28,
+                                    width: 28,
+                                    tintColor: theme.TEXT_COLOR
+                                }}
+                                resizeMode="contain"
+                                source={require('../../order.png')}
+                            />
+                        )
+                    };
+                }}
             />
             <Screen
                 name="ConsumerCart"
@@ -147,7 +148,7 @@ function TabBarIcon(props: {
 const tabBarVisibility = (route: any) => {
     const routeName = getFocusedRouteNameFromRoute(route);
 
-    const routes = ['BusinessPage', 'OrderDetails'];
+    const routes = ['BusinessPage'];
 
     if (routes.findIndex((r) => r === routeName) !== -1) {
         console.log('none', routeName);

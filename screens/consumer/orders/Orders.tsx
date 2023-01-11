@@ -1,10 +1,10 @@
-import { FlatList, ListRenderItem, View } from 'react-native';
+import { FlatList, ListRenderItem } from 'react-native';
 import React, { useEffect } from 'react';
 import Screen from '../../../components/Screen';
 import Text from '../../../components/Text';
 
-import { PREVIOUS_ROUTE, SIZES } from '../../../constants';
-import { useAppDispatch, useAppSelector } from '../../../redux/store';
+import { PREVIOUS_ROUTE } from '../../../constants';
+import { useAppSelector } from '../../../redux/store';
 import { useOrders } from '../../../hooks/useOrders';
 import Loader from '../../../components/Loader';
 import { Order } from '../../../redux/consumer/ordersSlide';
@@ -12,8 +12,6 @@ import OrderListItem from '../../../components/OrderListItem';
 import { useNavigation } from '@react-navigation/native';
 import Button from '../../../components/Button';
 
-import { getCurrentBusiness } from '../../../redux/business/businessActions';
-import { setPreviosRoute } from '../../../redux/consumer/settingSlide';
 import moment from 'moment';
 import { isTherePreviousRoute } from '../../../utils/checkForPreviousRoute';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -21,9 +19,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 type Props = {};
 
 const Orders = ({}: Props) => {
-    const dispatch = useAppDispatch();
-    const { business } = useAppSelector((state) => state.business);
-    const { previousRoute } = useAppSelector((state) => state.settings);
     const { orders, loading } = useOrders();
     const { user } = useAppSelector((state) => state.auth);
     const navigation = useNavigation();
@@ -42,12 +37,6 @@ const Orders = ({}: Props) => {
         );
     };
 
-    useEffect(() => {
-        if (orders.length > 0) {
-            dispatch(getCurrentBusiness(orders[0].businessId));
-        }
-    }, [orders.length]);
-
     const isPrevious = async () => {
         try {
             const { success } = await isTherePreviousRoute();
@@ -62,7 +51,6 @@ const Orders = ({}: Props) => {
         isPrevious();
     }, []);
 
-    if (loading) return <Loader />;
     if (!user)
         return (
             <Screen center>
@@ -81,7 +69,7 @@ const Orders = ({}: Props) => {
                 />
             </Screen>
         );
-    if (!orders.length)
+    if (orders.length === 0 && !loading)
         return (
             <Screen center>
                 <Text py_8 animation={'fadeInDown'} lobster medium>
@@ -97,6 +85,9 @@ const Orders = ({}: Props) => {
                 />
             </Screen>
         );
+
+    if (loading) return <Loader />;
+
     return (
         <Screen>
             <Text center lobster capitalize large py_4>

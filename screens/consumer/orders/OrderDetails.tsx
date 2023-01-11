@@ -1,4 +1,4 @@
-import { TouchableOpacity, View } from 'react-native';
+import { Alert, TouchableOpacity, View } from 'react-native';
 import React, {
     useCallback,
     useEffect,
@@ -34,6 +34,8 @@ import Row from '../../../components/Row';
 import { stripeFee } from '../../../utils/stripeFee';
 import Button from '../../../components/Button';
 import Header from '../../../components/Header';
+import { resetCart } from '../../../utils/saveCart';
+import { setCart } from '../../../redux/consumer/cartSlide';
 
 type Props = NativeStackScreenProps<ConsumerOrdersStackScreens, 'OrderDetails'>;
 
@@ -62,10 +64,6 @@ const OrderDetails = ({
     };
 
     const mapRef = useRef<MapView>(null);
-
-    const handleSheetChanges = useCallback((index: number) => {
-        console.log('handleSheetChanges', index);
-    }, []);
 
     useEffect(() => {
         if (!order?.courier?.coors) return;
@@ -289,7 +287,12 @@ const OrderDetails = ({
                             paddingVertical: SIZES.padding * 3
                         }}
                     >
-                        <View style={{ paddingVertical: SIZES.padding }}>
+                        <View
+                            style={{
+                                paddingVertical: SIZES.padding,
+                                paddingHorizontal: 6
+                            }}
+                        >
                             <Text
                                 large
                                 lobster
@@ -297,7 +300,7 @@ const OrderDetails = ({
                                 center
                                 animation={'fadeInDown'}
                             >
-                                We are looking for the best driver to diliver
+                                We are looking for the best driver to deliver
                                 your order.
                             </Text>
                         </View>
@@ -382,8 +385,7 @@ const OrderDetails = ({
         <View
             style={{
                 flex: 1,
-                backgroundColor:
-                    theme.mode === 'light' ? '#f5ebe0' : theme.BACKGROUND_COLOR
+                backgroundColor: theme.BACKGROUND_COLOR
             }}
         >
             <View
@@ -414,7 +416,10 @@ const OrderDetails = ({
                 ref={bottomSheetRef}
                 index={0}
                 snapPoints={snapPoints}
-                onChange={handleSheetChanges}
+                handleIndicatorStyle={{ backgroundColor: theme.TEXT_COLOR }}
+                backgroundStyle={{
+                    backgroundColor: theme.SECONDARY_BUTTON_COLOR
+                }}
             >
                 <BottomSheetScrollView
                     contentContainerStyle={{
@@ -423,10 +428,15 @@ const OrderDetails = ({
                 >
                     {order.status === ORDER_STATUS.delivered && (
                         <Stack center py={2}>
-                            <Button title="Re-Order" onPress={() => {}} />
+                            <Button
+                                title="Delivered"
+                                onPress={() => {
+                                    navigation.goBack();
+                                }}
+                            />
                         </Stack>
                     )}
-                    <Text darkText center lobster medium py_4>
+                    <Text center lobster medium py_4>
                         {order.status === ORDER_STATUS.new &&
                             `${business.name} just got your order`}
 
@@ -452,55 +462,49 @@ const OrderDetails = ({
                                 }}
                                 horizontalAlign="space-around"
                             >
-                                <Text darkText bold>
-                                    {duration.toFixed(0)} mins
-                                </Text>
+                                <Text bold>{duration.toFixed(0)} mins</Text>
                                 <FontAwesome
-                                    name="bicycle"
+                                    name={
+                                        order.courier &&
+                                        order.courier.transportation ===
+                                            'BICYCLING'
+                                            ? 'bicycle'
+                                            : 'car'
+                                    }
                                     size={26}
                                     color={'#212121'}
                                 />
-                                <Text bold darkText>
+                                <Text bold>
                                     {(distance * 0.621371).toFixed(1)} miles
                                 </Text>
                             </Row>
-                            <Text
-                                py_4
-                                capitalize
-                                lobster
-                                medium
-                                center
-                                darkText
-                            >
+                            <Text py_4 capitalize lobster medium center>
                                 {order.courier?.name} just picked up your order
                             </Text>
                         </>
                     )}
 
                     <Stack containerStyle={{ marginTop: 30 }}>
-                        <Text darkText bold>
-                            From
-                        </Text>
-                        <Text darkText>{business.address?.split(', ')[0]}</Text>
+                        <Text bold>From</Text>
+                        <Text>{business.address?.split(', ')[0]}</Text>
                         <View style={{ height: 10 }} />
-                        <Text darkText bold>
-                            To
-                        </Text>
-                        <Text darkText>
-                            {order.address?.street?.split(', ')[0]}
-                        </Text>
-                        <Text darkText py_4>
+                        <Text bold>To</Text>
+                        <Text>{order.address?.street?.split(', ')[0]}</Text>
+                        <Text py_4>
                             Order Date: {moment(order.orderDate).format('lll')}
                         </Text>
                     </Stack>
-                    <Divider small />
+                    <Divider
+                        thickness="medium"
+                        bgColor={theme.TEXT_COLOR}
+                        small
+                    />
                     <View style={{ padding: SIZES.padding }}>
-                        <Text darkText center bold>
+                        <Text center bold>
                             Items
                         </Text>
                         {order.items.map((item, index) => (
                             <ProductListItem
-                                themeTextColor
                                 key={index.toString()}
                                 item={item}
                                 index={index}
@@ -511,10 +515,8 @@ const OrderDetails = ({
                                 containerStyle={{ width: '100%' }}
                                 horizontalAlign="space-between"
                             >
-                                <Text darkText capitalize>
-                                    Sub Total
-                                </Text>
-                                <Text darkText capitalize>
+                                <Text capitalize>Sub Total</Text>
+                                <Text capitalize>
                                     ${order.total.toFixed(2)}
                                 </Text>
                             </Row>
@@ -522,10 +524,10 @@ const OrderDetails = ({
                                 containerStyle={{ width: '100%' }}
                                 horizontalAlign="space-between"
                             >
-                                <Text py_4 darkText capitalize>
+                                <Text py_4 capitalize>
                                     Service Fee
                                 </Text>
-                                <Text darkText capitalize>
+                                <Text capitalize>
                                     ${stripeFee(order.total).toFixed(2)}
                                 </Text>
                             </Row>
@@ -534,10 +536,10 @@ const OrderDetails = ({
                                 containerStyle={{ width: '100%' }}
                                 horizontalAlign="space-between"
                             >
-                                <Text py_4 darkText bold large capitalize>
+                                <Text py_4 bold large capitalize>
                                     Total
                                 </Text>
-                                <Text darkText bold large capitalize>
+                                <Text bold large capitalize>
                                     $
                                     {(
                                         order.total + stripeFee(order.total)
