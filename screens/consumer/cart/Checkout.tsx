@@ -24,15 +24,19 @@ import Button from '../../../components/Button';
 import PaymentLoading from '../../../components/PaymentLoading';
 
 import { usePayment } from '../../../hooks/usePayment';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { ConsumerCartStackScreens } from '../../../navigation/consumer/typing';
 
-type Props = {};
-
-const Checkout = ({}: Props) => {
+export type CheckOutProps = NativeStackScreenProps<
+    ConsumerCartStackScreens,
+    'Checkout'
+>;
+const Checkout = ({ navigation }: CheckOutProps) => {
     const theme = useAppSelector((state) => state.theme);
-    const navigation = useNavigation();
+    //const navigation = useNavigation();
     const { order } = useAppSelector((state) => state.orders);
     const { total, items, quantity } = useAppSelector((state) => state.cart);
-    const { loading, startPayment } = usePayment();
+    const { loading, startPayment } = usePayment({ nav: navigation });
 
     if (loading) return <PaymentLoading />;
     return (

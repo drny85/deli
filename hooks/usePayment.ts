@@ -6,8 +6,14 @@ import { fetchPaymentParams } from '../firebase';
 import { placeOrder } from '../redux/consumer/ordersActions';
 import { saveDeliveryAddress } from '../redux/consumer/ordersSlide';
 import { useAppDispatch, useAppSelector } from '../redux/store';
+import {CheckOutProps} from '../screens/consumer/cart/Checkout'
 
-export const usePayment = () => {
+type Props = {
+    
+    nav: CheckOutProps['navigation']
+    
+}
+export const usePayment = ({ nav}:Props) => {
     const { total } = useAppSelector((state) => state.cart);
     const { order } = useAppSelector((state) => state.orders);
     const { business } = useAppSelector((state) => state.business);
@@ -75,23 +81,25 @@ export const usePayment = () => {
 
                 console.log('Order Placed Result', payload);
                 if (!success || !orderId) return;
-                navigation.dispatch((state) => {
-                    const routes = state.routes.filter(
-                        (r) => r.name === ('Cart' as any)
-                    );
-                    //RESET ALL NAVIGATION BUT CART SCREEN
-                    return CommonActions.reset({
-                        ...state,
-                        routes: [...routes],
-                        index: 0
-                    });
-                });
+                // navigation.dispatch((state) => {
+                //     const routes = state.routes.filter(
+                //         (r) => r.name === ('Orders' as any)
+                //     );
+                //     //RESET ALL NAVIGATION BUT CART SCREEN
+                //     return CommonActions.reset({
+                //        ...state,
+                //         routes: [...routes,{name:'OrderSuccess'}],
+                //         index: 0
+                //     });
+                // });
                 dispatch(saveDeliveryAddress(null));
 
-                navigation.navigate('ConsumerOrders', {
-                    screen: 'OrderDetails',
-                    params: { orderId: orderId }
-                });
+                // navigation.navigate('ConsumerOrders', {
+                //     screen: 'OrderDetails',
+                //     params: { orderId: orderId }
+                // });
+                
+                nav.replace('OrderSuccess',{orderId:orderId})
             }
         } catch (error) {
             console.log('error C', error);

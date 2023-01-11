@@ -147,7 +147,7 @@ function TabBarIcon(props: {
 const tabBarVisibility = (route: any) => {
     const routeName = getFocusedRouteNameFromRoute(route);
 
-    const routes = ['BusinessPage', 'Checkout', 'OrderReview', 'OrderDetails'];
+    const routes = ['BusinessPage', 'OrderDetails'];
 
     if (routes.findIndex((r) => r === routeName) !== -1) {
         console.log('none', routeName);

@@ -323,14 +323,14 @@ const OrderDetails = ({
                     >
                         Have a wonderful day {user?.name}
                     </Text>
-                    <Text py_8 raleway animation={'fadeInLeft'} delay={800}>
+                    <Text py_8 medium animation={'fadeInLeft'} delay={800}>
                         Your order was delivery on{' '}
                         {moment(order.deliveredOn).format('lll')}
                     </Text>
                 </Stack>
                 <Stack center>
                     <Text bold> It was delivered by</Text>
-                    <Text py_6 lobster medium>
+                    <Text capitalize py_6 lobster medium>
                         {order.deliveredBy?.name}
                     </Text>
                 </Stack>
