@@ -1,6 +1,6 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { signOut } from 'firebase/auth';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import { auth, usersCollection } from '../../firebase';
 import { Courier } from '../../types';
 import { AppUser, setUserData } from './authSlide';
@@ -32,6 +32,20 @@ export const autoLogin = createAsyncThunk(
             const err = error as any;
             console.log(err.message);
             return null;
+        }
+    }
+);
+
+export const updateUser = createAsyncThunk(
+    'auth/update',
+    async (userData: AppUser, { dispatch }) => {
+        try {
+            if (!userData) return;
+            const docRef = doc(usersCollection, userData.id);
+            await setDoc(docRef, { ...userData }, { merge: true });
+        } catch (error) {
+            const err = error as any;
+            console.log(err.message);
         }
     }
 );

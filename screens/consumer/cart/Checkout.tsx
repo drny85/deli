@@ -34,7 +34,7 @@ export type CheckOutProps = NativeStackScreenProps<
 const Checkout = ({ navigation }: CheckOutProps) => {
     const theme = useAppSelector((state) => state.theme);
     //const navigation = useNavigation();
-    const { order } = useAppSelector((state) => state.orders);
+    const { order, deliveryAdd } = useAppSelector((state) => state.orders);
     const { total, items, quantity } = useAppSelector((state) => state.cart);
     const { loading, startPayment } = usePayment({ nav: navigation });
 
@@ -80,7 +80,11 @@ const Checkout = ({ navigation }: CheckOutProps) => {
                                     />
                                 </Row>
                             </Section>
-                            <Section onPress={() => navigation.goBack()}>
+                            <Section
+                                onPress={() =>
+                                    navigation.navigate('AddressSelection')
+                                }
+                            >
                                 <Row
                                     containerStyle={{ width: '100%' }}
                                     horizontalAlign="space-between"
@@ -88,13 +92,13 @@ const Checkout = ({ navigation }: CheckOutProps) => {
                                     <Stack>
                                         <Text bold>Delivery To</Text>
                                         <Text>
-                                            {order?.address?.street.substring(
+                                            {deliveryAdd?.street?.substring(
                                                 0,
-                                                order.address.street.length - 5
+                                                deliveryAdd.street.length - 5
                                             )}
                                         </Text>
-                                        {order?.address?.apt && (
-                                            <Text>Apt {order.address.apt}</Text>
+                                        {deliveryAdd?.apt && (
+                                            <Text>Apt {deliveryAdd.apt}</Text>
                                         )}
                                     </Stack>
                                     <FontAwesome

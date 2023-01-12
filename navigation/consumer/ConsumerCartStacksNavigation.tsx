@@ -3,6 +3,7 @@ import Cart from '../../screens/consumer/cart/Cart';
 import Checkout from '../../screens/consumer/cart/Checkout';
 import OrderReview from '../../screens/consumer/cart/OrderReview';
 import OrderSuccess from '../../screens/consumer/cart/OrderSuccess';
+import DeliveryAddressSelection from '../../screens/consumer/home/DeliveryAddressSelection';
 import AuthNavigationStack from '../auth/AuthNavigationStack';
 import ConsumerOrdersStackNavigation from './ConsumerOrdersStacksScreens';
 
@@ -28,6 +29,11 @@ const ConsumerCartStackNavigation = () => {
                 name="Checkout"
                 component={Checkout}
                 options={{ presentation: 'fullScreenModal' }}
+            />
+            <Screen
+                name="AddressSelection"
+                component={DeliveryAddressSelection}
+                options={{ presentation: 'modal' }}
             />
             <Screen
                 name="OrderSuccess"

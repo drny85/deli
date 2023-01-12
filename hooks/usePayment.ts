@@ -6,16 +6,14 @@ import { fetchPaymentParams } from '../firebase';
 import { placeOrder } from '../redux/consumer/ordersActions';
 import { saveDeliveryAddress } from '../redux/consumer/ordersSlide';
 import { useAppDispatch, useAppSelector } from '../redux/store';
-import {CheckOutProps} from '../screens/consumer/cart/Checkout'
+import { CheckOutProps } from '../screens/consumer/cart/Checkout';
 
 type Props = {
-    
-    nav: CheckOutProps['navigation']
-    
-}
-export const usePayment = ({ nav}:Props) => {
+    nav: CheckOutProps['navigation'];
+};
+export const usePayment = ({ nav }: Props) => {
     const { total } = useAppSelector((state) => state.cart);
-    const { order } = useAppSelector((state) => state.orders);
+    const { order, deliveryAdd } = useAppSelector((state) => state.orders);
     const { business } = useAppSelector((state) => state.business);
     const { user } = useAppSelector((state) => state.auth);
     const theme = useAppSelector((state) => state.theme);
@@ -51,10 +49,8 @@ export const usePayment = ({ nav}:Props) => {
             };
         } catch (error) {
             console.log('error', error);
-            const err = error as any
+            const err = error as any;
             Alert.alert(`${err.code}`, err.message);
-           
-            
         } finally {
             setLoading(false);
         }
@@ -72,7 +68,11 @@ export const usePayment = ({ nav}:Props) => {
                 if (!order) return;
 
                 const { payload } = await dispatch(
-                    placeOrder({ ...order, paymentIntent: paymentId })
+                    placeOrder({
+                        ...order,
+                        paymentIntent: paymentId,
+                        address: deliveryAdd
+                    })
                 );
                 const { success, orderId } = payload as {
                     success: boolean;
@@ -98,8 +98,8 @@ export const usePayment = ({ nav}:Props) => {
                 //     screen: 'OrderDetails',
                 //     params: { orderId: orderId }
                 // });
-                
-                nav.replace('OrderSuccess',{orderId:orderId})
+
+                nav.replace('OrderSuccess', { orderId: orderId });
             }
         } catch (error) {
             console.log('error C', error);
@@ -118,7 +118,7 @@ export const usePayment = ({ nav}:Props) => {
             const { error } = await initPaymentSheet({
                 customerEphemeralKeySecret: ephemeralKey,
                 paymentIntentClientSecret: paymentIntent,
-                
+
                 customerId: customer,
                 appearance: {
                     primaryButton: {

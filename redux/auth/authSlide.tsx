@@ -2,9 +2,10 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { Coors } from '../business/businessSlide';
 import { logoutUser, autoLogin } from './authActions';
 import { MapViewDirectionsMode } from 'react-native-maps-directions';
+import { Order } from '../consumer/ordersSlide';
 
 export interface UserPreferences {
-    shippingAddress: string[];
+    deliveryAddresses: Order['address'][];
 }
 export interface AppUser {
     id?: string;

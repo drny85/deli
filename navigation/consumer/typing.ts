@@ -25,6 +25,7 @@ export type ConsumerCartStackScreens = {
     OrderReview: undefined;
     Checkout: undefined;
     OrderSuccess: { orderId: string };
+    AddressSelection: undefined;
     Auth: NavigatorScreenParams<AuthScreens>;
     OrdersScreen: NavigatorScreenParams<ConsumerOrdersStackScreens>;
 };
