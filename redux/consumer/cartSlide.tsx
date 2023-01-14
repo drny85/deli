@@ -48,7 +48,6 @@ const cartSlide = createSlice({
 
                 //handle product with size
             } else {
-                console.log('NOT FOUND EXISTING PRODUCT WITH SIZE');
                 //handle product with no size
                 const pIndex = state.items.findIndex(
                     (item) => payload.id === item.id

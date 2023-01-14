@@ -212,7 +212,3 @@ const Princing = styled.View`
     width: 100%;
     padding: ${SIZES.base * 2}px;
 `;
-
-const styles = StyleSheet.create({
-    section: {}
-});

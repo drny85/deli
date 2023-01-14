@@ -91,14 +91,15 @@ const OrderReview = ({}: Props) => {
     };
 
     useEffect(() => {
-        if (!address || !longitude || !latitude) return;
-        const { street, streetNumber, city, subregion, postalCode } = address;
         if (deliveryAdd) {
             if (!googleRef.current?.isFocused()) {
                 setDeliveryAddress(deliveryAdd);
                 googleRef.current?.setAddressText(deliveryAdd.street);
             }
         } else {
+            if (!address || !longitude || !latitude) return;
+            const { street, streetNumber, city, subregion, postalCode } =
+                address;
             if (!googleRef.current?.isFocused()) {
                 setDeliveryAddress({
                     ...deliveryAddress!,

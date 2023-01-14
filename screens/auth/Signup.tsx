@@ -78,7 +78,9 @@ const Signup = ({ navigation }: Props) => {
                 lastName,
                 phone,
                 name,
-                type: 'consumer'
+                type: 'consumer',
+                favoritesStores: [],
+                deliveryAddresses: []
             };
 
             await dispatch(createUser(data));

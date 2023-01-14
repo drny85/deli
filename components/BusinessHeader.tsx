@@ -15,6 +15,8 @@ import { useNavigation } from '@react-navigation/native';
 import { FontAwesome } from '@expo/vector-icons';
 import { Business } from '../redux/business/businessSlide';
 import { LinearGradient } from 'expo-linear-gradient';
+import { updateUser } from '../redux/auth/authActions';
+import { AppUser } from '../redux/auth/authSlide';
 
 type Props = {
     business: Business;
@@ -23,8 +25,16 @@ type Props = {
 const BusinessHeader = ({ business }: Props) => {
     const { quantity } = useAppSelector((state) => state.cart);
     const { user } = useAppSelector((state) => state.auth);
+    const dispatch = useAppDispatch();
     const navigation = useNavigation();
     const theme = useAppSelector((state) => state.theme);
+    const toggleFavorite = async () => {
+        try {
+            console.log(user?.favoritesStores);
+        } catch (error) {
+            console.log(error);
+        }
+    };
     return (
         <>
             <ImageBackground
@@ -62,7 +72,7 @@ const BusinessHeader = ({ business }: Props) => {
                         {quantity > 0 && (
                             <MotiView
                                 from={{ opacity: 0, scale: 0 }}
-                                animate={{ opacity: 1, scale: [1, 1.1, 1] }}
+                                animate={{ opacity: 1, scale: 1 }}
                                 exit={{ opacity: 0, scale: 0 }}
                                 transition={{ type: 'timing' }}
                             >
@@ -76,20 +86,16 @@ const BusinessHeader = ({ business }: Props) => {
                                                         theme.BACKGROUND_COLOR,
                                                     shadowColor:
                                                         theme.SHADOW_COLOR,
-                                                    marginHorizontal: 5
+                                                    marginHorizontal:
+                                                        SIZES.padding
                                                 }
                                             ]}
-                                            onPress={() => {
-                                                console.log(
-                                                    'ADD business to favorite'
-                                                );
-                                            }}
+                                            onPress={toggleFavorite}
                                         >
                                             <MotiView
                                                 transition={{
                                                     type: 'timing',
-                                                    duration: 800,
-                                                    delay: 1000
+                                                    duration: 300
                                                 }}
                                                 from={{ opacity: 0, scale: 1 }}
                                                 animate={{

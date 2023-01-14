@@ -57,7 +57,7 @@ const OrderDetails = ({
     const theme = useAppSelector((state) => state.theme);
     const { loading, order } = useOrder(orderId);
     const [minutes, setMinutes] = useState<number | null>(null);
-    const snapPoints = useMemo(() => ['12%', '50%', '90%'], []);
+    const snapPoints = useMemo(() => ['14%', '50%', '90%'], []);
     const bottomSheetRef = useRef<BottomSheet>(null);
     const goToOrder = () => {
         navigation.navigate('ConsumerOrders', { screen: 'Orders' });

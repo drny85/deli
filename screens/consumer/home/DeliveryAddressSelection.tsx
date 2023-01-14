@@ -33,12 +33,7 @@ const DeliveryAddressSelection = ({}: Props) => {
                 dispatch(
                     updateUser({
                         ...user,
-                        preferences: {
-                            deliveryAddresses: [
-                                ...user.preferences?.deliveryAddresses!,
-                                address
-                            ]
-                        }
+                        deliveryAddresses: [...user.deliveryAddresses!, address]
                     })
                 );
             }
@@ -109,8 +104,8 @@ const DeliveryAddressSelection = ({}: Props) => {
                 <Stack>
                     <ScrollView>
                         {user &&
-                            user.preferences?.deliveryAddresses &&
-                            user.preferences.deliveryAddresses.map((a) => (
+                            user.deliveryAddresses &&
+                            user.deliveryAddresses.map((a) => (
                                 <TouchableOpacity
                                     onPress={() => {
                                         dispatch(

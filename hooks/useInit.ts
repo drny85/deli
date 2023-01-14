@@ -1,7 +1,7 @@
 import 'expo-dev-client';
 import React, { useCallback, useEffect, useState } from 'react';
 import { darkTheme, lightTheme } from './../Theme';
-import { useAppDispatch, useAppSelector } from './../redux/store';
+import { useAppDispatch } from './../redux/store';
 
 import { useFonts } from 'expo-font';
 
@@ -13,10 +13,7 @@ import { LogBox } from 'react-native';
 import { auth, usersCollection } from '../firebase';
 import { switchTheme } from '../redux/themeSlide';
 import { autoLogin } from '../redux/auth/authActions';
-import {
-    getBusiness,
-    getCurrentBusiness
-} from '../redux/business/businessActions';
+import { getCurrentBusiness } from '../redux/business/businessActions';
 import { loadCart } from '../utils/saveCart';
 import { setCart } from '../redux/consumer/cartSlide';
 import { AppUser } from '../redux/auth/authSlide';

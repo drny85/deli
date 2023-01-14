@@ -2,6 +2,7 @@ import { CommonActions, useNavigation } from '@react-navigation/native';
 import { useStripe } from '@stripe/stripe-react-native';
 import { useCallback, useState } from 'react';
 import { Alert } from 'react-native';
+
 import { fetchPaymentParams } from '../firebase';
 import { placeOrder } from '../redux/consumer/ordersActions';
 import { saveDeliveryAddress } from '../redux/consumer/ordersSlide';
@@ -17,17 +18,16 @@ export const usePayment = ({ nav }: Props) => {
     const { business } = useAppSelector((state) => state.business);
     const { user } = useAppSelector((state) => state.auth);
     const theme = useAppSelector((state) => state.theme);
-    const navigation = useNavigation();
     const dispatch = useAppDispatch();
     const { initPaymentSheet, presentPaymentSheet } = useStripe();
     const [loading, setLoading] = useState(false);
+    const navigattion = useNavigation();
 
     const fetchParams = useCallback(async () => {
         try {
             setLoading(true);
 
             if (!business || !business.stripeAccount) return;
-            console.log(+total.toFixed(2));
 
             const func = fetchPaymentParams('createPaymentIntent');
             const {
@@ -79,27 +79,12 @@ export const usePayment = ({ nav }: Props) => {
                     orderId: string | null;
                 };
 
-                console.log('Order Placed Result', payload);
                 if (!success || !orderId) return;
-                // navigation.dispatch((state) => {
-                //     const routes = state.routes.filter(
-                //         (r) => r.name === ('Orders' as any)
-                //     );
-                //     //RESET ALL NAVIGATION BUT CART SCREEN
-                //     return CommonActions.reset({
-                //        ...state,
-                //         routes: [...routes,{name:'OrderSuccess'}],
-                //         index: 0
-                //     });
-                // });
+                console.log('Order Placed Result', payload);
+
                 dispatch(saveDeliveryAddress(null));
 
-                // navigation.navigate('ConsumerOrders', {
-                //     screen: 'OrderDetails',
-                //     params: { orderId: orderId }
-                // });
-
-                nav.replace('OrderSuccess', { orderId: orderId });
+                nav.replace('OrderSuccess', { orderId });
             }
         } catch (error) {
             console.log('error C', error);

@@ -5,7 +5,7 @@ import { MapViewDirectionsMode } from 'react-native-maps-directions';
 import { Order } from '../consumer/ordersSlide';
 
 export interface UserPreferences {
-    deliveryAddresses: Order['address'][];
+    favoritesBusiness: string[];
 }
 export interface AppUser {
     id?: string;
@@ -19,6 +19,8 @@ export interface AppUser {
     pushToken?: string;
     coors?: Coors;
     transportation?: MapViewDirectionsMode;
+    favoritesStores: string[];
+    deliveryAddresses: Order['address'][];
 }
 interface IState {
     user: AppUser | null;

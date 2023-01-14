@@ -20,7 +20,6 @@ const { Navigator, Screen } =
 
 const ConsumerBottomTabs = () => {
     const theme = useAppSelector((state) => state.theme);
-
     const { quantity } = useAppSelector((state) => state.cart);
 
     return (
@@ -151,7 +150,6 @@ const tabBarVisibility = (route: any) => {
     const routes = ['BusinessPage'];
 
     if (routes.findIndex((r) => r === routeName) !== -1) {
-        console.log('none', routeName);
         return 'none';
     }
     return 'flex';

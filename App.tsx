@@ -74,10 +74,8 @@ const App = () => {
     );
 };
 
-export default () => {
-    return (
-        <Provider store={store}>
-            <App />
-        </Provider>
-    );
-};
+export default () => (
+    <Provider store={store}>
+        <App />
+    </Provider>
+);

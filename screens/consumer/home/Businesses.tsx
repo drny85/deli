@@ -6,7 +6,7 @@ import {
     TouchableOpacity,
     View
 } from 'react-native';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Screen from '../../../components/Screen';
 import Text from '../../../components/Text';
 import { useBusinessAvailable } from '../../../hooks/useBusinessAvailable';
@@ -25,7 +25,8 @@ import { saveDeliveryAddress } from '../../../redux/consumer/ordersSlide';
 
 import InputField from '../../../components/InputField';
 import { SIZES } from '../../../constants';
-import { useProducts } from '../../../hooks/useProducts';
+import { useAllProducts } from '../../../hooks/useAllProducts';
+import { list } from 'firebase/storage';
 
 type Props = {};
 
@@ -33,40 +34,58 @@ const Businesses = ({}: Props) => {
     const dispatch = useAppDispatch();
     const { address, latitude, longitude } = useLocation();
     const navigation = useNavigation();
+    const [nothingFound, setNothingFound] = useState(false);
     const { deliveryAdd } = useAppSelector((state) => state.orders);
     const theme = useAppSelector((state) => state.theme);
-    const [scrollY, setScrollY] = useState(0);
+    const [show, setShow] = useState(true);
     const [searchValue, setSearchValue] = useState('');
     const [route, setRoute] = useState<string>();
-    const { businessAvailable, isLoading } = useBusinessAvailable();
+    const listRef = useRef<FlatList>(null);
+    const {
+        businessAvailable,
+        allProducts,
+        loading: isLoading
+    } = useAllProducts();
     const [businesses, setBusinesses] = useState<Business[]>([]);
-
-    const { user } = useAppSelector((state) => state.auth);
-
     const onScroll = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
-        setScrollY(e.nativeEvent.contentOffset.y);
+        setShow(e.nativeEvent.contentOffset.y < 100);
     };
+
+    const { user, loading } = useAppSelector((state) => state.auth);
 
     const handleSearch = (text: string) => {
         setSearchValue(text);
+        // console.log('Searching...');
         if (text.length > 0) {
-            const bus = businesses.filter((b) => {
-                const regex = new RegExp(`${text}`, 'gi');
-            });
+            const bus = businessAvailable.filter((b) =>
+                allProducts.some((p) => {
+                    const regex = new RegExp(`${text}`, 'gi');
+                    console.log(p.name.match(regex), p.businessId === b.id);
+                    return p.businessId === b.id && p.name.match(regex);
+                })
+            );
+
+            if (bus.length > 0) {
+                setBusinesses(bus);
+                setNothingFound(false);
+            } else {
+                //setBusinesses(businessAvailable);
+                setBusinesses([]);
+                setNothingFound(true);
+            }
         } else {
             setBusinesses(businessAvailable);
         }
     };
 
     useEffect(() => {
-        if (!businessAvailable.length) return;
+        //if (!businessAvailable.length) return;
         setBusinesses(businessAvailable);
     }, [businessAvailable.length]);
 
     useEffect(() => {
         if (deliveryAdd) return;
         if (!address || !latitude || !longitude) return;
-        console.log(address);
 
         const { streetNumber, street, city, subregion, postalCode } = address;
         dispatch(
@@ -113,12 +132,13 @@ const Businesses = ({}: Props) => {
         );
     };
 
-    if (isLoading) return <Loader />;
+    if (isLoading || !deliveryAdd || !businessAvailable.length || loading)
+        return <Loader />;
 
     return (
         <Screen>
             <AnimatePresence>
-                {scrollY < 100 && (
+                {show && (
                     <MotiView
                         from={{ height: 0, opacity: 1, translateY: -50 }}
                         animate={{
@@ -172,9 +192,12 @@ const Businesses = ({}: Props) => {
                                     rightIcon={
                                         searchValue.length > 1 && (
                                             <TouchableOpacity
-                                                onPress={() =>
-                                                    setSearchValue('')
-                                                }
+                                                onPress={() => {
+                                                    setSearchValue('');
+                                                    setBusinesses(
+                                                        businessAvailable
+                                                    );
+                                                }}
                                                 style={{ marginRight: 6 }}
                                             >
                                                 <FontAwesome
@@ -191,13 +214,78 @@ const Businesses = ({}: Props) => {
                     </MotiView>
                 )}
             </AnimatePresence>
-            <FlatList
-                onScroll={onScroll}
-                showsVerticalScrollIndicator={false}
-                data={businesses}
-                keyExtractor={(item) => item.id!}
-                renderItem={renderBusinesses}
-            />
+
+            <AnimatePresence>
+                {!show && (
+                    <MotiView
+                        style={{
+                            position: 'absolute',
+                            bottom: 30,
+                            right: 20,
+                            justifyContent: 'center',
+                            alignItems: 'center'
+                        }}
+                        from={{
+                            opacity: 0,
+                            height: 0,
+                            width: 0,
+                            borderRadius: 0
+                        }}
+                        animate={{
+                            opacity: 1,
+                            height: 50,
+                            width: 50,
+                            borderRadius: 25,
+                            backgroundColor: theme.ASCENT,
+                            zIndex: 300
+                        }}
+                        transition={{ type: 'timing' }}
+                        exit={{ opacity: 0, width: 0, height: 0 }}
+                    >
+                        <TouchableOpacity
+                            onPress={() =>
+                                listRef.current?.scrollToIndex({
+                                    index: 0,
+                                    animated: true
+                                })
+                            }
+                            style={{
+                                padding: 10,
+                                justifyContent: 'center',
+                                alignItems: 'center'
+                            }}
+                        >
+                            <FontAwesome
+                                name="arrow-up"
+                                size={22}
+                                color={theme.TEXT_COLOR}
+                            />
+                        </TouchableOpacity>
+                    </MotiView>
+                )}
+            </AnimatePresence>
+
+            {nothingFound && searchValue.length ? (
+                <View
+                    style={{
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        flex: 1
+                    }}
+                >
+                    <Text>No Businesses selling {searchValue}</Text>
+                </View>
+            ) : (
+                <FlatList
+                    ref={listRef}
+                    onScroll={onScroll}
+                    scrollEventThrottle={16}
+                    showsVerticalScrollIndicator={false}
+                    data={[...businesses]}
+                    keyExtractor={(item) => item.id!}
+                    renderItem={renderBusinesses}
+                />
+            )}
         </Screen>
     );
 };

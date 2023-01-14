@@ -15,10 +15,12 @@ import Button from '../../../components/Button';
 import moment from 'moment';
 import { isTherePreviousRoute } from '../../../utils/checkForPreviousRoute';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { ConsumerOrdersStackScreens } from '../../../navigation/consumer/typing';
 
-type Props = {};
+type Props = NativeStackScreenProps<ConsumerOrdersStackScreens, 'Orders'>;
 
-const Orders = ({}: Props) => {
+const Orders = ({ route: { params } }: Props) => {
     const { orders, loading } = useOrders();
     const { user } = useAppSelector((state) => state.auth);
     const navigation = useNavigation();
@@ -46,6 +48,16 @@ const Orders = ({}: Props) => {
             console.log(error);
         }
     };
+
+    useEffect(() => {
+        if (!params) return;
+        if (params.orderId) {
+            navigation.navigate('ConsumerOrders', {
+                screen: 'OrderDetails',
+                params: { orderId: params.orderId }
+            });
+        }
+    }, [params]);
 
     useEffect(() => {
         isPrevious();
