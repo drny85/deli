@@ -19,7 +19,6 @@ const OrderSuccess = ({
 }: Props) => {
     //const navigation = useNavigation();
     const state = nav.getState();
-    console.log(state);
 
     useEffect(() => {
         if (!orderId) return;
@@ -51,7 +50,7 @@ const OrderSuccess = ({
             style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
         >
             <Text py_8 lobster large>
-                Congratulations! --
+                Congratulations
             </Text>
         </View>
     );

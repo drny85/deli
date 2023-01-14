@@ -7,6 +7,11 @@ export interface Coors {
     lng: number;
 }
 
+export enum BUSINESS_ORDER_TYPE {
+    deliveryOnly = 'deliveryOnly',
+    both = 'both'
+}
+
 export interface Business {
     id?: string;
     name: string;
@@ -25,7 +30,9 @@ export interface Business {
     charges_enabled: boolean;
     milesRadius: number | null;
     minimumDelivery: number | null;
+    orderType?: BUSINESS_ORDER_TYPE;
     isOpen: boolean;
+    readyIn?: number;
     distance?: number | null;
 }
 interface IState {

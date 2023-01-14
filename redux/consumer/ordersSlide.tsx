@@ -51,11 +51,13 @@ interface OrdersState {
     orders: Order[];
     deliveryAdd: Order['address'] | null;
     order: Order | null;
+    orderType: ORDER_TYPE;
     loading: boolean;
 }
 const initialState: OrdersState = {
     orders: [],
     order: null,
+    orderType: ORDER_TYPE.delivery,
     deliveryAdd: null,
     loading: false
 };
@@ -72,10 +74,14 @@ const ordersSlice = createSlice({
             { payload }: PayloadAction<Order['address']>
         ) => {
             state.deliveryAdd = payload;
+        },
+        switchOrderType: (state, { payload }: PayloadAction<ORDER_TYPE>) => {
+            state.orderType = payload;
         }
     }
 });
 
-export const { setOrder, saveDeliveryAddress } = ordersSlice.actions;
+export const { setOrder, saveDeliveryAddress, switchOrderType } =
+    ordersSlice.actions;
 
 export default ordersSlice.reducer;

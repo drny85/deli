@@ -3,13 +3,14 @@ import {
     ListRenderItem,
     NativeScrollEvent,
     NativeSyntheticEvent,
+    Pressable,
     TouchableOpacity,
     View
 } from 'react-native';
 import React, { useEffect, useRef, useState } from 'react';
 import Screen from '../../../components/Screen';
 import Text from '../../../components/Text';
-import { useBusinessAvailable } from '../../../hooks/useBusinessAvailable';
+
 import Loader from '../../../components/Loader';
 import { Business, setBusiness } from '../../../redux/business/businessSlide';
 import { useAppDispatch, useAppSelector } from '../../../redux/store';
@@ -21,17 +22,23 @@ import { FontAwesome } from '@expo/vector-icons';
 import { isTherePreviousRoute } from '../../../utils/checkForPreviousRoute';
 import { AnimatePresence, MotiView } from 'moti';
 import Row from '../../../components/Row';
-import { saveDeliveryAddress } from '../../../redux/consumer/ordersSlide';
+import {
+    ORDER_TYPE,
+    saveDeliveryAddress
+} from '../../../redux/consumer/ordersSlide';
 
 import InputField from '../../../components/InputField';
 import { SIZES } from '../../../constants';
 import { useAllProducts } from '../../../hooks/useAllProducts';
-import { list } from 'firebase/storage';
+
+import Stack from '../../../components/Stack';
+import OrderTypeSwitcher from '../../../components/OrderTypeSwitcher';
 
 type Props = {};
 
 const Businesses = ({}: Props) => {
     const dispatch = useAppDispatch();
+
     const { address, latitude, longitude } = useLocation();
     const navigation = useNavigation();
     const [nothingFound, setNothingFound] = useState(false);
@@ -50,16 +57,16 @@ const Businesses = ({}: Props) => {
     const onScroll = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
         setShow(e.nativeEvent.contentOffset.y < 100);
     };
-
     const { user, loading } = useAppSelector((state) => state.auth);
 
     const handleSearch = (text: string) => {
-        setSearchValue(text);
+        setSearchValue(text.replace(/[^a-z]/gi, ''));
+
         // console.log('Searching...');
         if (text.length > 0) {
             const bus = businessAvailable.filter((b) =>
                 allProducts.some((p) => {
-                    const regex = new RegExp(`${text}`, 'gi');
+                    const regex = new RegExp(`${searchValue}`, 'gi');
                     console.log(p.name.match(regex), p.businessId === b.id);
                     return p.businessId === b.id && p.name.match(regex);
                 })
@@ -190,7 +197,7 @@ const Businesses = ({}: Props) => {
                                     }}
                                     value={searchValue}
                                     rightIcon={
-                                        searchValue.length > 1 && (
+                                        searchValue.length > 0 && (
                                             <TouchableOpacity
                                                 onPress={() => {
                                                     setSearchValue('');
@@ -264,6 +271,8 @@ const Businesses = ({}: Props) => {
                     </MotiView>
                 )}
             </AnimatePresence>
+
+            <OrderTypeSwitcher />
 
             {nothingFound && searchValue.length ? (
                 <View
