@@ -25,15 +25,14 @@ import { AnimatePresence, MotiView } from 'moti';
 import Row from '../../../components/Row';
 import {
     Order,
+    ORDER_STATUS,
     saveDeliveryAddress
 } from '../../../redux/consumer/ordersSlide';
 
 import InputField from '../../../components/InputField';
 import { SIZES } from '../../../constants';
 import { useAllProducts } from '../../../hooks/useAllProducts';
-
 import OrderTypeSwitcher from '../../../components/OrderTypeSwitcher';
-import { useOrders } from '../../../hooks/useOrders';
 import MostRecentOrders from '../../../components/MostRecentOrders';
 import FloatingArrowUpButton from '../../../components/FloatingArrowUpButton';
 import Divider from '../../../components/Divider';
@@ -74,9 +73,15 @@ const Businesses = () => {
         if (text.length > 0) {
             const bus = businessAvailable.filter((b) =>
                 allProducts.some((p) => {
-                    const regex = new RegExp(`${searchValue}`, 'gi');
+                    const regex = new RegExp(
+                        `${searchValue.toLowerCase()}`,
+                        'gi'
+                    );
                     console.log(p.name.match(regex), p.businessId === b.id);
-                    return p.businessId === b.id && p.name.match(regex);
+                    return (
+                        p.businessId === b.id &&
+                        p.name.toLowerCase().match(regex)
+                    );
                 })
             );
             if (bus.length > 0) {
@@ -106,7 +111,7 @@ const Businesses = () => {
             saveDeliveryAddress({
                 street: `${streetNumber} ${street} , ${city}, ${subregion}, ${postalCode}`,
                 coors: { lat: latitude, lng: longitude },
-                apt: null
+                addedOn: new Date().toISOString()
             })
         );
     }, [address, latitude, latitude]);
@@ -144,8 +149,7 @@ const Businesses = () => {
         );
     };
 
-    if (isLoading || !deliveryAdd || !businessAvailable.length || loading)
-        return <Loader />;
+    if (isLoading || !businessAvailable.length || loading) return <Loader />;
 
     return (
         <Screen>
@@ -318,7 +322,19 @@ const Businesses = () => {
 
                         <View>
                             <Stack containerStyle={{ marginTop: 30 }}>
-                                <Text bold>From</Text>
+                                <Divider bgColor={theme.TEXT_COLOR} />
+                                <Text bold>
+                                    From{' '}
+                                    <Text lobster medium>
+                                        {' '}
+                                        {
+                                            businessAvailable.find(
+                                                (b) =>
+                                                    b.id === order?.businessId
+                                            )?.name
+                                        }
+                                    </Text>
+                                </Text>
                                 <Text>
                                     {businessAvailable.find(
                                         (b) => b.id! === order?.businessId!
@@ -333,7 +349,12 @@ const Businesses = () => {
                                         : ''}
                                 </Text>
                                 <View style={{ height: 10 }} />
-                                <Text bold>To</Text>
+                                <Text bold>
+                                    To{' '}
+                                    <Text lobster medium>
+                                        {order?.contactPerson.name}
+                                    </Text>
+                                </Text>
                                 <Text>
                                     {order?.address?.street?.split(', ')[0]}
                                 </Text>
@@ -341,6 +362,14 @@ const Businesses = () => {
                                     Order Date:{' '}
                                     {moment(order?.orderDate).format('lll')}
                                 </Text>
+                                {order?.status === ORDER_STATUS.delivered && (
+                                    <Text py_4>
+                                        Delivered On:{' '}
+                                        {moment(order?.deliveredOn).format(
+                                            'lll'
+                                        )}
+                                    </Text>
+                                )}
                             </Stack>
                             <Divider
                                 thickness="medium"

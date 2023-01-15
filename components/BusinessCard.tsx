@@ -1,14 +1,13 @@
-import {
-    ImageBackground,
-    StyleSheet,
-    TouchableOpacity,
-    View
-} from 'react-native';
+import { ImageBackground, StyleSheet, TouchableOpacity } from 'react-native';
 import React from 'react';
 import Text from './Text';
 import { SIZES } from '../constants';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Business } from '../redux/business/businessSlide';
+import { AnimatePresence, MotiView } from 'moti';
+import { FontAwesome } from '@expo/vector-icons';
+import { usersCollection } from '../firebase';
+import { useAppSelector } from '../redux/store';
 
 type Props = {
     business: Business;
@@ -16,6 +15,7 @@ type Props = {
 };
 
 const BusinessCard = ({ business, onPress }: Props) => {
+    const { user } = useAppSelector((state) => state.auth);
     return (
         <TouchableOpacity onPress={onPress} style={[styles.container]}>
             <ImageBackground
@@ -54,6 +54,21 @@ const BusinessCard = ({ business, onPress }: Props) => {
                     )}
                 </LinearGradient>
             </ImageBackground>
+            <AnimatePresence>
+                {user &&
+                    user?.favoritesStores.findIndex(
+                        (i) => i === business.id
+                    ) !== -1 && (
+                        <MotiView
+                            from={{ opacity: 0, scale: 0 }}
+                            animate={{ opacity: 1, scale: [1, 1.2, 1] }}
+                            transition={{ type: 'timing', repeat: 3 }}
+                            style={{ position: 'absolute', top: 10, right: 15 }}
+                        >
+                            <FontAwesome name="heart" size={20} color={'red'} />
+                        </MotiView>
+                    )}
+            </AnimatePresence>
         </TouchableOpacity>
     );
 };

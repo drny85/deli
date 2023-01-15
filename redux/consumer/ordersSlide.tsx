@@ -27,6 +27,12 @@ export enum ORDER_TYPE {
     pickup = 'pickup',
     delivery = 'delivery'
 }
+export interface OrderAddress {
+    street: string;
+    apt?: string;
+    coors: Coors;
+    addedOn: string;
+}
 export interface Order {
     id?: string;
     orderNumber?: number;
@@ -39,7 +45,7 @@ export interface Order {
     contactPerson: ContactPerson;
     orderType: ORDER_TYPE;
     deliveryInstructions: string | null;
-    address: { street: string; apt: string | null; coors: Coors } | null;
+    address: OrderAddress | null;
     status: ORDER_STATUS;
     courier?: Courier | null;
     deliveredOn?: string | null;

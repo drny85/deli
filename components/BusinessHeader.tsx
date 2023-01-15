@@ -4,7 +4,7 @@ import {
     TouchableOpacity,
     StyleSheet
 } from 'react-native';
-import React from 'react';
+import React, { useCallback } from 'react';
 
 import Text from './Text';
 import { IMAGE_PLACEHOLDER, SIZES } from '../constants';
@@ -16,7 +16,7 @@ import { FontAwesome } from '@expo/vector-icons';
 import { Business } from '../redux/business/businessSlide';
 import { LinearGradient } from 'expo-linear-gradient';
 import { updateUser } from '../redux/auth/authActions';
-import { AppUser } from '../redux/auth/authSlide';
+import { AppUser, setUserData } from '../redux/auth/authSlide';
 
 type Props = {
     business: Business;
@@ -27,14 +27,34 @@ const BusinessHeader = ({ business }: Props) => {
     const { user } = useAppSelector((state) => state.auth);
     const dispatch = useAppDispatch();
     const navigation = useNavigation();
+
     const theme = useAppSelector((state) => state.theme);
-    const toggleFavorite = async () => {
+    const toggleFavorite = useCallback(async () => {
         try {
-            console.log(user?.favoritesStores);
+            let favoritesStores: string[] = [...user?.favoritesStores!];
+            const index = user?.favoritesStores.findIndex(
+                (id) => id === business.id
+            );
+
+            const isFavorite = index !== -1;
+            if (isFavorite) {
+                favoritesStores = [
+                    ...favoritesStores.filter((f) => f !== business.id)
+                ];
+            } else {
+                if (user?.favoritesStores !== undefined) {
+                    favoritesStores = [...favoritesStores, business.id!];
+                } else {
+                    favoritesStores = [business.id!];
+                }
+            }
+
+            await dispatch(updateUser({ ...user!, favoritesStores }));
+            dispatch(setUserData({ ...user!, favoritesStores }));
         } catch (error) {
             console.log(error);
         }
-    };
+    }, [user]);
     return (
         <>
             <ImageBackground
@@ -69,7 +89,7 @@ const BusinessHeader = ({ business }: Props) => {
                         {business?.name}
                     </Text>
                     <AnimatePresence>
-                        {quantity > 0 && (
+                        {true && (
                             <MotiView
                                 from={{ opacity: 0, scale: 0 }}
                                 animate={{ opacity: 1, scale: 1 }}
@@ -95,16 +115,37 @@ const BusinessHeader = ({ business }: Props) => {
                                             <MotiView
                                                 transition={{
                                                     type: 'timing',
-                                                    duration: 300
+                                                    duration: 300,
+                                                    repeat: 3
                                                 }}
-                                                from={{ opacity: 0, scale: 1 }}
+                                                from={{
+                                                    opacity: 0,
+                                                    scale: 0
+                                                }}
                                                 animate={{
-                                                    scale: 1,
+                                                    scale:
+                                                        user.favoritesStores &&
+                                                        user.favoritesStores.findIndex(
+                                                            (i) =>
+                                                                i ===
+                                                                business.id
+                                                        ) !== -1
+                                                            ? [1, 1.2, 1]
+                                                            : 1,
                                                     opacity: 1
                                                 }}
                                             >
                                                 <FontAwesome
-                                                    name="heart"
+                                                    name={
+                                                        user.favoritesStores &&
+                                                        user.favoritesStores.findIndex(
+                                                            (i) =>
+                                                                i ===
+                                                                business.id
+                                                        ) !== -1
+                                                            ? 'heart'
+                                                            : 'heart-o'
+                                                    }
                                                     size={24}
                                                     color={'red'}
                                                 />
@@ -163,7 +204,6 @@ const BusinessHeader = ({ business }: Props) => {
                             </MotiView>
                         )}
                     </AnimatePresence>
-                    {quantity === 0 && <View />}
                 </Row>
             </View>
             <LinearGradient

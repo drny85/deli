@@ -113,7 +113,7 @@ const OrderReview = ({}: Props) => {
                 saveDeliveryAddress({
                     street: `${streetNumber} ${street} , ${city}, ${subregion}, ${postalCode}`,
                     coors: { lat: latitude, lng: longitude },
-                    apt: null
+                    addedOn: new Date().toISOString()
                 })
             );
         }
@@ -188,7 +188,7 @@ const OrderReview = ({}: Props) => {
                                     saveDeliveryAddress({
                                         street: details.formatted_address,
                                         coors: details.geometry.location,
-                                        apt: null
+                                        addedOn: new Date().toISOString()
                                     })
                                 );
                             }}

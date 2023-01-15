@@ -14,6 +14,7 @@ import Stack from './Stack';
 import { Order, ORDER_STATUS } from '../redux/consumer/ordersSlide';
 import { Business } from '../redux/business/businessSlide';
 import { useOrders } from '../hooks/useOrders';
+import Row from './Row';
 
 type Props = {
     businesses: Business[];
@@ -22,6 +23,7 @@ type Props = {
 
 const MostRecentOrders = ({ businesses, onPress }: Props) => {
     const { orders } = useOrders();
+    const filtered = orders;
     const renderMostRecentOrders: ListRenderItem<Order> = ({ item }) => (
         <TouchableOpacity
             style={{
@@ -50,10 +52,12 @@ const MostRecentOrders = ({ businesses, onPress }: Props) => {
                         opacity: 0.8,
                         borderRadius: SIZES.radius
                     }}
+                    center
                 >
                     <Text
                         lightText
-                        bold
+                        lobster
+                        medium
                         center
                         numberOfLines={1}
                         ellipsizeMode="tail"
@@ -64,17 +68,33 @@ const MostRecentOrders = ({ businesses, onPress }: Props) => {
                             )?.name
                         }
                     </Text>
+                    <Row
+                        containerStyle={{ width: '100%' }}
+                        horizontalAlign="space-evenly"
+                    >
+                        <Text lightText bold small>
+                            {item.items.reduce(
+                                (acc, sum) => sum.quantity + acc,
+                                0
+                            )}{' '}
+                            {item.items.reduce(
+                                (acc, sum) => sum.quantity + acc,
+                                0
+                            ) > 1
+                                ? 'items'
+                                : 'item'}
+                        </Text>
+                        <Text lightText bold small>
+                            ${item.total.toFixed(2)}
+                        </Text>
+                    </Row>
                 </Stack>
             </ImageBackground>
         </TouchableOpacity>
     );
     return (
         <View>
-            {orders.filter(
-                (o) =>
-                    o.status === ORDER_STATUS.delivered ||
-                    o.status === ORDER_STATUS.picked_up_by_client
-            ).length > 0 && (
+            {filtered.length > 0 && (
                 <View style={{ height: 100 }}>
                     <Text lobster medium px_4>
                         Recent Orders
@@ -83,9 +103,7 @@ const MostRecentOrders = ({ businesses, onPress }: Props) => {
                         horizontal
                         contentContainerStyle={{ padding: SIZES.base }}
                         showsHorizontalScrollIndicator={false}
-                        data={orders.filter(
-                            (o) => o.status === ORDER_STATUS.delivered
-                        )}
+                        data={filtered}
                         keyExtractor={(item) => item.id!}
                         renderItem={renderMostRecentOrders}
                     />

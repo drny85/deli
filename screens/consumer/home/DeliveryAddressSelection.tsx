@@ -22,6 +22,7 @@ type Props = {};
 
 const DeliveryAddressSelection = ({}: Props) => {
     const { user } = useAppSelector((state) => state.auth);
+    console.log(user?.deliveryAddresses);
     const navigation = useNavigation();
     const [address, setAddress] = useState<Order['address']>();
     const dispatch = useAppDispatch();
@@ -46,7 +47,7 @@ const DeliveryAddressSelection = ({}: Props) => {
         setAddress({
             coors: { ...details.geometry.location! },
             street: details.formatted_address,
-            apt: ''
+            addedOn: new Date().toISOString()
         });
     };
     return (
