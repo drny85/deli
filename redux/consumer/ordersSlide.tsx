@@ -19,7 +19,8 @@ export enum ORDER_STATUS {
     cancelled = 'cancelled',
     accepted_by_driver = 'accepted_by_driver',
     all = 'all orders',
-    picked_up_by_driver = 'picked_up_by_driver'
+    picked_up_by_driver = 'picked_up_by_driver',
+    picked_up_by_client = 'picked_up_by_client'
 }
 
 export enum ORDER_TYPE {

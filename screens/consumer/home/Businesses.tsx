@@ -1,16 +1,17 @@
 import {
     FlatList,
     ListRenderItem,
+    Modal,
     NativeScrollEvent,
     NativeSyntheticEvent,
-    Pressable,
+    ScrollView,
+    StyleSheet,
     TouchableOpacity,
     View
 } from 'react-native';
 import React, { useEffect, useRef, useState } from 'react';
 import Screen from '../../../components/Screen';
 import Text from '../../../components/Text';
-
 import Loader from '../../../components/Loader';
 import { Business, setBusiness } from '../../../redux/business/businessSlide';
 import { useAppDispatch, useAppSelector } from '../../../redux/store';
@@ -23,7 +24,7 @@ import { isTherePreviousRoute } from '../../../utils/checkForPreviousRoute';
 import { AnimatePresence, MotiView } from 'moti';
 import Row from '../../../components/Row';
 import {
-    ORDER_TYPE,
+    Order,
     saveDeliveryAddress
 } from '../../../redux/consumer/ordersSlide';
 
@@ -31,22 +32,30 @@ import InputField from '../../../components/InputField';
 import { SIZES } from '../../../constants';
 import { useAllProducts } from '../../../hooks/useAllProducts';
 
-import Stack from '../../../components/Stack';
 import OrderTypeSwitcher from '../../../components/OrderTypeSwitcher';
+import { useOrders } from '../../../hooks/useOrders';
+import MostRecentOrders from '../../../components/MostRecentOrders';
+import FloatingArrowUpButton from '../../../components/FloatingArrowUpButton';
+import Divider from '../../../components/Divider';
+import { stripeFee } from '../../../utils/stripeFee';
+import Stack from '../../../components/Stack';
+import moment from 'moment';
+import ProductListItem from '../../../components/ProductListItem';
+import Header from '../../../components/Header';
 
-type Props = {};
-
-const Businesses = ({}: Props) => {
+const Businesses = () => {
     const dispatch = useAppDispatch();
-
+    const [visible, setVisible] = useState(false);
+    const [order, setOrder] = useState<Order>();
+    // variables
     const { address, latitude, longitude } = useLocation();
     const navigation = useNavigation();
+
     const [nothingFound, setNothingFound] = useState(false);
     const { deliveryAdd } = useAppSelector((state) => state.orders);
     const theme = useAppSelector((state) => state.theme);
     const [show, setShow] = useState(true);
     const [searchValue, setSearchValue] = useState('');
-    const [route, setRoute] = useState<string>();
     const listRef = useRef<FlatList>(null);
     const {
         businessAvailable,
@@ -62,7 +71,6 @@ const Businesses = ({}: Props) => {
     const handleSearch = (text: string) => {
         setSearchValue(text.replace(/[^a-z]/gi, ''));
 
-        // console.log('Searching...');
         if (text.length > 0) {
             const bus = businessAvailable.filter((b) =>
                 allProducts.some((p) => {
@@ -71,7 +79,6 @@ const Businesses = ({}: Props) => {
                     return p.businessId === b.id && p.name.match(regex);
                 })
             );
-
             if (bus.length > 0) {
                 setBusinesses(bus);
                 setNothingFound(false);
@@ -107,8 +114,6 @@ const Businesses = ({}: Props) => {
     useEffect(() => {
         const sub = navigation.addListener('focus', async () => {
             const { success, route } = await isTherePreviousRoute();
-
-            setRoute(route);
 
             if (user && success) {
                 if (route === 'OrderReview') {
@@ -222,57 +227,26 @@ const Businesses = ({}: Props) => {
                 )}
             </AnimatePresence>
 
-            <AnimatePresence>
-                {!show && (
-                    <MotiView
-                        style={{
-                            position: 'absolute',
-                            bottom: 30,
-                            right: 20,
-                            justifyContent: 'center',
-                            alignItems: 'center'
-                        }}
-                        from={{
-                            opacity: 0,
-                            height: 0,
-                            width: 0,
-                            borderRadius: 0
-                        }}
-                        animate={{
-                            opacity: 1,
-                            height: 50,
-                            width: 50,
-                            borderRadius: 25,
-                            backgroundColor: theme.ASCENT,
-                            zIndex: 300
-                        }}
-                        transition={{ type: 'timing' }}
-                        exit={{ opacity: 0, width: 0, height: 0 }}
-                    >
-                        <TouchableOpacity
-                            onPress={() =>
-                                listRef.current?.scrollToIndex({
-                                    index: 0,
-                                    animated: true
-                                })
-                            }
-                            style={{
-                                padding: 10,
-                                justifyContent: 'center',
-                                alignItems: 'center'
-                            }}
-                        >
-                            <FontAwesome
-                                name="arrow-up"
-                                size={22}
-                                color={theme.TEXT_COLOR}
-                            />
-                        </TouchableOpacity>
-                    </MotiView>
-                )}
-            </AnimatePresence>
+            <FloatingArrowUpButton
+                show={show}
+                onPress={() => {
+                    listRef.current?.scrollToIndex({
+                        index: 0,
+                        animated: true
+                    });
+                }}
+            />
 
             <OrderTypeSwitcher />
+            {user && (
+                <MostRecentOrders
+                    businesses={businessAvailable}
+                    onPress={(order) => {
+                        setOrder(order);
+                        setVisible(true);
+                    }}
+                />
+            )}
 
             {nothingFound && searchValue.length ? (
                 <View
@@ -285,18 +259,172 @@ const Businesses = ({}: Props) => {
                     <Text>No Businesses selling {searchValue}</Text>
                 </View>
             ) : (
-                <FlatList
-                    ref={listRef}
-                    onScroll={onScroll}
-                    scrollEventThrottle={16}
-                    showsVerticalScrollIndicator={false}
-                    data={[...businesses]}
-                    keyExtractor={(item) => item.id!}
-                    renderItem={renderBusinesses}
-                />
+                <>
+                    <Text lobster medium px_4>
+                        Groceries
+                    </Text>
+                    <FlatList
+                        ref={listRef}
+                        onScroll={onScroll}
+                        scrollEventThrottle={16}
+                        showsVerticalScrollIndicator={false}
+                        data={[...businesses]}
+                        keyExtractor={(item) => item.id!}
+                        renderItem={renderBusinesses}
+                    />
+                </>
+            )}
+
+            {businessAvailable.length && (
+                <Modal
+                    visible={visible}
+                    presentationStyle="pageSheet"
+                    animationType="slide"
+                    style={{ backgroundColor: theme.BACKGROUND_COLOR }}
+                >
+                    <View
+                        style={[
+                            styles.container,
+                            { backgroundColor: theme.BACKGROUND_COLOR }
+                        ]}
+                    >
+                        <View
+                            style={{
+                                position: 'absolute',
+                                top: 20,
+                                width: '100%',
+                                zIndex: 400,
+                                backgroundColor: theme.BACKGROUND_COLOR
+                            }}
+                        >
+                            <Header
+                                title="Order Details"
+                                rightIcon={
+                                    <TouchableOpacity
+                                        onPress={() => setVisible(false)}
+                                        style={{
+                                            padding: 10
+                                        }}
+                                    >
+                                        <FontAwesome
+                                            name="close"
+                                            color={theme.SECONDARY_BUTTON_COLOR}
+                                            size={20}
+                                        />
+                                    </TouchableOpacity>
+                                }
+                            />
+                        </View>
+
+                        <View>
+                            <Stack containerStyle={{ marginTop: 30 }}>
+                                <Text bold>From</Text>
+                                <Text>
+                                    {businessAvailable.find(
+                                        (b) => b.id! === order?.businessId!
+                                    ) !== undefined
+                                        ? businessAvailable
+                                              .find(
+                                                  (b) =>
+                                                      b.id! ===
+                                                      order?.businessId!
+                                              )
+                                              ?.address?.slice(0, -15)
+                                        : ''}
+                                </Text>
+                                <View style={{ height: 10 }} />
+                                <Text bold>To</Text>
+                                <Text>
+                                    {order?.address?.street?.split(', ')[0]}
+                                </Text>
+                                <Text py_4>
+                                    Order Date:{' '}
+                                    {moment(order?.orderDate).format('lll')}
+                                </Text>
+                            </Stack>
+                            <Divider
+                                thickness="medium"
+                                bgColor={theme.TEXT_COLOR}
+                                small
+                            />
+                            <View style={{ padding: SIZES.padding }}>
+                                <Text center bold>
+                                    Items
+                                </Text>
+                                <ScrollView
+                                    contentContainerStyle={{ maxHeight: 200 }}
+                                >
+                                    {order?.items.map((item, index) => (
+                                        <ProductListItem
+                                            key={index.toString()}
+                                            item={item}
+                                            index={index}
+                                        />
+                                    ))}
+                                </ScrollView>
+
+                                <Divider
+                                    thickness="medium"
+                                    bgColor={theme.TEXT_COLOR}
+                                    small
+                                />
+
+                                <View style={{ marginTop: 10 }}>
+                                    <Row
+                                        containerStyle={{ width: '100%' }}
+                                        horizontalAlign="space-between"
+                                    >
+                                        <Text capitalize>Sub Total</Text>
+                                        <Text capitalize>
+                                            ${order?.total.toFixed(2)}
+                                        </Text>
+                                    </Row>
+                                    <Row
+                                        containerStyle={{ width: '100%' }}
+                                        horizontalAlign="space-between"
+                                    >
+                                        <Text py_4 capitalize>
+                                            Service Fee
+                                        </Text>
+                                        <Text capitalize>
+                                            $
+                                            {stripeFee(order?.total!).toFixed(
+                                                2
+                                            )}
+                                        </Text>
+                                    </Row>
+                                    <Divider small />
+                                    <Row
+                                        containerStyle={{ width: '100%' }}
+                                        horizontalAlign="space-between"
+                                    >
+                                        <Text py_4 bold large capitalize>
+                                            Total
+                                        </Text>
+                                        <Text bold large capitalize>
+                                            $
+                                            {(
+                                                order?.total! +
+                                                stripeFee(order?.total!)
+                                            ).toFixed(2)}
+                                        </Text>
+                                    </Row>
+                                </View>
+                            </View>
+                        </View>
+                    </View>
+                </Modal>
             )}
         </Screen>
     );
 };
 
 export default Businesses;
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        padding: 24,
+        paddingTop: SIZES.padding
+    }
+});
