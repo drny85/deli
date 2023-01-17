@@ -23,23 +23,19 @@ const ConsumerCartStackNavigation = () => {
             <Screen
                 name="OrderReview"
                 component={OrderReview}
-                options={{ presentation: 'fullScreenModal' }}
+                // options={{ presentation: 'fullScreenModal' }}
             />
             <Screen
                 name="Checkout"
                 component={Checkout}
-                options={{ presentation: 'fullScreenModal' }}
+                // options={{ presentation: 'fullScreenModal' }}
             />
             <Screen
                 name="AddressSelection"
                 component={DeliveryAddressSelection}
-                options={{ presentation: 'modal' }}
+                // options={{ presentation: 'modal' }}
             />
-            <Screen
-                name="OrderSuccess"
-                component={OrderSuccess}
-                options={{ presentation: 'fullScreenModal' }}
-            />
+            <Screen name="OrderSuccess" component={OrderSuccess} />
 
             <Screen name="Auth" component={AuthNavigationStack} />
             <Screen

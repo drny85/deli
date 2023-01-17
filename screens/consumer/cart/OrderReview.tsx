@@ -10,13 +10,13 @@ import Screen from '../../../components/Screen';
 import Stack from '../../../components/Stack';
 import Text from '../../../components/Text';
 import { PREVIOUS_ROUTE, SIZES } from '../../../constants';
-import { setPreviosRoute } from '../../../redux/consumer/settingSlide';
 import { useAppSelector } from '../../../redux/store';
 
 import Loader from '../../../components/Loader';
 
 import {
     Order,
+    OrderAddress,
     ORDER_STATUS,
     ORDER_TYPE,
     saveDeliveryAddress,
@@ -29,20 +29,18 @@ import ProductListItem from '../../../components/ProductListItem';
 import { useLocation } from '../../../hooks/useLocation';
 import { AnimatePresence, MotiView } from 'moti';
 import GoogleAutoComplete from '../../../components/GoogleAutoCompleteField';
-import { Business } from '../../../redux/business/businessSlide';
+
 import {
     GooglePlaceDetail,
     GooglePlacesAutocompleteRef
 } from 'react-native-google-places-autocomplete';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-type Props = {};
-
-const OrderReview = ({}: Props) => {
+const OrderReview = () => {
     const navigation = useNavigation();
     const googleRef = useRef<GooglePlacesAutocompleteRef>(null);
     const { address, latitude, longitude } = useLocation();
-    const [deliveryAddress, setDeliveryAddress] = useState<Order['address']>();
+    const [deliveryAddress, setDeliveryAddress] = useState<OrderAddress>();
     const { user } = useAppSelector((state) => state.auth);
     const { order, deliveryAdd } = useAppSelector((state) => state.orders);
 
@@ -92,10 +90,8 @@ const OrderReview = ({}: Props) => {
 
     useEffect(() => {
         if (deliveryAdd) {
-            if (!googleRef.current?.isFocused()) {
-                setDeliveryAddress(deliveryAdd);
-                googleRef.current?.setAddressText(deliveryAdd.street);
-            }
+            setDeliveryAddress(deliveryAdd);
+            googleRef.current?.setAddressText(deliveryAdd.street);
         } else {
             if (!address || !longitude || !latitude) return;
             const { street, streetNumber, city, subregion, postalCode } =
@@ -182,7 +178,8 @@ const OrderReview = ({}: Props) => {
                                     street: details.formatted_address,
                                     coors: {
                                         ...details.geometry.location
-                                    }
+                                    },
+                                    addedOn: new Date().toISOString()
                                 });
                                 dispatch(
                                     saveDeliveryAddress({
@@ -303,7 +300,14 @@ const OrderReview = ({}: Props) => {
                 </Stack>
             </View>
 
-            <View style={[styles.btn]}>
+            <View
+                style={[
+                    styles.btn,
+                    {
+                        bottom: 30
+                    }
+                ]}
+            >
                 <Row horizontalAlign="space-evenly">
                     <View
                         style={[
@@ -338,7 +342,6 @@ export default OrderReview;
 const styles = StyleSheet.create({
     btn: {
         position: 'absolute',
-        bottom: 30,
         alignSelf: 'center',
         width: '90%'
     },

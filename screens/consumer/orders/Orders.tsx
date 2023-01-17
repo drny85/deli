@@ -51,7 +51,8 @@ const Orders = ({ route: { params } }: Props) => {
 
     useEffect(() => {
         if (!params) return;
-        if (params.orderId) {
+
+        if (params) {
             navigation.navigate('ConsumerOrders', {
                 screen: 'OrderDetails',
                 params: { orderId: params.orderId }

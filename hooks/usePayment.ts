@@ -5,7 +5,10 @@ import { Alert } from 'react-native';
 
 import { fetchPaymentParams } from '../firebase';
 import { placeOrder } from '../redux/consumer/ordersActions';
-import { saveDeliveryAddress } from '../redux/consumer/ordersSlide';
+import {
+    saveDeliveryAddress,
+    setOrderWasPlaced
+} from '../redux/consumer/ordersSlide';
 import { useAppDispatch, useAppSelector } from '../redux/store';
 import { CheckOutProps } from '../screens/consumer/cart/Checkout';
 
@@ -21,7 +24,6 @@ export const usePayment = ({ nav }: Props) => {
     const dispatch = useAppDispatch();
     const { initPaymentSheet, presentPaymentSheet } = useStripe();
     const [loading, setLoading] = useState(false);
-    const navigattion = useNavigation();
 
     const fetchParams = useCallback(async () => {
         try {
@@ -84,7 +86,7 @@ export const usePayment = ({ nav }: Props) => {
 
                 dispatch(saveDeliveryAddress(null));
 
-                nav.replace('OrderSuccess', { orderId });
+                dispatch(setOrderWasPlaced({ success, orderId }));
             }
         } catch (error) {
             console.log('error C', error);

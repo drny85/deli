@@ -279,11 +279,18 @@ const BusinessOrderDetails = ({
                                     status === ORDER_STATUS.all ||
                                     status ===
                                         ORDER_STATUS.accepted_by_driver ||
-                                    status === ORDER_STATUS.picked_up_by_driver
+                                    status ===
+                                        ORDER_STATUS.picked_up_by_driver ||
+                                    status === ORDER_STATUS.picked_up_by_client
                                 )
                                     return;
                                 return (
-                                    <Row key={status}>
+                                    <Row
+                                        containerStyle={{
+                                            marginVertical: SIZES.base
+                                        }}
+                                        key={status}
+                                    >
                                         <RadioButton
                                             selected={newStatus === status}
                                             onPress={() => {

@@ -14,7 +14,6 @@ export type ConsumerHomeStackScreens = {
     BusinessPage: undefined;
     ProductDetails: { product: Product };
     DeliveryAddressSelection: undefined;
-   
 };
 export type ConsumerOrdersStackScreens = {
     Orders: { orderId: string } | undefined;

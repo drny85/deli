@@ -1,11 +1,5 @@
-import { Alert, TouchableOpacity, View } from 'react-native';
-import React, {
-    useCallback,
-    useEffect,
-    useMemo,
-    useRef,
-    useState
-} from 'react';
+import { View } from 'react-native';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 
 import Text from '../../../components/Text';
 
@@ -34,12 +28,10 @@ import Row from '../../../components/Row';
 import { stripeFee } from '../../../utils/stripeFee';
 import Button from '../../../components/Button';
 import Header from '../../../components/Header';
-import { resetCart } from '../../../utils/saveCart';
-import { setCart } from '../../../redux/consumer/cartSlide';
 
 type Props = NativeStackScreenProps<ConsumerOrdersStackScreens, 'OrderDetails'>;
 
-const EGDE = 10;
+const EGDE = 200;
 
 const OrderDetails = ({
     route: {
@@ -57,7 +49,7 @@ const OrderDetails = ({
     const theme = useAppSelector((state) => state.theme);
     const { loading, order } = useOrder(orderId);
     const [minutes, setMinutes] = useState<number | null>(null);
-    const snapPoints = useMemo(() => ['12%', '50%', '90%'], []);
+    const snapPoints = useMemo(() => ['16%', '25%', '50%', '90%'], []);
     const bottomSheetRef = useRef<BottomSheet>(null);
     const goToOrder = () => {
         navigation.navigate('ConsumerOrders', { screen: 'Orders' });
@@ -104,8 +96,18 @@ const OrderDetails = ({
     }, [business?.coors, order?.address?.coors]);
 
     useEffect(() => {
+        if (
+            order?.status === ORDER_STATUS.picked_up_by_driver ||
+            order?.status === ORDER_STATUS.accepted_by_driver
+        ) {
+            bottomSheetRef.current?.snapToIndex(1);
+        }
+    }, [order?.status]);
+
+    useEffect(() => {
         if (!order) return;
         setDestination(order.address?.coors);
+
         // @ts-ignore
         dispatch(getCurrentBusiness(order.businessId!));
     }, [order?.businessId]);
@@ -114,7 +116,15 @@ const OrderDetails = ({
 
     const renderOrderMarkedForDelivery = (): JSX.Element => {
         return (
-            <View style={{ height: SIZES.height * 0.88 }}>
+            <View
+                style={{
+                    height:
+                        order.status === ORDER_STATUS.accepted_by_driver ||
+                        order.status === ORDER_STATUS.picked_up_by_driver
+                            ? SIZES.height * 0.8
+                            : 0.9
+                }}
+            >
                 <MapView
                     ref={mapRef}
                     initialRegion={{
@@ -123,9 +133,12 @@ const OrderDetails = ({
                         latitudeDelta: 0.7665,
                         longitudeDelta: 0.6076
                     }}
+                    mapPadding={{ bottom: 50, left: 50, top: 50, right: 50 }}
                     style={{ flex: 1, borderRadius: SIZES.base }}
+                    mapType="mutedStandard"
                 >
                     <Marker
+                        identifier="origin"
                         coordinate={{
                             latitude: origin?.lat!,
                             longitude: origin?.lng!
@@ -149,6 +162,7 @@ const OrderDetails = ({
                             longitude: destination?.lng!
                         }}
                         draggable
+                        identifier="destination"
                         title="Me"
                         description={order.address?.street.split(', ')[0]}
 
@@ -179,10 +193,10 @@ const OrderDetails = ({
                                 result.coordinates,
                                 {
                                     edgePadding: {
-                                        right: SIZES.width / EGDE,
-                                        bottom: SIZES.height / EGDE,
-                                        left: SIZES.width / EGDE,
-                                        top: SIZES.height / EGDE
+                                        right: EGDE * 1.5,
+                                        bottom: EGDE * 2,
+                                        left: EGDE * 1.5,
+                                        top: EGDE * 2
                                     }
                                 }
                             );
@@ -197,29 +211,6 @@ const OrderDetails = ({
                         }}
                     ></MapViewDirections>
                 </MapView>
-                {minutes && <Text>ETA {Math.round(minutes)} minutes</Text>}
-                <TouchableOpacity
-                    onPress={goToOrder}
-                    style={{
-                        position: 'absolute',
-                        top: SIZES.statusBarHeight,
-
-                        left: 10,
-                        height: 40,
-                        width: 40,
-                        borderRadius: 20,
-
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        zIndex: 100
-                    }}
-                >
-                    <FontAwesome
-                        name="chevron-left"
-                        size={28}
-                        color={theme.TEXT_COLOR}
-                    />
-                </TouchableOpacity>
             </View>
         );
     };
@@ -390,8 +381,12 @@ const OrderDetails = ({
         >
             <View
                 style={{
-                    marginTop: SIZES.statusBarHeight,
-                    paddingHorizontal: 10
+                    zIndex: 200,
+                    paddingHorizontal: 10,
+                    position: 'absolute',
+                    left: 0,
+                    right: 0,
+                    top: SIZES.statusBarHeight
                 }}
             >
                 <Header
@@ -421,6 +416,51 @@ const OrderDetails = ({
                     backgroundColor: theme.SECONDARY_BUTTON_COLOR
                 }}
             >
+                {order.status === ORDER_STATUS.picked_up_by_driver && (
+                    <Stack center>
+                        <Row
+                            containerStyle={{
+                                alignSelf: 'center',
+                                width: '100%',
+                                maxWidth: 200
+                            }}
+                            horizontalAlign="space-around"
+                        >
+                            <Text bold>{duration.toFixed(0)} mins</Text>
+                            <FontAwesome
+                                name={
+                                    order.courier &&
+                                    order.courier.transportation === 'BICYCLING'
+                                        ? 'bicycle'
+                                        : 'car'
+                                }
+                                size={26}
+                                color={'#212121'}
+                            />
+                            <Text bold>
+                                {(distance * 0.621371).toFixed(1)} miles
+                            </Text>
+                        </Row>
+                        <Stack center>
+                            <Image
+                                style={{
+                                    width: 60,
+                                    height: 60,
+                                    borderRadius: 30
+                                }}
+                                resizeMode="contain"
+                                source={
+                                    order.courier && order.courier.image
+                                        ? { uri: order.courier.image }
+                                        : require('../../../assets/images/user.png')
+                                }
+                            />
+                            <Text py_4 capitalize lobster medium center>
+                                {order.courier?.name} just picked up your order
+                            </Text>
+                        </Stack>
+                    </Stack>
+                )}
                 <BottomSheetScrollView
                     contentContainerStyle={{
                         width: '100%'
@@ -451,38 +491,6 @@ const OrderDetails = ({
                                 order.courier && order.courier.name
                             } has accepted your order`}
                     </Text>
-
-                    {order.status === ORDER_STATUS.picked_up_by_driver && (
-                        <>
-                            <Row
-                                containerStyle={{
-                                    alignSelf: 'center',
-                                    width: '100%',
-                                    maxWidth: 200
-                                }}
-                                horizontalAlign="space-around"
-                            >
-                                <Text bold>{duration.toFixed(0)} mins</Text>
-                                <FontAwesome
-                                    name={
-                                        order.courier &&
-                                        order.courier.transportation ===
-                                            'BICYCLING'
-                                            ? 'bicycle'
-                                            : 'car'
-                                    }
-                                    size={26}
-                                    color={'#212121'}
-                                />
-                                <Text bold>
-                                    {(distance * 0.621371).toFixed(1)} miles
-                                </Text>
-                            </Row>
-                            <Text py_4 capitalize lobster medium center>
-                                {order.courier?.name} just picked up your order
-                            </Text>
-                        </>
-                    )}
 
                     <Stack containerStyle={{ marginTop: 30 }}>
                         <Text bold>From</Text>

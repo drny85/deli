@@ -8,6 +8,8 @@ import { ConsumerCartStackScreens } from '../../../navigation/consumer/typing';
 import Loader from '../../../components/Loader';
 import Button from '../../../components/Button';
 import { View } from 'react-native';
+import AnimatedLottieView from 'lottie-react-native';
+import { useAppSelector } from '../../../redux/store';
 
 type Props = NativeStackScreenProps<ConsumerCartStackScreens, 'OrderSuccess'>;
 
@@ -18,40 +20,47 @@ const OrderSuccess = ({
     }
 }: Props) => {
     //const navigation = useNavigation();
-    const state = nav.getState();
+    const theme = useAppSelector((state) => state.theme);
 
-    useEffect(() => {
-        if (!orderId) return;
-        setTimeout(() => {
-            nav.dispatch(
-                (state) => {
-                    const routes = state.routes.filter(
-                        (r) => r.name === 'Cart'
-                    );
-                    return CommonActions.reset({
-                        ...state,
-                        routes,
-                        index: 0
-                    });
+    const goToOrderDetails = () => {
+        nav.dispatch((state) => {
+            const routes = [
+                {
+                    name: 'Orders'
                 }
-                //nav.navigate('OrderSuccess', { orderId: orderId });
-            );
-            console.log('HERE');
-            nav.navigate('OrdersScreen', {
-                screen: 'OrderDetails',
-                params: { orderId: orderId }
+            ];
+
+            return CommonActions.reset({
+                routes,
+                index: 0
             });
-        }, 300);
-    }, [orderId, nav]);
+        });
+        nav.navigate('OrdersScreen', {
+            screen: 'Orders',
+            params: { orderId: orderId }
+        });
+    };
 
     if (!orderId) return <Loader />;
     return (
         <View
-            style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
+            style={{
+                flex: 1,
+                backgroundColor: theme.BACKGROUND_COLOR
+            }}
         >
-            <Text py_8 lobster large>
-                Congratulations
-            </Text>
+            <AnimatedLottieView
+                style={{ flex: 1 }}
+                autoPlay
+                loop={false}
+                onAnimationFinish={goToOrderDetails}
+                resizeMode="contain"
+                source={
+                    theme.mode === 'dark'
+                        ? require('../../../assets/animations/success_dark.json')
+                        : require('../../../assets/animations/success_light.json')
+                }
+            />
         </View>
     );
 };

@@ -4,4 +4,5 @@ export type AuthScreens = {
     BusinessSignup: undefined;
     EmailVerification: { email: string };
     CourierSignup: undefined;
+    ForgotPassword: { email: string } | undefined;
 };

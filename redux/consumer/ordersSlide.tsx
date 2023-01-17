@@ -60,13 +60,15 @@ interface OrdersState {
     order: Order | null;
     orderType: ORDER_TYPE;
     loading: boolean;
+    orderSuccess: { success: boolean; orderId: string | undefined };
 }
 const initialState: OrdersState = {
     orders: [],
     order: null,
     orderType: ORDER_TYPE.delivery,
     deliveryAdd: null,
-    loading: false
+    loading: false,
+    orderSuccess: { success: false, orderId: undefined }
 };
 
 const ordersSlice = createSlice({
@@ -84,11 +86,22 @@ const ordersSlice = createSlice({
         },
         switchOrderType: (state, { payload }: PayloadAction<ORDER_TYPE>) => {
             state.orderType = payload;
+        },
+
+        setOrderWasPlaced: (
+            state,
+            { payload }: PayloadAction<OrdersState['orderSuccess']>
+        ) => {
+            state.orderSuccess = payload;
         }
     }
 });
 
-export const { setOrder, saveDeliveryAddress, switchOrderType } =
-    ordersSlice.actions;
+export const {
+    setOrder,
+    saveDeliveryAddress,
+    switchOrderType,
+    setOrderWasPlaced
+} = ordersSlice.actions;
 
 export default ordersSlice.reducer;

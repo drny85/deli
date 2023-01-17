@@ -88,7 +88,9 @@ const BusinessSignUp = ({ navigation }: Props) => {
                 email,
                 phone: null,
                 emailVerified: user.emailVerified,
-                type: 'business'
+                type: 'business',
+                favoritesStores: [],
+                deliveryAddresses: []
             };
             console.log('BUS =>', business);
             await dispatch(createBusiness(business));

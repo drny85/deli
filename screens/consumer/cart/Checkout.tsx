@@ -5,12 +5,12 @@ import {
     TouchableOpacity,
     View
 } from 'react-native';
-import React from 'react';
+import React, { useEffect } from 'react';
 import Screen from '../../../components/Screen';
 import Text from '../../../components/Text';
 import { StripeProvider } from '@stripe/stripe-react-native';
-import { useAppSelector } from '../../../redux/store';
-import { useNavigation } from '@react-navigation/native';
+import { useAppDispatch, useAppSelector } from '../../../redux/store';
+import { CommonActions, useNavigation } from '@react-navigation/native';
 import Header from '../../../components/Header';
 import Stack from '../../../components/Stack';
 import Row from '../../../components/Row';
@@ -26,6 +26,7 @@ import PaymentLoading from '../../../components/PaymentLoading';
 import { usePayment } from '../../../hooks/usePayment';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { ConsumerCartStackScreens } from '../../../navigation/consumer/typing';
+import { setOrderWasPlaced } from '../../../redux/consumer/ordersSlide';
 
 export type CheckOutProps = NativeStackScreenProps<
     ConsumerCartStackScreens,
@@ -33,10 +34,27 @@ export type CheckOutProps = NativeStackScreenProps<
 >;
 const Checkout = ({ navigation }: CheckOutProps) => {
     const theme = useAppSelector((state) => state.theme);
+    const dispatch = useAppDispatch();
     //const navigation = useNavigation();
-    const { order, deliveryAdd } = useAppSelector((state) => state.orders);
+    const { order, deliveryAdd, orderSuccess } = useAppSelector(
+        (state) => state.orders
+    );
     const { total, items, quantity } = useAppSelector((state) => state.cart);
     const { loading, startPayment } = usePayment({ nav: navigation });
+
+    useEffect(() => {
+        if (!orderSuccess.success || !orderSuccess.orderId) return;
+
+        if (orderSuccess.orderId) {
+            navigation.replace('OrderSuccess', {
+                orderId: orderSuccess.orderId
+            });
+        }
+
+        return () => {
+            dispatch(setOrderWasPlaced({ success: false, orderId: undefined }));
+        };
+    }, [orderSuccess.orderId, orderSuccess.success]);
 
     if (loading) return <PaymentLoading />;
     return (

@@ -55,7 +55,8 @@ const Orders = ({}: Props) => {
                             s === ORDER_STATUS.marked_ready_for_pickup ||
                             s === ORDER_STATUS.cancelled ||
                             s === ORDER_STATUS.picked_up_by_driver ||
-                            s == ORDER_STATUS.accepted_by_driver
+                            s == ORDER_STATUS.accepted_by_driver ||
+                            s == ORDER_STATUS.picked_up_by_client
                         )
                             return;
                         return (

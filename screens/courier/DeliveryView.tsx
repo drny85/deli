@@ -22,7 +22,7 @@ import * as Location from 'expo-location';
 import { Business, Coors } from '../../redux/business/businessSlide';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 
-import MapView, { Marker } from 'react-native-maps';
+import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import MapViewDirections from 'react-native-maps-directions';
 import { SIZES } from '../../constants';
 import { FontAwesome } from '@expo/vector-icons';
@@ -36,10 +36,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { CourierStackScreens } from '../../navigation/courier/typing';
 import { useReadyForDeliveryOrders } from '../../hooks/useReadyForDeliveryOrders';
 
-let b: NodeJS.Timeout;
 let a: NodeJS.Timeout;
-let c: NodeJS.Timeout;
+
 const ACCEPTED_TIME = 'ACCEPTED_TIME';
+const EGDE_PADDING = 200;
 
 type Props = NativeStackScreenProps<CourierStackScreens, 'DeliveryView'>;
 
@@ -51,6 +51,7 @@ const DeliveryView = ({
 }: Props) => {
     const { user } = useAppSelector((state) => state.auth);
     const { location } = useLocation();
+    const [isReady, setIsReady] = useState(false);
     const [isCloseToDestination, setIsCloseToDestination] = useState(false);
     const [accepted, setAccepted] = useState(false);
     const theme = useAppSelector((state) => state.theme);
@@ -93,6 +94,12 @@ const DeliveryView = ({
                 if (!orderRef.exists()) {
                     throw 'Document does not exist!';
                 }
+                if (
+                    orderRef.data().status === ORDER_STATUS.accepted_by_driver
+                ) {
+                    Alert.alert('Order was already taken by some other driver');
+                    return;
+                }
 
                 transaction.update(docRf, {
                     status: ORDER_STATUS.accepted_by_driver,
@@ -102,16 +109,22 @@ const DeliveryView = ({
                         coors: { lat: origin?.lat!, lng: origin?.lng! }
                     }
                 });
+
+                console.log('Transaction successfully committed!');
             });
-            console.log('Transaction successfully committed!');
         } catch (e) {
             console.log('Transaction failed: ', e);
         }
     };
 
     const checkIfCourierCanAceeptAnotherDelivery = (): boolean => {
-        console.log(orders.length);
-        if (orders.length > 0) return true;
+        if (
+            orders.length > 0 &&
+            orders.some(
+                (order) => order.status === ORDER_STATUS.accepted_by_driver
+            )
+        )
+            return true;
 
         return false;
     };
@@ -229,29 +242,29 @@ const DeliveryView = ({
                     ['origin', 'business'],
                     {
                         edgePadding: {
-                            left: 200,
-                            right: 200,
-                            top: 200,
-                            bottom: 200
+                            left: EGDE_PADDING / 2,
+                            right: EGDE_PADDING / 2,
+                            top: EGDE_PADDING,
+                            bottom: EGDE_PADDING * 1.5
                         }
                     }
                 );
             }, 1000);
 
-            b = setTimeout(() => {
+            a = setTimeout(() => {
                 mapViewRef.current?.fitToSuppliedMarkers(
                     ['business', 'destination'],
                     {
                         edgePadding: {
-                            left: 200,
-                            right: 200,
-                            top: 200,
-                            bottom: 200
+                            left: EGDE_PADDING / 2,
+                            right: EGDE_PADDING / 2,
+                            top: EGDE_PADDING,
+                            bottom: EGDE_PADDING * 1.5
                         }
                     }
                 );
             }, 4000);
-            c = setTimeout(() => {
+            a = setTimeout(() => {
                 mapViewRef.current?.fitToSuppliedMarkers(
                     ['origin', 'business', 'destination'],
                     {
@@ -282,10 +295,10 @@ const DeliveryView = ({
                     ['origin', 'business'],
                     {
                         edgePadding: {
-                            left: 100,
-                            right: 100,
-                            top: 100,
-                            bottom: 100
+                            left: EGDE_PADDING / 2,
+                            right: EGDE_PADDING / 2,
+                            top: EGDE_PADDING,
+                            bottom: EGDE_PADDING * 1.5
                         }
                     }
                 );
@@ -307,10 +320,10 @@ const DeliveryView = ({
                     ['business', 'destination'],
                     {
                         edgePadding: {
-                            left: 100,
-                            right: 100,
-                            top: 100,
-                            bottom: 100
+                            left: EGDE_PADDING / 2,
+                            right: EGDE_PADDING / 2,
+                            top: EGDE_PADDING,
+                            bottom: EGDE_PADDING
                         }
                     }
                 );
@@ -319,8 +332,6 @@ const DeliveryView = ({
 
         return () => {
             clearTimeout(a);
-            clearTimeout(b);
-            clearTimeout(c);
         };
     }, [order?.status, location]);
 
@@ -328,6 +339,7 @@ const DeliveryView = ({
         let sub: Location.LocationSubscription;
         (async () => {
             if (!order) return;
+            console.log('HEE');
             if (
                 !accepted ||
                 order.status === ORDER_STATUS.marked_ready_for_delivery
@@ -408,13 +420,16 @@ const DeliveryView = ({
 
     useEffect(() => {
         if (!order?.courier) return;
+        setAccepted(
+            order.status === ORDER_STATUS.accepted_by_driver ||
+                order.status === ORDER_STATUS.picked_up_by_driver
+        );
 
         setOrigin({
             lat: order.courier.coors?.lat!,
             lng: order.courier.coors?.lng!
         });
         if (order.status === ORDER_STATUS.accepted_by_driver) {
-            setAccepted(true);
             setDestination({
                 lat: business?.coors?.lat!,
                 lng: business?.coors?.lng!
@@ -422,10 +437,10 @@ const DeliveryView = ({
 
             mapViewRef.current?.fitToSuppliedMarkers(['origin', 'business'], {
                 edgePadding: {
-                    left: 100,
-                    right: 100,
-                    top: 100,
-                    bottom: 100
+                    left: EGDE_PADDING / 100,
+                    right: EGDE_PADDING / 200,
+                    top: EGDE_PADDING,
+                    bottom: EGDE_PADDING * 1.5
                 },
                 animated: true
             });
@@ -441,10 +456,10 @@ const DeliveryView = ({
                 ['business', 'destination'],
                 {
                     edgePadding: {
-                        left: 100,
-                        right: 100,
-                        top: 100,
-                        bottom: 100
+                        left: EGDE_PADDING / 2,
+                        right: EGDE_PADDING / 2,
+                        top: EGDE_PADDING,
+                        bottom: EGDE_PADDING * 1.5
                     }
                 }
             );
@@ -499,10 +514,13 @@ const DeliveryView = ({
             <MapView
                 showsUserLocation
                 followsUserLocation
-                provider="google"
-                mapType="standard"
+                provider={PROVIDER_GOOGLE}
+                mapType="mutedStandard"
+                showsPointsOfInterest={false}
+                showsBuildings={false}
                 zoomEnabled
                 zoomControlEnabled
+                zoomTapEnabled
                 ref={mapViewRef}
                 style={{ height: '91%', width: '100%' }}
                 region={{
@@ -512,50 +530,65 @@ const DeliveryView = ({
                     longitudeDelta: 0.04
                 }}
             >
-                <Marker
-                    title={business?.name}
-                    identifier="business"
-                    description={business?.address?.split(', ')[0]}
-                    coordinate={{
-                        latitude: business?.coors?.lat!,
-                        longitude: business?.coors?.lng!
-                    }}
-                >
-                    <Image
-                        style={{
-                            width: 40,
-                            height: 40,
-                            tintColor: '#212121'
+                {business?.coors && (
+                    <Marker
+                        title={business?.name}
+                        identifier="business"
+                        description={business?.address?.split(', ')[0]}
+                        coordinate={{
+                            latitude: business?.coors?.lat!,
+                            longitude: business?.coors?.lng!
                         }}
-                        resizeMode="contain"
-                        source={require('../../restaurant.png')}
-                    />
-                </Marker>
+                    >
+                        <Image
+                            style={{
+                                width: 40,
+                                height: 40,
+                                tintColor: '#212121'
+                            }}
+                            resizeMode="contain"
+                            source={require('../../restaurant.png')}
+                        />
+                    </Marker>
+                )}
+                {origin && (
+                    <Marker
+                        title="Me"
+                        identifier="origin"
+                        coordinate={{
+                            latitude: origin.lat!,
+                            longitude: origin?.lng!
+                        }}
+                    >
+                        <Image
+                            style={{
+                                width: 50,
+                                height: 50,
+                                tintColor: '#212121'
+                            }}
+                            resizeMode="contain"
+                            source={require('../../assets/images/delivery.png')}
+                        />
+                    </Marker>
+                )}
 
-                <Marker
-                    title="Me"
-                    identifier="origin"
-                    coordinate={{
-                        latitude: origin.lat!,
-                        longitude: origin?.lng!
-                    }}
-                />
-
-                <Marker
-                    title={order?.contactPerson.name}
-                    identifier="destination"
-                    description={order?.address?.street.split(', ')[0]}
-                    coordinate={{
-                        latitude: order?.address?.coors.lat!,
-                        longitude: order?.address?.coors?.lng!
-                    }}
-                >
-                    <FontAwesome
-                        name="user"
-                        color={theme.TEXT_COLOR}
-                        size={26}
-                    />
-                </Marker>
+                {order?.address?.coors && (
+                    <Marker
+                        title={order?.contactPerson.name}
+                        identifier="destination"
+                        description={order?.address?.street.split(', ')[0]}
+                        coordinate={{
+                            latitude: order?.address?.coors.lat!,
+                            longitude: order?.address?.coors?.lng!
+                        }}
+                    >
+                        <FontAwesome
+                            name="user"
+                            color={theme.TEXT_COLOR}
+                            size={26}
+                        />
+                    </Marker>
+                )}
 
                 <MapViewDirections
                     apikey={process.env.GOOGLE_API!}

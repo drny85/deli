@@ -41,8 +41,10 @@ import Stack from '../../../components/Stack';
 import moment from 'moment';
 import ProductListItem from '../../../components/ProductListItem';
 import Header from '../../../components/Header';
+import useNotifications from '../../../hooks/useNotifications';
 
 const Businesses = () => {
+    useNotifications();
     const dispatch = useAppDispatch();
     const [visible, setVisible] = useState(false);
     const [order, setOrder] = useState<Order>();

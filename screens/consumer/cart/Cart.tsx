@@ -3,9 +3,10 @@ import {
     FlatList,
     ListRenderItem,
     TouchableOpacity,
-    View
+    View,
+    StyleSheet
 } from 'react-native';
-import React from 'react';
+import React, { useCallback, useMemo, useRef } from 'react';
 import Screen from '../../../components/Screen';
 import Text from '../../../components/Text';
 import { useAppDispatch, useAppSelector } from '../../../redux/store';
@@ -20,6 +21,11 @@ import { CommonActions, useNavigation } from '@react-navigation/native';
 import { setPreviosRoute } from '../../../redux/consumer/settingSlide';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { PREVIOUS_ROUTE } from '../../../constants';
+import {
+    BottomSheetModalProvider,
+    BottomSheetModal
+} from '@gorhom/bottom-sheet';
+import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 
 type Props = {};
 
@@ -81,6 +87,7 @@ const Cart = ({}: Props) => {
 
     const goToOrderReview = async () => {
         try {
+            //bottomSheetModalRef.current?.present();
             naviagation.navigate('ConsumerCart', {
                 screen: 'OrderReview'
             });
@@ -191,3 +198,22 @@ const Cart = ({}: Props) => {
 };
 
 export default Cart;
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        padding: 24,
+        justifyContent: 'center',
+        backgroundColor: 'grey'
+    },
+    contentContainer: {
+        flex: 1,
+        alignItems: 'center',
+        zIndex: 100000,
+        position: 'absolute',
+        top: 0,
+        bottom: 0,
+        right: 0,
+        left: 0
+    }
+});

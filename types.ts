@@ -34,6 +34,7 @@ export interface BusinessDay {
 
 export interface Courier extends AppUser {
     transportation?: MapViewDirectionsMode;
+    image?: string;
 }
 
 export const DAYS = [

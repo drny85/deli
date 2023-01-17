@@ -2,7 +2,11 @@ import { Alert, Image, StyleSheet, TouchableOpacity, View } from 'react-native';
 import React from 'react';
 
 import Text from './Text';
-import { Order, ORDER_STATUS } from '../redux/consumer/ordersSlide';
+import {
+    Order,
+    ORDER_STATUS,
+    saveDeliveryAddress
+} from '../redux/consumer/ordersSlide';
 import { IMAGE_PLACEHOLDER, SIZES } from '../constants';
 import { useAppDispatch, useAppSelector } from '../redux/store';
 import moment from 'moment';
@@ -19,6 +23,7 @@ import { STATUS_NAME } from '../utils/orderStatus';
 import Loader from './Loader';
 import { resetCart } from '../utils/saveCart';
 import { setCart } from '../redux/consumer/cartSlide';
+import { osVersion } from 'expo-device';
 
 type Props = {
     order: Order;
@@ -61,6 +66,7 @@ const OrderListItem = ({ order, onPress }: Props) => {
             if (!order) return;
             const { items, total } = order;
             await resetCart();
+            dispatch(saveDeliveryAddress({ ...order.address! }));
             dispatch(setCart({ items: items, quantity: qty, total: total }));
             navigation.navigate('ConsumerCart', { screen: 'OrderReview' });
         } catch (error) {

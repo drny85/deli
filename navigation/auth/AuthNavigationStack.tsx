@@ -2,6 +2,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import BusinessSignUp from '../../screens/auth/BusinessSignUp';
 import CourierSignUp from '../../screens/auth/CourierSignUp';
 import EmailVerification from '../../screens/auth/EmailVerification';
+import ForgotPassword from '../../screens/auth/ForgotPassword';
 import Login from '../../screens/auth/Login';
 import Signup from '../../screens/auth/Signup';
 import { AuthScreens } from './typing';
@@ -21,6 +22,11 @@ const AuthNavigationStack = () => {
             <Screen name="BusinessSignup" component={BusinessSignUp} />
             <Screen name="EmailVerification" component={EmailVerification} />
             <Screen name="CourierSignup" component={CourierSignUp} />
+            <Screen
+                name="ForgotPassword"
+                component={ForgotPassword}
+                options={{ presentation: 'modal' }}
+            />
         </Navigator>
     );
 };

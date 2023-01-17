@@ -146,6 +146,21 @@ const Login = ({ navigation }: Props) => {
                         />
                     }
                 />
+                <View style={{ width: '100%', maxWidth: 600, opacity: 0.6 }}>
+                    <TouchableOpacity
+                        style={{
+                            justifyContent: 'flex-end',
+                            alignSelf: 'flex-end'
+                        }}
+                        onPress={() =>
+                            navigation.navigate('ForgotPassword', { email })
+                        }
+                    >
+                        <Text right px_6>
+                            Forgot Password?
+                        </Text>
+                    </TouchableOpacity>
+                </View>
 
                 <Button
                     containerStyle={{ width: '50%', marginVertical: 20 }}

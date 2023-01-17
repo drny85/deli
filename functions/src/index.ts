@@ -1,7 +1,7 @@
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
 import * as dotenv from 'dotenv';
-
+import fetch from 'node-fetch';
 dotenv.config();
 admin.initializeApp();
 
@@ -10,7 +10,7 @@ import Stripe from 'stripe';
 import { assignUserType, stripeFee } from './shared';
 
 import { UserRecord } from 'firebase-functions/v1/auth';
-import { AppUser, Business, CartItem } from './typing';
+import { AppUser, Business, CartItem, Order, ORDER_STATUS } from './typing';
 
 const stripe = new Stripe(process.env.STRIPE_TEST_KEY!, {
     apiVersion: '2022-11-15'
@@ -449,13 +449,13 @@ exports.generateOrderNumber = functions.firestore
     .document('/orders/{orderId}')
     .onCreate(async (snap, contex) => {
         try {
-            const storeId = snap.data().businessId;
+            const data = snap.data() as Order;
 
             const restaurantOrdersTotal = (
                 await admin
                     .firestore()
                     .collection('orders')
-                    .where('businessId', '==', storeId)
+                    .where('businessId', '==', data.businessId)
                     .get()
             ).docs.length;
             return await snap.ref.update({
@@ -495,6 +495,74 @@ exports.updateUnitSold = functions.firestore
             }
         });
     });
+
+exports.sendOrderStatusUpdates = functions.firestore
+    .document('orders/{orderId}')
+    .onUpdate(
+        async (
+            change: functions.Change<functions.firestore.QueryDocumentSnapshot>,
+            context
+        ) => {
+            try {
+                const data = change.after.data() as Order;
+                const before = change.before.data() as Order;
+                if (data.status === before.status) return;
+                let title,
+                    body,
+                    notificationType = '';
+
+                if (!data) return;
+
+                if (data.status === ORDER_STATUS.picked_up_by_driver) {
+                    title = 'Great News';
+                    body = `${
+                        data.courier?.name.charAt(0).toUpperCase() +
+                        data.courier?.name.slice(1)!
+                    } is on his way to pick up your order`;
+                    notificationType = data.status;
+                } else if (data.status === ORDER_STATUS.delivered) {
+                    title = 'You got Delivered';
+                    body =
+                        'Your order was just delivery, we hope you enjoy it!';
+                    notificationType = data.status;
+                } else {
+                    return;
+                }
+
+                const userRef = await admin
+                    .firestore()
+                    .collection('users')
+                    .doc(data.userId)
+                    .get();
+                if (!userRef.exists) return;
+                const user = userRef.data() as AppUser;
+
+                if (!user.pushToken) return;
+
+                return fetch('https://exp.host/--/api/v2/push/send', {
+                    method: 'POST',
+                    headers: {
+                        host: 'exp.host',
+                        accept: 'application/json',
+                        'accept-encoding': 'gzip, deflate',
+                        'content-type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        to: user.pushToken,
+                        title: `${title}`,
+                        body: `${body}`,
+                        data: { notificationType }
+                    })
+                });
+            } catch (error) {
+                console.log(error);
+                throw new functions.https.HttpsError(
+                    'aborted',
+                    'error sending notification'
+                );
+            }
+        }
+    );
 
 export async function isAuthorizedToGrantAccess(
     email: string

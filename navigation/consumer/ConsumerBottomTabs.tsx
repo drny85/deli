@@ -1,8 +1,5 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import {
-    getFocusedRouteNameFromRoute,
-    useNavigation
-} from '@react-navigation/native';
+import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
 import { useAppSelector } from '../../redux/store';
 import { ConsumerBottomTabScreens } from './typing';
 
@@ -11,9 +8,8 @@ import ConsumerHomeStackNavigation from './ConsumerHomeStacksScreens';
 import ConsumerOrdersStackNavigation from './ConsumerOrdersStacksScreens';
 import ConsumerCartStackNavigation from './ConsumerCartStacksNavigation';
 import ConsumerProfileStackNavigation from './ConsumerProfileStacksNavigation';
-import { MotiView } from 'moti';
+
 import { Image } from 'react-native';
-import { Asset, useAssets } from 'expo-asset';
 
 const { Navigator, Screen } =
     createBottomTabNavigator<ConsumerBottomTabScreens>();
@@ -95,7 +91,7 @@ const ConsumerBottomTabs = () => {
                         backgroundColor: theme.BACKGROUND_COLOR,
                         borderTopWidth: 0,
                         elevation: 0,
-                        height: tabBarVisibility(route) === 'flex' ? 80 : 0
+                        height: tabBarVisibility(route) === 'flex' ? 79 : 0
                     },
                     tabBarBadge: quantity > 0 ? quantity : undefined,
                     tabBarBadgeStyle:
@@ -147,7 +143,13 @@ function TabBarIcon(props: {
 const tabBarVisibility = (route: any) => {
     const routeName = getFocusedRouteNameFromRoute(route);
 
-    const routes = ['BusinessPage'];
+    const routes = [
+        'BusinessPage',
+        'OrderSuccess',
+        'OrderDetails',
+        'Checkout',
+        'OrderReview'
+    ];
 
     if (routes.findIndex((r) => r === routeName) !== -1) {
         return 'none';

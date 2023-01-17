@@ -3,15 +3,24 @@ export interface Coors {
     lng: number;
 }
 
+export interface UserPreferences {
+    favoritesBusiness: string[];
+}
 export interface AppUser {
     id?: string;
     name: string;
     lastName: string;
     email: string;
     emailVerified: boolean;
-    type: 'admin' | 'business' | 'consumer';
+    phone: string | null;
+    type: 'admin' | 'business' | 'consumer' | 'courier';
+    preferences?: UserPreferences;
+    pushToken?: string;
+    coors?: Coors;
+    transportation?: MapViewDirectionsMode;
+    favoritesStores: string[];
+    deliveryAddresses: Order['address'][];
 }
-
 export interface hour {
     [key: string]: string;
 }
@@ -62,3 +71,64 @@ export interface Business {
     minimumDelivery: number | null;
     milesRadius: number | null;
 }
+
+export interface Order {
+    id?: string;
+    orderNumber?: number;
+    total: number;
+    items: CartItem[];
+    paymentIntent: string;
+    orderDate: string;
+    userId: string;
+    businessId: string;
+    contactPerson: ContactPerson;
+    orderType: ORDER_TYPE;
+    deliveryInstructions: string | null;
+    address: OrderAddress | null;
+    status: ORDER_STATUS;
+    courier?: Courier | null;
+    deliveredOn?: string | null;
+    deliveredBy?: AppUser | null;
+    pickedUpOn?: string | null;
+    acceptedOn?: string | null;
+}
+
+export enum ORDER_TYPE {
+    pickup = 'pickup',
+    delivery = 'delivery'
+}
+export interface OrderAddress {
+    street: string;
+    apt?: string;
+    coors: Coors;
+    addedOn: string;
+}
+
+export interface ContactPerson {
+    name: string;
+    lastName: string;
+    phone: string;
+}
+
+export enum ORDER_STATUS {
+    delivered = 'delivered',
+    in_progress = 'in_progress',
+    new = 'new',
+    marked_ready_for_delivery = 'marked_ready_for_delivery',
+    marked_ready_for_pickup = 'marked_ready_for_pickup',
+    cancelled = 'cancelled',
+    accepted_by_driver = 'accepted_by_driver',
+    all = 'all orders',
+    picked_up_by_driver = 'picked_up_by_driver',
+    picked_up_by_client = 'picked_up_by_client'
+}
+
+export interface Courier extends AppUser {
+    transportation?: MapViewDirectionsMode;
+}
+
+export type MapViewDirectionsMode =
+    | 'DRIVING'
+    | 'BICYCLING'
+    | 'TRANSIT'
+    | 'WALKING';
