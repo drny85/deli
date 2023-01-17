@@ -34,7 +34,7 @@ const cartSlide = createSlice({
                 if (productIndex !== -1) {
                     //handle if product already in cart
                     state.items[productIndex].quantity += payload.quantity;
-                    state.total += payload.quantity * payload.size.price;
+                    state.total += payload.quantity * +payload.size.price;
                     state.quantity += payload.quantity;
                     saveCart(state);
                 } else {
@@ -42,7 +42,7 @@ const cartSlide = createSlice({
 
                     state.items.push(payload);
                     state.quantity += payload.quantity;
-                    state.total += payload.size.price * payload.quantity;
+                    state.total += +payload.size.price * payload.quantity;
                     saveCart(state);
                 }
 
@@ -76,18 +76,15 @@ const cartSlide = createSlice({
                 );
                 if (productIndex !== -1) {
                     //found product
-                    console.log('TTT', payload);
 
-                    console.log('found product');
                     if (state.items[productIndex].quantity > 1) {
                         state.items[productIndex].quantity -= 1;
                         state.quantity -= 1;
-                        state.total -= payload.size.price;
+                        state.total -= +payload.size.price;
                         saveCart(state);
                     } else {
-                        console.log('no found product');
                         state.items.splice(productIndex, 1);
-                        state.total -= payload.size.price;
+                        state.total -= +payload.size.price;
                         state.quantity -= 1;
                         saveCart(state);
                     }

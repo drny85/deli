@@ -110,15 +110,7 @@ const CartListItem = ({ item }: Props) => {
                                         quantity={item.quantity}
                                     />
                                     <Text capitalize>
-                                        {' '}
-                                        {item.size
-                                            ? item.size.size.substring(
-                                                  0,
-                                                  item.size.size === 'xlarge'
-                                                      ? 2
-                                                      : 1
-                                              )
-                                            : ''}
+                                        {item.size?.size || ''}
                                     </Text>
                                     <Text bold>
                                         $

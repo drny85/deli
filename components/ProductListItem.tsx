@@ -37,7 +37,7 @@ const ProductListItem = ({ item, index, themeTextColor }: Props) => {
                     horizontalAlign="space-between"
                 >
                     <Text darkText={themeTextColor} capitalize px_6>
-                        {item.size ? item.size.size.substring(0, 1) : ''}
+                        {item.size?.size}
                     </Text>
                     <Text darkText={themeTextColor} center>
                         {item.size ? item.size.price : item.price}
@@ -45,7 +45,7 @@ const ProductListItem = ({ item, index, themeTextColor }: Props) => {
                     <Text darkText={themeTextColor} bold>
                         $
                         {(
-                            (item.size ? item.size.price : +item.price) *
+                            (item.size ? +item.size.price : +item.price) *
                             item.quantity
                         ).toFixed(2)}
                     </Text>

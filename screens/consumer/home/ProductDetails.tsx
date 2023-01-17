@@ -284,7 +284,7 @@ const ProductDetails = ({
                     >
                         <Text bold medium>
                             $
-                            {(selected ? selected.price : +product.price) *
+                            {(selected ? +selected.price : +product.price) *
                                 quantity}
                         </Text>
                     </View>

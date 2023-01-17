@@ -6,9 +6,9 @@ import {
     View,
     StyleSheet
 } from 'react-native';
-import React, { useCallback, useMemo, useRef } from 'react';
+import React from 'react';
 import Screen from '../../../components/Screen';
-import Text from '../../../components/Text';
+
 import { useAppDispatch, useAppSelector } from '../../../redux/store';
 import { CartItem, setCart } from '../../../redux/consumer/cartSlide';
 
@@ -21,11 +21,6 @@ import { CommonActions, useNavigation } from '@react-navigation/native';
 import { setPreviosRoute } from '../../../redux/consumer/settingSlide';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { PREVIOUS_ROUTE } from '../../../constants';
-import {
-    BottomSheetModalProvider,
-    BottomSheetModal
-} from '@gorhom/bottom-sheet';
-import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 
 type Props = {};
 

@@ -6,7 +6,7 @@ import {
     TouchableOpacity,
     View
 } from 'react-native';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
 import Text from '../../../components/Text';
 import Header from '../../../components/Header';
@@ -31,6 +31,10 @@ import { addProduct } from '../../../redux/business/productsActions';
 import { PRODUCT_SIZES, P_Size } from '../../../utils/sizes';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import Loader from '../../../components/Loader';
+import { FontAwesome } from '@expo/vector-icons';
+import VariantionSelector from '../../../components/VariantionSelector';
+import KeyboardScreen from '../../../components/KeyboardScreen';
+import Stack from '../../../components/Stack';
 
 type Props = {};
 
@@ -38,15 +42,53 @@ const AddProduct = ({}: Props) => {
     const theme = useAppSelector((state) => state.theme);
     const { business } = useAppSelector((state) => state.business);
     const [sizes, setSizes] = useState<P_Size[]>([]);
-    const [increase, setIncrease] = useState(0.1);
+    const [variationQuantity, setVatientionQuantity] = useState<number>(1);
     const dispatch = useAppDispatch();
     const [comeInSizes, setComeInSizes] = useState(false);
+    const [variations, setVariations] = useState<P_Size[]>([]);
+    const [showVariationModal, setShowVariationModal] = useState(false);
     const { productImage } = useAppSelector((state) => state.products);
     const { categories } = useAppSelector((state) => state.categories);
+    const [showCategoryModal, setShowCategoryModal] = React.useState(false);
     const navigation = useNavigation();
     useSaveImage();
+    const { pickImage } = useImage();
 
-    const [showCategoryModal, setShowCategoryModal] = React.useState(false);
+    const variationtValidated: boolean = variations.some((v) => v.price !== '');
+
+    const onVariantionChange = useCallback(
+        (value: 'minus' | 'plus') => {
+            if (value === 'minus') {
+                if (variationQuantity === 2) {
+                    setComeInSizes(false);
+                    setVariations([]);
+                    setVatientionQuantity(1);
+                    //return;
+                } else {
+                    setVatientionQuantity((prev) => prev - 1);
+                }
+            } else if (value === 'plus') {
+                if (variationQuantity >= 6) return;
+                setVatientionQuantity((prev) => prev + 1);
+            }
+        },
+        [variationQuantity]
+    );
+
+    useEffect(() => {
+        if (variationQuantity === 1) {
+            setVariations([]);
+        } else if (variationQuantity >= 2) {
+            const vars = [...Array(variationQuantity)].map((_) => ({
+                id: '',
+                size: '',
+                price: ''
+            }));
+            setVariations(vars);
+        } else {
+            console.log('HEE');
+        }
+    }, [variationQuantity]);
 
     const [product, setProduct] = React.useState<Product>({
         name: '',
@@ -55,13 +97,9 @@ const AddProduct = ({}: Props) => {
         category: null,
         description: '',
         businessId: business?.id!,
-        sizes:
-            sizes.length > 0
-                ? sizes.sort((a, b) => (a.id > b.id ? 1 : -1)).reverse()
-                : []
+        unitSold: 0,
+        sizes: variations
     });
-
-    const { pickImage } = useImage();
 
     const handleAddProduct = async () => {
         try {
@@ -70,7 +108,7 @@ const AddProduct = ({}: Props) => {
 
             const newProduct: Product = {
                 ...product,
-                sizes,
+                sizes: variations,
                 businessId: business?.id!
             };
             const { payload } = await dispatch(addProduct(newProduct));
@@ -92,7 +130,8 @@ const AddProduct = ({}: Props) => {
             category: null,
             description: '',
             sizes: [],
-            businessId: business?.id!
+            businessId: business?.id!,
+            unitSold: 0
         });
         navigation.goBack();
     };
@@ -125,8 +164,9 @@ const AddProduct = ({}: Props) => {
             return false;
         }
         if (comeInSizes) {
-            if (sizes.length === 0) {
-                Alert.alert('Error', 'Please select at least one size');
+            if (variations.length === 0 || !variationtValidated) {
+                Alert.alert('Error', 'Please fill out the variations');
+                setShowVariationModal(true);
                 return false;
             }
         }
@@ -202,6 +242,14 @@ const AddProduct = ({}: Props) => {
                         }
                     />
                     <InputField
+                        leftIcon={
+                            <FontAwesome
+                                style={{ paddingLeft: SIZES.base }}
+                                name="dollar"
+                                size={16}
+                                color={theme.TEXT_COLOR}
+                            />
+                        }
                         keyboardType="numeric"
                         value={product.price as string}
                         maxLenght={5}
@@ -212,7 +260,7 @@ const AddProduct = ({}: Props) => {
                         }
                     />
                     <AnimatePresence>
-                        {product.image && product.price && product.name && (
+                        {product.price && product.name && (
                             <MotiView
                                 from={{ opacity: 0, scale: 0 }}
                                 animate={{ opacity: 1, scale: 1 }}
@@ -224,7 +272,7 @@ const AddProduct = ({}: Props) => {
                                         marginVertical: SIZES.padding
                                     }}
                                 >
-                                    <Text px_4 bold>
+                                    <Text bold py_6>
                                         Category
                                     </Text>
                                     <TouchableOpacity
@@ -253,197 +301,92 @@ const AddProduct = ({}: Props) => {
                                 </Row>
                                 <Row
                                     containerStyle={{
-                                        marginVertical: SIZES.padding
+                                        marginBottom: SIZES.padding * 1.5
                                     }}
                                 >
-                                    <Text bold px_4>
-                                        Come In Sizes?
-                                    </Text>
+                                    <Text bold>Come In Variation?</Text>
                                     <Switch
+                                        style={{ marginLeft: 6 }}
                                         trackColor={{
                                             true: theme.SHADOW_COLOR,
                                             false: theme.SHADOW_COLOR
                                         }}
                                         value={comeInSizes}
                                         onValueChange={() =>
-                                            setComeInSizes((prev) => !prev)
+                                            setComeInSizes((prev) => {
+                                                if (prev) {
+                                                    setVatientionQuantity(1);
+                                                } else {
+                                                    setVatientionQuantity(2);
+                                                }
+                                                return !prev;
+                                            })
                                         }
                                         thumbColor={theme.ASCENT}
                                     />
                                 </Row>
+
+                                <VariantionSelector
+                                    show={comeInSizes}
+                                    onPressDone={() => {
+                                        setShowVariationModal(true);
+                                    }}
+                                    onPressVariation={onVariantionChange}
+                                    variationQuantity={variationQuantity}
+                                />
+
                                 <AnimatePresence>
-                                    {comeInSizes && (
+                                    {variationtValidated && (
                                         <MotiView
-                                            style={{
-                                                backgroundColor:
-                                                    theme.BACKGROUND_COLOR,
-                                                shadowOffset: {
-                                                    width: 2,
-                                                    height: 2
-                                                },
-                                                shadowOpacity: 0.4,
-                                                shadowRadius: 3,
-                                                shadowColor: theme.SHADOW_COLOR,
-                                                borderRadius: SIZES.radius,
-                                                padding: SIZES.base,
-                                                alignSelf: 'center',
-                                                justifyContent: 'center',
-                                                alignItems: 'center'
-                                            }}
                                             from={{
                                                 opacity: 0,
-                                                translateY: -10
+                                                translateY: -20
                                             }}
                                             animate={{
                                                 opacity: 1,
                                                 translateY: 0
                                             }}
-                                            transition={{
-                                                type: 'timing'
-                                            }}
-                                            exit={{
-                                                opacity: 0,
-                                                translateY: -10
-                                            }}
                                         >
-                                            <Text center>
-                                                Increase price per size by:{' '}
-                                                {(increase * 100).toFixed(0)}%
-                                            </Text>
-                                            <Slider
-                                                style={{
-                                                    width: SIZES.width * 0.6,
-                                                    maxWidth: 500,
-                                                    height: 30,
-                                                    marginVertical:
-                                                        SIZES.base * 1.5
+                                            <Stack
+                                                containerStyle={{
+                                                    width: '100%',
+                                                    shadowColor:
+                                                        theme.SHADOW_COLOR,
+                                                    shadowOffset: {
+                                                        width: 4,
+                                                        height: 4
+                                                    },
+                                                    elevation: 6,
+                                                    shadowOpacity: 0.5,
+                                                    shadowRadius: 6,
+                                                    borderRadius: SIZES.radius,
+                                                    backgroundColor:
+                                                        theme.BACKGROUND_COLOR
                                                 }}
-                                                minimumValue={0.1}
-                                                maximumValue={1}
-                                                value={increase}
-                                                minimumTrackTintColor={
-                                                    theme.ASCENT
-                                                }
-                                                maximumTrackTintColor={
-                                                    theme.SHADOW_COLOR
-                                                }
-                                                step={0.1}
-                                                thumbTintColor={theme.ASCENT}
-                                                onValueChange={(value) => {
-                                                    setIncrease(value);
-                                                }}
-                                            />
-                                            <View
-                                                style={{
-                                                    flexDirection: 'row',
-                                                    justifyContent:
-                                                        'space-evenly'
-                                                }}
+                                                center
                                             >
-                                                {PRODUCT_SIZES.map(
-                                                    (size, index) => (
-                                                        <View key={size.id}>
-                                                            <Row>
-                                                                <Text
-                                                                    capitalize
-                                                                    bold
-                                                                    px_4
-                                                                >
-                                                                    {size.size ===
-                                                                    'xlarge'
-                                                                        ? size.size.substring(
-                                                                              0,
-                                                                              2
-                                                                          )
-                                                                        : size
-                                                                              .size[0]}
-                                                                </Text>
-                                                                <Switch
-                                                                    thumbColor={
-                                                                        theme.ASCENT
-                                                                    }
-                                                                    trackColor={{
-                                                                        true: theme.SHADOW_COLOR,
-                                                                        false: theme.SHADOW_COLOR
-                                                                    }}
-                                                                    value={
-                                                                        sizes.findIndex(
-                                                                            (
-                                                                                s
-                                                                            ) =>
-                                                                                s.size ===
-                                                                                size.size
-                                                                        ) !== -1
-                                                                    }
-                                                                    onValueChange={(
-                                                                        e
-                                                                    ) => {
-                                                                        setSizes(
-                                                                            (
-                                                                                prev
-                                                                            ) => {
-                                                                                if (
-                                                                                    e
-                                                                                ) {
-                                                                                    return [
-                                                                                        ...prev,
-                                                                                        {
-                                                                                            ...size,
-                                                                                            price:
-                                                                                                index ===
-                                                                                                0
-                                                                                                    ? +(+product.price).toFixed(
-                                                                                                          2
-                                                                                                      )
-                                                                                                    : +(
-                                                                                                          +product.price *
-                                                                                                              increase *
-                                                                                                              index +
-                                                                                                          +product.price
-                                                                                                      ).toFixed(
-                                                                                                          2
-                                                                                                      )
-                                                                                        }
-                                                                                    ];
-                                                                                } else {
-                                                                                    return prev.filter(
-                                                                                        (
-                                                                                            s
-                                                                                        ) =>
-                                                                                            s.size !==
-                                                                                            size.size
-                                                                                    );
-                                                                                }
-                                                                            }
-                                                                        );
-                                                                    }}
-                                                                />
-                                                            </Row>
-                                                            {product.price && (
-                                                                <Text
-                                                                    py_4
-                                                                    center
-                                                                >
-                                                                    $
-                                                                    {(index ===
-                                                                    0
-                                                                        ? +product.price
-                                                                        : +product.price *
-                                                                              increase *
-                                                                              index +
-                                                                          +product.price
-                                                                    ).toFixed(
-                                                                        2
-                                                                    )}
-                                                                </Text>
-                                                            )}
+                                                <Row
+                                                    containerStyle={{
+                                                        width: '80%'
+                                                    }}
+                                                    horizontalAlign="space-evenly"
+                                                >
+                                                    {variations.map((v) => (
+                                                        <View key={v.id}>
+                                                            <Text bold>
+                                                                {v.size}
+                                                            </Text>
+                                                            <Text center>
+                                                                ${v.price}
+                                                            </Text>
                                                         </View>
-                                                    )
-                                                )}
-                                            </View>
+                                                    ))}
+                                                </Row>
+                                            </Stack>
                                         </MotiView>
                                     )}
                                 </AnimatePresence>
+
                                 <InputField
                                     value={product.description!}
                                     multiline
@@ -510,6 +453,100 @@ const AddProduct = ({}: Props) => {
                             />
                         ))}
                     </ScrollView>
+                </View>
+            </Modal>
+            <Modal
+                visible={showVariationModal}
+                presentationStyle="overFullScreen"
+                animationType="slide"
+            >
+                <View
+                    style={{
+                        padding: SIZES.padding,
+                        flex: 1,
+                        marginTop: SIZES.statusBarHeight
+                    }}
+                >
+                    <Header
+                        title="Fill Out Variations"
+                        onPressBack={() => setShowVariationModal(false)}
+                        rightIcon={
+                            <View>
+                                <Row>
+                                    <Text px_6>Add More</Text>
+                                    <TouchableOpacity
+                                        onPress={() =>
+                                            onVariantionChange('plus')
+                                        }
+                                    >
+                                        <FontAwesome
+                                            name="plus-circle"
+                                            size={32}
+                                            color={theme.TEXT_COLOR}
+                                        />
+                                    </TouchableOpacity>
+                                </Row>
+                            </View>
+                        }
+                    />
+                    <KeyboardScreen>
+                        <View
+                            style={{
+                                flex: 1,
+                                alignItems: 'center',
+                                width: '100%'
+                            }}
+                        >
+                            {variations.map((v, index) => (
+                                <Row
+                                    containerStyle={{
+                                        width: '100%',
+                                        maxWidth: 600
+                                    }}
+                                    key={index}
+                                >
+                                    <InputField
+                                        mainStyle={{ width: '50%' }}
+                                        value={v.size}
+                                        autoCapitalize="words"
+                                        placeholder="Variation Name"
+                                        onChangeText={(text) => {
+                                            variations[index].size = text;
+                                            variations[index].id = index;
+                                            setVariations([...variations]);
+                                        }}
+                                    />
+                                    <InputField
+                                        mainStyle={{ width: '70%' }}
+                                        leftIcon={
+                                            <FontAwesome
+                                                style={{
+                                                    paddingLeft: SIZES.base
+                                                }}
+                                                name="dollar"
+                                                size={16}
+                                                color={theme.TEXT_COLOR}
+                                            />
+                                        }
+                                        keyboardType="numeric"
+                                        value={v.price as string}
+                                        placeholder="Price"
+                                        onChangeText={(text) => {
+                                            //console.log(text);
+                                            variations[index].price = +text;
+
+                                            setVariations([...variations]);
+                                        }}
+                                    />
+                                </Row>
+                            ))}
+
+                            <Button
+                                title="Done"
+                                onPress={() => setShowVariationModal(false)}
+                            />
+                        </View>
+                    </KeyboardScreen>
                 </View>
             </Modal>
         </KeyboardAwareScrollView>
