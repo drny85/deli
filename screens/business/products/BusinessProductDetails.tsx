@@ -5,11 +5,10 @@ import {
     TouchableOpacity,
     View
 } from 'react-native';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 import Text from '../../../components/Text';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { ConsumerHomeStackScreens } from '../../../navigation/consumer/typing';
 import { useAppDispatch, useAppSelector } from '../../../redux/store';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SIZES } from '../../../constants';
@@ -18,99 +17,49 @@ import { FontAwesome } from '@expo/vector-icons';
 import RadioButton from '../../../components/RadioButton';
 import { P_Size } from '../../../utils/sizes';
 import Button from '../../../components/Button';
-import Quantifier from '../../../components/Quantifier';
-import { AnimatePresence } from 'moti';
-import {
-    addToCart,
-    CartItem,
-    setCart
-} from '../../../redux/consumer/cartSlide';
-import InputField from '../../../components/InputField';
+
 import Stack from '../../../components/Stack';
 
 import KeyboardScreen from '../../../components/KeyboardScreen';
+import { BusinessProductsStackScreens } from '../../../navigation/business/typing';
 
-type Props = NativeStackScreenProps<ConsumerHomeStackScreens, 'ProductDetails'>;
+import Loader from '../../../components/Loader';
 
-const ProductDetails = ({
+import Divider from '../../../components/Divider';
+import { useBusinessOrders } from '../../../hooks/useBusinessOrders';
+import moment from 'moment';
+import { deleteProduct } from '../../../redux/business/productsActions';
+
+type Props = NativeStackScreenProps<
+    BusinessProductsStackScreens,
+    'BusinessProductDetails'
+>;
+
+const BusinessProductDetails = ({
     navigation,
     route: {
         params: { product }
     }
 }: Props) => {
     const theme = useAppSelector((state) => state.theme);
+    const { loading, orders } = useBusinessOrders();
+    const [lastOrdered, setLastOrdered] = useState('');
 
     const dispatch = useAppDispatch();
-    const { items } = useAppSelector((state) => state.cart);
+
     const [selected, setSelected] = React.useState<P_Size | null>(null);
-    const [quantity, setQuatity] = React.useState<number>(1);
-    const [instructions, setInstructions] = React.useState<string>('');
 
-    const emptyCartAndAddNewProduct = async () => {
-        try {
-            dispatch(setCart({ quantity: 0, items: [], total: 0 }));
-            const item: CartItem = {
-                ...product,
-                quantity: quantity,
-                size: selected,
-                instructions: instructions
-            };
-            dispatch(addToCart(item));
-            navigation.pop();
-        } catch (error) {
-            console.log(error);
+    useEffect(() => {
+        if (loading || !orders.length) return;
+        const found = orders
+            .filter((order) => order.items.some((o) => o.id === product.id))
+            .sort((a, b) => (a.orderDate > b.orderDate ? -1 : 1));
+        if (found.length) {
+            setLastOrdered(found[0].orderDate);
         }
-    };
+    }, [loading, orders.length]);
 
-    const handleAddToCart = React.useCallback(
-        async (
-            isSelected: P_Size | null,
-            quantity: number,
-            instructions: string
-        ) => {
-            try {
-                const item: CartItem = {
-                    ...product,
-                    quantity: quantity,
-                    size: isSelected,
-                    instructions: instructions
-                };
-
-                dispatch(addToCart({ ...item }));
-                navigation.pop();
-            } catch (error) {
-                console.log(error);
-            }
-        },
-        [selected]
-    );
-
-    const checkIfItemIfFromCurrentStore = React.useCallback(async () => {
-        if (items.length > 0) {
-            if (items[0].businessId !== product.businessId) {
-                Alert.alert(
-                    'Items in Cart',
-                    'You are already shopping from another business, Switch business?',
-                    [
-                        {
-                            text: 'Stay Here',
-                            style: 'cancel'
-                        },
-                        {
-                            text: 'Switch',
-                            onPress: emptyCartAndAddNewProduct,
-                            style: 'destructive'
-                        }
-                    ]
-                );
-                return false;
-            } else {
-                await handleAddToCart(selected, quantity, instructions);
-            }
-        } else {
-            await handleAddToCart(selected, quantity, instructions);
-        }
-    }, [selected, quantity, instructions]);
+    if (!product) return <Loader />;
 
     return (
         <KeyboardScreen containerStyle={{ flex: 1 }} extraHeight={30}>
@@ -120,24 +69,64 @@ const ProductDetails = ({
                     resizeMode="cover"
                     style={[styles.image]}
                 >
-                    <LinearGradient
-                        colors={[
-                            'rgba(0,0,0,0.1)',
-                            'rgba(0,0,0,0.3)',
-                            'rgba(0,0,0,0.7)'
-                        ]}
-                        start={{ x: 0, y: 0.3 }}
-                        end={{ x: 1, y: 0.8 }}
-                        style={[styles.back]}
+                    <Row
+                        containerStyle={{
+                            zIndex: 200,
+                            marginTop: SIZES.statusBarHeight,
+                            paddingHorizontal: SIZES.padding
+                        }}
+                        horizontalAlign="space-between"
                     >
-                        <TouchableOpacity onPress={() => navigation.goBack()}>
+                        <LinearGradient
+                            colors={[
+                                'rgba(0,0,0,0.1)',
+                                'rgba(0,0,0,0.3)',
+                                'rgba(0,0,0,0.7)'
+                            ]}
+                            start={{ x: 0, y: 0.3 }}
+                            end={{ x: 1, y: 0.8 }}
+                            style={[styles.back]}
+                        >
+                            <TouchableOpacity
+                                onPress={() => navigation.goBack()}
+                            >
+                                <FontAwesome
+                                    name="chevron-left"
+                                    size={24}
+                                    color={theme.WHITE_COLOR}
+                                />
+                            </TouchableOpacity>
+                        </LinearGradient>
+
+                        <TouchableOpacity
+                            style={{ paddingRight: SIZES.padding }}
+                            onPress={() => {
+                                Alert.alert(
+                                    'Delete Product',
+                                    'Are you sure you want to delete this product?',
+                                    [
+                                        { text: 'Cancel', style: 'cancel' },
+                                        {
+                                            text: 'Yes, Delete it',
+                                            style: 'destructive',
+                                            onPress: async () => {
+                                                await dispatch(
+                                                    deleteProduct(product)
+                                                );
+                                                navigation.goBack();
+                                            }
+                                        }
+                                    ]
+                                );
+                            }}
+                        >
                             <FontAwesome
-                                name="chevron-left"
-                                size={24}
-                                color={theme.WHITE_COLOR}
+                                name="trash-o"
+                                size={36}
+                                color={'red'}
                             />
                         </TouchableOpacity>
-                    </LinearGradient>
+                    </Row>
                     <LinearGradient
                         colors={[
                             'rgba(0,0,0,0.1)',
@@ -180,39 +169,49 @@ const ProductDetails = ({
                         </Row>
                     </LinearGradient>
                 </ImageBackground>
-                <AnimatePresence>
-                    {product.sizes && product.sizes.length === 0 && (
-                        <>
-                            <Text py_4 bold center>
-                                Qty
-                            </Text>
-                            <Quantifier
-                                onPressLeft={() => {
-                                    setQuatity((prev) => {
-                                        if (prev > 1) return prev - 1;
-                                        return 1;
-                                    });
-                                }}
-                                onPressRight={() => {
-                                    setQuatity((prev) => {
-                                        return prev + 1;
-                                    });
-                                }}
-                                quantity={quantity}
-                            />
-                        </>
-                    )}
-                </AnimatePresence>
+
                 <View>
-                    <Stack center>
+                    <Stack
+                        containerStyle={{
+                            backgroundColor: theme.SECONDARY_BUTTON_COLOR
+                        }}
+                        center
+                    >
+                        <Text bold medium>
+                            Product Description
+                        </Text>
                         <Text medium py_6 raleway_italic>
                             {product.description}
                         </Text>
                     </Stack>
+                    <Divider />
+                    <Stack
+                        containerStyle={{
+                            backgroundColor: theme.SECONDARY_BUTTON_COLOR
+                        }}
+                        center
+                    >
+                        <Text bold medium>
+                            Product Sales Info
+                        </Text>
+                        <Row>
+                            <Text bold py_4>
+                                Units Sold: <Text>{product.unitSold}</Text>
+                            </Text>
+                            <Text bold px_6>
+                                Last Ordered{' '}
+                                <Text>
+                                    {lastOrdered
+                                        ? moment(lastOrdered).format('ll')
+                                        : 'None'}{' '}
+                                </Text>
+                            </Text>
+                        </Row>
+                    </Stack>
                     {product.sizes && product.sizes.length > 0 && (
                         <View>
-                            <Text raleway_bold medium center>
-                                Pick One
+                            <Text bold medium center>
+                                Variations
                             </Text>
                             <Row
                                 horizontalAlign="space-evenly"
@@ -264,60 +263,30 @@ const ProductDetails = ({
                             </Row>
                         </View>
                     )}
-                    <Stack center>
-                        <InputField
-                            value={instructions}
-                            textContainerStyle={{ color: theme.SHADOW_COLOR }}
-                            label={'Special instructions'}
-                            containerStyle={{ borderRadius: SIZES.base }}
-                            multiline
-                            onChangeText={setInstructions}
-                            placeholder="Dressing on the side"
-                        />
-                    </Stack>
                 </View>
-            </View>
-            <View style={[styles.btn]}>
-                <Row horizontalAlign="space-evenly">
-                    <View
-                        style={{
-                            shadowOffset: { width: 3, height: 3 },
-                            shadowColor: theme.SHADOW_COLOR,
-                            shadowOpacity: 0.5,
-                            backgroundColor: theme.BACKGROUND_COLOR,
-                            paddingVertical: SIZES.base * 1.5,
-                            paddingHorizontal: SIZES.padding * 1.5,
-                            borderRadius: SIZES.radius,
-                            elevation: 4,
-                            borderWidth: 0.3,
-                            borderColor: theme.SHADOW_COLOR
-                        }}
-                    >
-                        <Text bold medium>
-                            $
-                            {(selected ? +selected.price : +product.price) *
-                                quantity}
-                        </Text>
-                    </View>
+                <View
+                    style={{ width: '60%', alignSelf: 'center', marginTop: 50 }}
+                >
                     <Button
-                        disabled={
-                            product.sizes &&
-                            product.sizes.length > 0 &&
-                            selected === null
+                        leftIcon={
+                            <FontAwesome
+                                name="edit"
+                                size={24}
+                                color={theme.WHITE_COLOR}
+                            />
                         }
-                        containerStyle={{
-                            paddingVertical: SIZES.padding * 0.8
+                        title="Edit Product"
+                        onPress={() => {
+                            navigation.navigate('AddProduct', { product });
                         }}
-                        title={`Add to Cart`}
-                        onPress={checkIfItemIfFromCurrentStore}
                     />
-                </Row>
+                </View>
             </View>
         </KeyboardScreen>
     );
 };
 
-export default ProductDetails;
+export default BusinessProductDetails;
 const styles = StyleSheet.create({
     name: {
         position: 'absolute',
@@ -327,9 +296,6 @@ const styles = StyleSheet.create({
         paddingVertical: SIZES.padding
     },
     back: {
-        position: 'absolute',
-        top: SIZES.statusBarHeight,
-        left: 20,
         width: 50,
         height: 50,
         borderRadius: 25,

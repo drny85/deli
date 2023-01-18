@@ -27,7 +27,11 @@ import CategoryTile from '../../../components/CategoryTile';
 
 import Button from '../../../components/Button';
 import { useSaveImage } from '../../../utils/saveImage';
-import { addProduct } from '../../../redux/business/productsActions';
+import {
+    addProduct,
+    deleteProduct,
+    updateProduct
+} from '../../../redux/business/productsActions';
 import { PRODUCT_SIZES, P_Size } from '../../../utils/sizes';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import Loader from '../../../components/Loader';
@@ -35,13 +39,15 @@ import { FontAwesome } from '@expo/vector-icons';
 import VariantionSelector from '../../../components/VariantionSelector';
 import KeyboardScreen from '../../../components/KeyboardScreen';
 import Stack from '../../../components/Stack';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { BusinessProductsStackScreens } from '../../../navigation/business/typing';
 
-type Props = {};
+type Props = NativeStackScreenProps<BusinessProductsStackScreens, 'AddProduct'>;
 
-const AddProduct = ({}: Props) => {
+const AddProduct = ({ route: { params } }: Props) => {
     const theme = useAppSelector((state) => state.theme);
     const { business } = useAppSelector((state) => state.business);
-    const [sizes, setSizes] = useState<P_Size[]>([]);
+    const navigation = useNavigation();
     const [variationQuantity, setVatientionQuantity] = useState<number>(1);
     const dispatch = useAppDispatch();
     const [comeInSizes, setComeInSizes] = useState(false);
@@ -50,11 +56,12 @@ const AddProduct = ({}: Props) => {
     const { productImage } = useAppSelector((state) => state.products);
     const { categories } = useAppSelector((state) => state.categories);
     const [showCategoryModal, setShowCategoryModal] = React.useState(false);
-    const navigation = useNavigation();
+    const [variationValidated, setVariationValidated] = useState(
+        variations.some((v) => v.price !== '')
+    );
+
     useSaveImage();
     const { pickImage } = useImage();
-
-    const variationtValidated: boolean = variations.some((v) => v.price !== '');
 
     const onVariantionChange = useCallback(
         (value: 'minus' | 'plus') => {
@@ -77,13 +84,19 @@ const AddProduct = ({}: Props) => {
 
     useEffect(() => {
         if (variationQuantity === 1) {
-            setVariations([]);
+            setComeInSizes(false);
         } else if (variationQuantity >= 2) {
-            const vars = [...Array(variationQuantity)].map((_) => ({
-                id: '',
-                size: '',
-                price: ''
-            }));
+            let vars: P_Size[] = [];
+            if (params?.product) {
+                vars = product.sizes;
+            } else {
+                vars = [...Array(variationQuantity)].map((_) => ({
+                    id: '',
+                    size: '',
+                    price: ''
+                }));
+            }
+
             setVariations(vars);
         } else {
             console.log('HEE');
@@ -108,14 +121,20 @@ const AddProduct = ({}: Props) => {
 
             const newProduct: Product = {
                 ...product,
-                sizes: variations,
+                sizes: comeInSizes ? variations : [],
                 businessId: business?.id!
             };
-            const { payload } = await dispatch(addProduct(newProduct));
-            if (payload) {
-                resetProduct();
+            if (params?.product) {
+                const { payload } = await dispatch(updateProduct(newProduct));
+                if (payload) {
+                    navigation.goBack();
+                }
+            } else {
+                const { payload } = await dispatch(addProduct(newProduct));
+                if (payload) {
+                    resetProduct();
+                }
             }
-            console.log(newProduct);
         } catch (error) {
             console.log(error);
         }
@@ -164,7 +183,7 @@ const AddProduct = ({}: Props) => {
             return false;
         }
         if (comeInSizes) {
-            if (variations.length === 0 || !variationtValidated) {
+            if (variations.length === 0 || !variationValidated) {
                 Alert.alert('Error', 'Please fill out the variations');
                 setShowVariationModal(true);
                 return false;
@@ -181,12 +200,30 @@ const AddProduct = ({}: Props) => {
         if (productImage) {
             setProduct({ ...product, image: productImage });
         }
-        if (!comeInSizes) {
-            setSizes([]);
-        } else {
-            setSizes(sizes);
+    }, [productImage]);
+
+    useEffect(() => {
+        if (!params?.product) return;
+        const { product } = params;
+
+        setProduct({ ...product, price: product.price as string });
+
+        if (product.sizes.length > 0) {
+            setVatientionQuantity(product.sizes.length);
+            setVariationValidated(product.sizes.some((s) => s.price !== ''));
+
+            setComeInSizes(true);
+            setProduct({ ...product, price: product.sizes[0].price });
+
+            setVariations(
+                product.sizes.map((s) => ({
+                    id: s.id,
+                    size: s.size,
+                    price: s.price as string
+                }))
+            );
         }
-    }, [productImage, comeInSizes]);
+    }, [params?.product]);
 
     if (!business) return <Loader />;
     return (
@@ -251,7 +288,7 @@ const AddProduct = ({}: Props) => {
                             />
                         }
                         keyboardType="numeric"
-                        value={product.price as string}
+                        value={product.price.toString()}
                         maxLenght={5}
                         placeholder="Ex. 2.99"
                         label="Product's Price"
@@ -336,61 +373,83 @@ const AddProduct = ({}: Props) => {
                                 />
 
                                 <AnimatePresence>
-                                    {variationtValidated && (
-                                        <MotiView
-                                            from={{
-                                                opacity: 0,
-                                                translateY: -20
-                                            }}
-                                            animate={{
-                                                opacity: 1,
-                                                translateY: 0
-                                            }}
-                                        >
-                                            <Stack
-                                                containerStyle={{
-                                                    width: '100%',
-                                                    shadowColor:
-                                                        theme.SHADOW_COLOR,
-                                                    shadowOffset: {
-                                                        width: 4,
-                                                        height: 4
-                                                    },
-                                                    elevation: 6,
-                                                    shadowOpacity: 0.5,
-                                                    shadowRadius: 6,
-                                                    borderRadius: SIZES.radius,
-                                                    backgroundColor:
-                                                        theme.BACKGROUND_COLOR
+                                    {variationValidated &&
+                                        variations.length > 0 && (
+                                            <MotiView
+                                                from={{
+                                                    opacity: 0,
+                                                    translateY: -20
                                                 }}
-                                                center
+                                                animate={{
+                                                    opacity: 1,
+                                                    translateY: 0
+                                                }}
                                             >
-                                                <Row
+                                                <Stack
                                                     containerStyle={{
-                                                        width: '80%'
+                                                        marginBottom: 12,
+                                                        width: '100%',
+                                                        shadowColor:
+                                                            theme.SHADOW_COLOR,
+                                                        shadowOffset: {
+                                                            width: 4,
+                                                            height: 4
+                                                        },
+                                                        elevation: 6,
+                                                        shadowOpacity: 0.5,
+                                                        shadowRadius: 6,
+                                                        borderRadius:
+                                                            SIZES.radius,
+                                                        backgroundColor:
+                                                            theme.BACKGROUND_COLOR
                                                     }}
-                                                    horizontalAlign="space-evenly"
+                                                    center
                                                 >
-                                                    {variations.map((v) => (
-                                                        <View key={v.id}>
-                                                            <Text bold>
-                                                                {v.size}
-                                                            </Text>
-                                                            <Text center>
-                                                                ${v.price}
-                                                            </Text>
-                                                        </View>
-                                                    ))}
-                                                </Row>
-                                            </Stack>
-                                        </MotiView>
-                                    )}
+                                                    <Row
+                                                        containerStyle={{
+                                                            width: '80%'
+                                                        }}
+                                                        horizontalAlign="space-evenly"
+                                                    >
+                                                        {variations.map((v) => {
+                                                            if (v.id === '')
+                                                                return;
+                                                            return (
+                                                                <View
+                                                                    key={
+                                                                        v.id.toString() +
+                                                                        v.size
+                                                                    }
+                                                                >
+                                                                    <Text
+                                                                        capitalize
+                                                                        bold
+                                                                    >
+                                                                        {v.size}
+                                                                    </Text>
+                                                                    <Text
+                                                                        center
+                                                                    >
+                                                                        $
+                                                                        {
+                                                                            v.price
+                                                                        }
+                                                                    </Text>
+                                                                </View>
+                                                            );
+                                                        })}
+                                                    </Row>
+                                                </Stack>
+                                            </MotiView>
+                                        )}
                                 </AnimatePresence>
 
                                 <InputField
                                     value={product.description!}
                                     multiline
-                                    containerStyle={{ minHeight: 80 }}
+                                    containerStyle={{
+                                        minHeight: 80
+                                    }}
                                     placeholder="Ex. a delicious coffee with milk and cream"
                                     label="Product's Description"
                                     onChangeText={(text) => {
@@ -418,7 +477,11 @@ const AddProduct = ({}: Props) => {
                                 marginHorizontal: 20,
                                 width: '80%'
                             }}
-                            title="Add Product"
+                            title={
+                                params?.product
+                                    ? 'Update Product'
+                                    : 'Add Product'
+                            }
                             onPress={handleAddProduct}
                         />
                     </View>
@@ -503,7 +566,7 @@ const AddProduct = ({}: Props) => {
                                         width: '100%',
                                         maxWidth: 600
                                     }}
-                                    key={index}
+                                    key={index.toString() + v.size + v.price}
                                 >
                                     <InputField
                                         mainStyle={{ width: '50%' }}
@@ -529,11 +592,11 @@ const AddProduct = ({}: Props) => {
                                             />
                                         }
                                         keyboardType="numeric"
-                                        value={v.price as string}
+                                        value={`${v.price}`}
                                         placeholder="Price"
                                         onChangeText={(text) => {
                                             //console.log(text);
-                                            variations[index].price = +text;
+                                            variations[index].price = text;
 
                                             setVariations([...variations]);
                                         }}

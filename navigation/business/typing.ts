@@ -1,4 +1,5 @@
 import { NavigatorScreenParams } from '@react-navigation/native';
+import { Product } from '../../redux/business/productsSlice';
 import { ConnectedAccountParams } from '../../types';
 
 export type BusinessnBottomTabScreens = {
@@ -17,8 +18,9 @@ export type BusinessOrdersStackScreens = {
 };
 export type BusinessProductsStackScreens = {
     Products: undefined;
-    AddProduct: undefined;
+    AddProduct: { product: Product } | undefined;
     AddCategoryScreen: undefined;
+    BusinessProductDetails: { product: Product };
 };
 export type BusinessSettingsStackScreens = {
     Settings: undefined;

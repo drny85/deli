@@ -112,7 +112,12 @@ const Products = ({}: Props) => {
             <ProductsList
                 categories={categories}
                 products={products}
-                onPressProduct={() => {}}
+                onPressProduct={(product) => {
+                    navigation.navigate('BusinessProducts', {
+                        screen: 'BusinessProductDetails',
+                        params: { product }
+                    });
+                }}
             />
         </Screen>
     );
