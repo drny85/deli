@@ -39,7 +39,7 @@ import { useReadyForDeliveryOrders } from '../../hooks/useReadyForDeliveryOrders
 let a: NodeJS.Timeout;
 
 const ACCEPTED_TIME = 'ACCEPTED_TIME';
-const EGDE_PADDING = 200;
+const EGDE_PADDING = 100;
 
 type Props = NativeStackScreenProps<CourierStackScreens, 'DeliveryView'>;
 
@@ -242,8 +242,8 @@ const DeliveryView = ({
                     ['origin', 'business'],
                     {
                         edgePadding: {
-                            left: EGDE_PADDING / 2,
-                            right: EGDE_PADDING / 2,
+                            left: EGDE_PADDING,
+                            right: EGDE_PADDING,
                             top: EGDE_PADDING,
                             bottom: EGDE_PADDING * 1.5
                         }
@@ -256,8 +256,8 @@ const DeliveryView = ({
                     ['business', 'destination'],
                     {
                         edgePadding: {
-                            left: EGDE_PADDING / 2,
-                            right: EGDE_PADDING / 2,
+                            left: EGDE_PADDING,
+                            right: EGDE_PADDING,
                             top: EGDE_PADDING,
                             bottom: EGDE_PADDING * 1.5
                         }
@@ -269,20 +269,35 @@ const DeliveryView = ({
                     ['origin', 'business', 'destination'],
                     {
                         edgePadding: {
-                            left: 50,
-                            right: 50,
-                            top: 50,
-                            bottom: 50
+                            left: EGDE_PADDING,
+                            right: EGDE_PADDING,
+                            top: EGDE_PADDING,
+                            bottom: EGDE_PADDING * 1.5
                         }
                     }
                 );
             }, 5000);
+
+            a = setTimeout(() => {
+                mapViewRef.current?.fitToSuppliedMarkers(
+                    ['origin', 'business'],
+                    {
+                        edgePadding: {
+                            left: EGDE_PADDING,
+                            right: EGDE_PADDING,
+                            top: EGDE_PADDING,
+                            bottom: EGDE_PADDING * 1.5
+                        }
+                    }
+                );
+            }, 7000);
         }
         if (order.status === ORDER_STATUS.accepted_by_driver) {
             setDestination({
                 lat: business?.coors?.lat!,
                 lng: business?.coors?.lng!
             });
+            saveAcceptedTimeStamp();
 
             mapViewRef.current?.animateToRegion({
                 latitude: business?.coors?.lat!,
@@ -295,8 +310,8 @@ const DeliveryView = ({
                     ['origin', 'business'],
                     {
                         edgePadding: {
-                            left: EGDE_PADDING / 2,
-                            right: EGDE_PADDING / 2,
+                            left: EGDE_PADDING,
+                            right: EGDE_PADDING,
                             top: EGDE_PADDING,
                             bottom: EGDE_PADDING * 1.5
                         }
@@ -315,19 +330,18 @@ const DeliveryView = ({
                 latitudeDelta: 0.02,
                 longitudeDelta: 0.02
             });
-            a = setTimeout(() => {
-                mapViewRef.current?.fitToSuppliedMarkers(
-                    ['business', 'destination'],
-                    {
-                        edgePadding: {
-                            left: EGDE_PADDING / 2,
-                            right: EGDE_PADDING / 2,
-                            top: EGDE_PADDING,
-                            bottom: EGDE_PADDING
-                        }
+
+            mapViewRef.current?.fitToSuppliedMarkers(
+                ['business', 'destination'],
+                {
+                    edgePadding: {
+                        left: EGDE_PADDING,
+                        right: EGDE_PADDING,
+                        top: EGDE_PADDING,
+                        bottom: EGDE_PADDING
                     }
-                );
-            }, 2000);
+                }
+            );
         }
 
         return () => {
@@ -429,41 +443,6 @@ const DeliveryView = ({
             lat: order.courier.coors?.lat!,
             lng: order.courier.coors?.lng!
         });
-        if (order.status === ORDER_STATUS.accepted_by_driver) {
-            setDestination({
-                lat: business?.coors?.lat!,
-                lng: business?.coors?.lng!
-            });
-
-            mapViewRef.current?.fitToSuppliedMarkers(['origin', 'business'], {
-                edgePadding: {
-                    left: EGDE_PADDING / 100,
-                    right: EGDE_PADDING / 200,
-                    top: EGDE_PADDING,
-                    bottom: EGDE_PADDING * 1.5
-                },
-                animated: true
-            });
-            saveAcceptedTimeStamp();
-        }
-        if (order.status === ORDER_STATUS.picked_up_by_driver) {
-            setDestination({
-                lat: order.address?.coors.lat!,
-                lng: order.address?.coors.lng!
-            });
-
-            mapViewRef.current?.fitToSuppliedMarkers(
-                ['business', 'destination'],
-                {
-                    edgePadding: {
-                        left: EGDE_PADDING / 2,
-                        right: EGDE_PADDING / 2,
-                        top: EGDE_PADDING,
-                        bottom: EGDE_PADDING * 1.5
-                    }
-                }
-            );
-        }
     }, [order?.courier, order?.status]);
     if (!location) {
         return (
@@ -514,12 +493,12 @@ const DeliveryView = ({
             <MapView
                 showsUserLocation
                 followsUserLocation
-                provider={PROVIDER_GOOGLE}
                 mapType="mutedStandard"
                 showsPointsOfInterest={false}
                 showsBuildings={false}
                 zoomEnabled
                 zoomControlEnabled
+                mapPadding={{ left: 50, top: 50, right: 50, bottom: 100 }}
                 zoomTapEnabled
                 ref={mapViewRef}
                 style={{ height: '91%', width: '100%' }}

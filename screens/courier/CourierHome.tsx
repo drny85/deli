@@ -2,7 +2,6 @@ import { FlatList, ListRenderItem, TouchableOpacity, View } from 'react-native';
 import React, {
     useCallback,
     useEffect,
-    useLayoutEffect,
     useMemo,
     useRef,
     useState
@@ -28,10 +27,11 @@ import { Theme } from '../../types';
 import BottomSheet, { BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import Header from '../../components/Header';
 import { SIZES } from '../../constants';
-import { useFocusEffect } from '@react-navigation/native';
+
 import Button from '../../components/Button';
 import Row from '../../components/Row';
 import { logoutUser } from '../../redux/auth/authActions';
+import MenuButtons from '../../components/courier/MenuButtons';
 
 type Props = NativeStackScreenProps<CourierStackScreens, 'CourierHome'>;
 
@@ -147,6 +147,7 @@ const CourierHome = ({ navigation }: Props) => {
                     </View>
                 )}
             </View>
+            <MenuButtons navigation={navigation} />
 
             <BottomSheet
                 ref={bottomSheetRef}

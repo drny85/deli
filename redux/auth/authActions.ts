@@ -45,8 +45,7 @@ export const updateUser = createAsyncThunk(
             await setDoc(docRef, { ...userData }, { merge: true });
             const user = await getDoc(docRef);
             //if (!user.exists) return null;
-
-            setUserData({ id: user.id, ...user.data()! });
+            dispatch(setUserData({ id: user.id, ...user.data()! }));
         } catch (error) {
             const err = error as any;
             console.log(err.message);

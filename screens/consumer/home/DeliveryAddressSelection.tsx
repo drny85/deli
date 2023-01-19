@@ -17,7 +17,6 @@ import Button from '../../../components/Button';
 import { useAppDispatch, useAppSelector } from '../../../redux/store';
 import { updateUser } from '../../../redux/auth/authActions';
 import Stack from '../../../components/Stack';
-import themeSlide from '../../../redux/themeSlide';
 
 type Props = {};
 
@@ -35,9 +34,15 @@ const DeliveryAddressSelection = ({}: Props) => {
                 if (user.deliveryAddresses) {
                     const deliveryAddress = [...user.deliveryAddresses];
                     deliveryAddress.push(address);
-                    console.log('DEL', deliveryAddress);
+
+                    await dispatch(
+                        updateUser({
+                            ...user,
+                            deliveryAddresses: deliveryAddress
+                        })
+                    );
+                    navigation.goBack();
                 } else {
-                    console.log('HERE');
                     await dispatch(
                         updateUser({
                             ...user,

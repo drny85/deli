@@ -48,12 +48,9 @@ const OrderDetails = ({
     const [destination, setDestination] = useState<Coors>();
     const theme = useAppSelector((state) => state.theme);
     const { loading, order } = useOrder(orderId);
-    const [minutes, setMinutes] = useState<number | null>(null);
-    const snapPoints = useMemo(() => ['16%', '25%', '50%', '90%'], []);
+
+    const snapPoints = useMemo(() => ['13%', '25%', '50%', '90%'], []);
     const bottomSheetRef = useRef<BottomSheet>(null);
-    const goToOrder = () => {
-        navigation.navigate('ConsumerOrders', { screen: 'Orders' });
-    };
 
     const mapRef = useRef<MapView>(null);
 
@@ -96,11 +93,15 @@ const OrderDetails = ({
     }, [business?.coors, order?.address?.coors]);
 
     useEffect(() => {
+        if (order?.status === ORDER_STATUS.picked_up_by_driver) {
+            bottomSheetRef.current?.snapToIndex(1);
+        }
+
         if (
-            order?.status === ORDER_STATUS.picked_up_by_driver ||
+            order?.status === ORDER_STATUS.marked_ready_for_delivery ||
             order?.status === ORDER_STATUS.accepted_by_driver
         ) {
-            bottomSheetRef.current?.snapToIndex(1);
+            bottomSheetRef.current?.snapToIndex(0);
         }
     }, [order?.status]);
 
@@ -161,18 +162,20 @@ const OrderDetails = ({
                             latitude: destination?.lat!,
                             longitude: destination?.lng!
                         }}
-                        draggable
                         identifier="destination"
                         title="Me"
                         description={order.address?.street.split(', ')[0]}
-
-                        // onDragEnd={(coors) => {
-                        //     setDestination({
-                        //         lat: coors.nativeEvent.coordinate.latitude,
-                        //         lng: coors.nativeEvent.coordinate.longitude
-                        //     });
-                        // }}
-                    />
+                    >
+                        <Image
+                            source={require('../../../assets/images/user.png')}
+                            style={{
+                                height: 40,
+                                width: 40,
+                                tintColor: '#212121'
+                            }}
+                            resizeMode="contain"
+                        />
+                    </Marker>
                     <MapViewDirections
                         mode={
                             order.courier && order.courier.transportation
@@ -180,10 +183,9 @@ const OrderDetails = ({
                                 : 'BICYCLING'
                         }
                         apikey={process.env.GOOGLE_API!}
-                        strokeColor={theme.ASCENT}
-                        strokeWidth={5}
                         onError={(er) => console.log(er)}
                         optimizeWaypoints={true}
+                        strokeWidth={0.1}
                         onReady={(result) => {
                             const { duration, distance } = result;
 
@@ -239,8 +241,14 @@ const OrderDetails = ({
                             paddingVertical: SIZES.padding * 3
                         }}
                     >
-                        <View style={{ paddingVertical: SIZES.padding }}>
-                            <Text large lobster center animation={'fadeInDown'}>
+                        <View style={{ paddingVertical: SIZES.padding * 2 }}>
+                            <Text
+                                py_8
+                                large
+                                lobster
+                                center
+                                animation={'fadeInDown'}
+                            >
                                 {order.courier?.name}, is on his way to pick up
                                 your order.
                             </Text>
@@ -280,12 +288,12 @@ const OrderDetails = ({
                     >
                         <View
                             style={{
-                                paddingVertical: SIZES.padding,
+                                paddingVertical: SIZES.padding * 2,
                                 paddingHorizontal: 6
                             }}
                         >
                             <Text
-                                large
+                                medium
                                 lobster
                                 py_8
                                 center
