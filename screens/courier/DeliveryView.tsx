@@ -35,6 +35,7 @@ import AnimatedLottieView from 'lottie-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { CourierStackScreens } from '../../navigation/courier/typing';
 import { useReadyForDeliveryOrders } from '../../hooks/useReadyForDeliveryOrders';
+import { customMapStyleDark, customMapStyleLight } from '../../utils/customMap';
 
 let a: NodeJS.Timeout;
 
@@ -190,7 +191,7 @@ const DeliveryView = ({
                 if (!user) return;
                 if (!isCloseToDestination) {
                     Alert.alert(
-                        'No There Tey',
+                        'No There yet',
                         'Please get more closer to the destination'
                     );
                     return;
@@ -353,7 +354,7 @@ const DeliveryView = ({
         let sub: Location.LocationSubscription;
         (async () => {
             if (!order) return;
-            console.log('HEE');
+
             if (
                 !accepted ||
                 order.status === ORDER_STATUS.marked_ready_for_delivery
@@ -493,10 +494,15 @@ const DeliveryView = ({
             <MapView
                 showsUserLocation
                 followsUserLocation
-                mapType="mutedStandard"
                 showsPointsOfInterest={false}
                 showsBuildings={false}
+                customMapStyle={
+                    theme.mode === 'dark'
+                        ? customMapStyleDark
+                        : customMapStyleLight
+                }
                 zoomEnabled
+                provider={PROVIDER_GOOGLE}
                 zoomControlEnabled
                 mapPadding={{ left: 50, top: 50, right: 50, bottom: 100 }}
                 zoomTapEnabled

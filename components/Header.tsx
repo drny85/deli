@@ -1,4 +1,4 @@
-import { TouchableOpacity, View } from 'react-native';
+import { StyleProp, TouchableOpacity, View, ViewStyle } from 'react-native';
 import React from 'react';
 import { FontAwesome } from '@expo/vector-icons';
 import Text from './Text';
@@ -13,6 +13,7 @@ type Props = {
     iconColor?: string;
     titleColor?: string;
     rightIcon?: React.ReactNode;
+    containerStyle?: StyleProp<ViewStyle>;
 };
 
 const Header = ({
@@ -20,11 +21,13 @@ const Header = ({
     title,
     iconColor,
     rightIcon,
-    titleColor
+    titleColor,
+    containerStyle
 }: Props) => {
     const theme = useAppSelector((state) => state.theme);
     return (
         <MotiView
+            style={containerStyle}
             from={{ opacity: 0, translateY: -20 }}
             animate={{ opacity: 1, translateY: 0 }}
             transition={{ type: 'timing' }}

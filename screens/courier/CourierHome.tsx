@@ -39,23 +39,11 @@ const CourierHome = ({ navigation }: Props) => {
     useNotifications();
     const dispatch = useAppDispatch();
     const theme = useAppSelector((state) => state.theme);
-    const [show, setShow] = useState(false);
     const [orders, setOrders] = React.useState<Order[]>([]);
     const { businessAvailable, isLoading } = useBusinessAvailable();
     const [isOpen, setIsOpen] = useState(false);
 
     const [loading, setLoading] = React.useState(true);
-
-    const snapPoints = useMemo(() => ['1%', '20%', '50%', '86%'], []);
-    const bottomSheetRef = useRef<BottomSheet>(null);
-    const handleSheetChange = useCallback((index: number) => {
-        console.log('handleSheetChange', index);
-        setIsOpen(index > 0);
-        if (index === 0) {
-            bottomSheetRef.current?.close();
-        }
-    }, []);
-    console.log(isOpen);
 
     const renderOrders: ListRenderItem<Order> = ({ item }) => {
         return (
@@ -80,15 +68,6 @@ const CourierHome = ({ navigation }: Props) => {
     };
 
     useEffect(() => {
-        const sub = navigation.addListener('focus', () => {
-            console.log('FFF');
-            bottomSheetRef.current?.close();
-        });
-
-        return sub;
-    }, []);
-
-    useEffect(() => {
         setLoading(true);
         const q = query(
             ordersCollection,
@@ -106,21 +85,8 @@ const CourierHome = ({ navigation }: Props) => {
     return (
         <Screen>
             <Header
+                containerStyle={{ marginTop: SIZES.base }}
                 title={`Orders For Delivery (${orders.length})`}
-                rightIcon={
-                    <FloatingMenu
-                        onPress={() => {
-                            if (isOpen) {
-                                bottomSheetRef.current?.close();
-                            } else {
-                                console.log('HE');
-
-                                bottomSheetRef.current?.snapToIndex(1);
-                            }
-                        }}
-                        theme={theme}
-                    />
-                }
             />
             <View style={{ flex: 1 }}>
                 {/* <Text center lobster large py_4>
@@ -148,73 +114,6 @@ const CourierHome = ({ navigation }: Props) => {
                 )}
             </View>
             <MenuButtons navigation={navigation} />
-
-            <BottomSheet
-                ref={bottomSheetRef}
-                snapPoints={snapPoints}
-                onChange={handleSheetChange}
-                backgroundStyle={{
-                    backgroundColor: theme.SECONDARY_BUTTON_COLOR
-                }}
-                index={0}
-            >
-                <BottomSheetScrollView
-                // style={{
-                //     flex: 1,
-                //     backgroundColor:
-                //         theme.mode === 'light'
-                //             ? '#edede9'
-                //             : theme.BACKGROUND_COLOR,
-                //     borderRadius: SIZES.radius * 2
-                // }}
-                >
-                    <View style={{ flex: 1, justifyContent: 'space-between' }}>
-                        <View style={{ flexGrow: 1 }}>
-                            <Stack containerStyle={{ height: '100%' }}>
-                                <Row
-                                    horizontalAlign="space-evenly"
-                                    containerStyle={{ width: '100%' }}
-                                >
-                                    <Button
-                                        notRounded
-                                        title="My Deliveries"
-                                        outlined
-                                        onPress={() => {
-                                            bottomSheetRef.current?.close();
-                                            navigation.navigate('MyDeliveries');
-                                        }}
-                                    />
-                                    <Button
-                                        title="Pending"
-                                        notRounded
-                                        outlined
-                                        onPress={() =>
-                                            navigation.navigate(
-                                                'CourierDeliveries'
-                                            )
-                                        }
-                                    />
-                                </Row>
-                            </Stack>
-                        </View>
-                    </View>
-                    <View
-                        style={{
-                            justifyContent: 'center',
-                            alignItems: 'center'
-                        }}
-                    >
-                        <TouchableOpacity
-                            style={{ padding: 20 }}
-                            onPress={() => {
-                                dispatch(logoutUser());
-                            }}
-                        >
-                            <Text bold>Sign Out</Text>
-                        </TouchableOpacity>
-                    </View>
-                </BottomSheetScrollView>
-            </BottomSheet>
         </Screen>
     );
 };

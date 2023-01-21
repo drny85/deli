@@ -10,7 +10,7 @@ import { ConsumerOrdersStackScreens } from '../../../navigation/consumer/typing'
 import Loader from '../../../components/Loader';
 import { useAppSelector } from '../../../redux/store';
 import { SIZES } from '../../../constants';
-import MapView, { Marker } from 'react-native-maps';
+import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import MapViewDirections from 'react-native-maps-directions';
 import { useDispatch } from 'react-redux';
 import { getCurrentBusiness } from '../../../redux/business/businessActions';
@@ -28,6 +28,10 @@ import Row from '../../../components/Row';
 import { stripeFee } from '../../../utils/stripeFee';
 import Button from '../../../components/Button';
 import Header from '../../../components/Header';
+import {
+    customMapStyleDark,
+    customMapStyleLight
+} from '../../../utils/customMap';
 
 type Props = NativeStackScreenProps<ConsumerOrdersStackScreens, 'OrderDetails'>;
 
@@ -128,6 +132,11 @@ const OrderDetails = ({
             >
                 <MapView
                     ref={mapRef}
+                    customMapStyle={
+                        theme.mode === 'dark'
+                            ? customMapStyleDark
+                            : customMapStyleLight
+                    }
                     initialRegion={{
                         latitude: origin?.lat!,
                         longitude: origin?.lng!,
@@ -136,7 +145,7 @@ const OrderDetails = ({
                     }}
                     mapPadding={{ bottom: 50, left: 50, top: 50, right: 50 }}
                     style={{ flex: 1, borderRadius: SIZES.base }}
-                    mapType="mutedStandard"
+                    provider={PROVIDER_GOOGLE}
                 >
                     <Marker
                         identifier="origin"
@@ -313,16 +322,10 @@ const OrderDetails = ({
         return (
             <View style={{ flex: 1, justifyContent: 'center' }}>
                 <Stack center>
-                    <Text lobster medium animation={'fadeInDown'}>
+                    <Text lobster large animation={'fadeInDown'}>
                         Thank you for doing business with us
                     </Text>
-                    <Text
-                        lobster
-                        medium
-                        py_8
-                        animation={'fadeInUp'}
-                        delay={600}
-                    >
+                    <Text lobster large py_8 animation={'fadeInUp'} delay={600}>
                         Have a wonderful day {user?.name}
                     </Text>
                     <Text py_8 medium animation={'fadeInLeft'} delay={800}>

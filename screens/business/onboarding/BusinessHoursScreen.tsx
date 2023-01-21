@@ -13,7 +13,7 @@ import Button from '../../../components/Button';
 import { Business } from '../../../redux/business/businessSlide';
 import { updateBusiness } from '../../../redux/business/businessActions';
 import Loader from '../../../components/Loader';
-import BusinessHoursReviewModal from '../../../components/BusinessHoursReviewModal';
+import BusinessHoursReviewModal from '../../../components/business/BusinessHoursReviewModal';
 import { connectedStore } from '../../../firebase';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { BusinessOnBoardingStackScreens } from '../../../navigation/business/typing';

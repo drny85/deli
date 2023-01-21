@@ -1,15 +1,15 @@
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import React from 'react';
-import Text from './Text';
-import { Order, ORDER_TYPE } from '../redux/consumer/ordersSlide';
-import Stack from './Stack';
-import { useAppSelector } from '../redux/store';
-import Row from './Row';
-import { SIZES } from '../constants';
+import Text from '../Text';
+import { Order, ORDER_TYPE } from '../../redux/consumer/ordersSlide';
+import Stack from '../Stack';
+import { useAppSelector } from '../../redux/store';
+import Row from '../Row';
+import { SIZES } from '../../constants';
 import { FontAwesome } from '@expo/vector-icons';
 import moment from 'moment';
-import { STATUS_NAME } from '../utils/orderStatus';
-import { useBusinessOrders } from '../hooks/useBusinessOrders';
+import { STATUS_NAME } from '../../utils/orderStatus';
+import { useBusinessOrders } from '../../hooks/useBusinessOrders';
 
 type Props = {
     order: Order;

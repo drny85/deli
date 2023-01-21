@@ -1,4 +1,5 @@
 import {
+    Alert,
     StyleProp,
     StyleSheet,
     TouchableOpacity,
@@ -8,8 +9,9 @@ import {
 import React, { useState } from 'react';
 
 import { AntDesign, Entypo, FontAwesome } from '@expo/vector-icons';
-import { useAppSelector } from '../../redux/store';
+import { useAppDispatch, useAppSelector } from '../../redux/store';
 import { MotiText, MotiView } from 'moti';
+import { logoutUser } from '../../redux/auth/authActions';
 
 const WIDTH = 50;
 type Props = {
@@ -18,13 +20,28 @@ type Props = {
 const MenuButtons = ({ navigation }: Props) => {
     const theme = useAppSelector((state) => state.theme);
     const [show, setShow] = useState(false);
-
+    const dispatch = useAppDispatch();
     const toogle = () => {
         setShow((prev) => !prev);
     };
+
+    const handleLogOut = async () => {
+        try {
+            Alert.alert('Logging Out', 'Are you sure you want to log out?', [
+                { text: 'Cancel', style: 'cancel' },
+                {
+                    text: 'Yes',
+                    style: 'destructive',
+                    onPress: () => dispatch(logoutUser())
+                }
+            ]);
+        } catch (error) {
+            console.log(error);
+        }
+    };
     return (
         <View style={[styles.container, { shadowColor: theme.SHADOW_COLOR }]}>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={handleLogOut}>
                 <MotiView
                     style={[
                         styles.btn,

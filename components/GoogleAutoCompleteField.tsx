@@ -55,7 +55,7 @@ const GoogleAutoComplete: FC<Props> = React.forwardRef(
                             paddingHorizontal: SIZES.base * 2,
                             borderBottomWidth: 0.3,
                             borderBottomColor: theme.SHADOW_COLOR,
-                            paddingVertical: 16,
+                            paddingVertical: SIZES.base,
                             borderRadius: inputRadius
                                 ? inputRadius
                                 : SIZES.radius * 2,

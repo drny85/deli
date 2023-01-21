@@ -36,7 +36,7 @@ import { PRODUCT_SIZES, P_Size } from '../../../utils/sizes';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import Loader from '../../../components/Loader';
 import { FontAwesome } from '@expo/vector-icons';
-import VariantionSelector from '../../../components/VariantionSelector';
+import VariantionSelector from '../../../components/business/VariantionSelector';
 import KeyboardScreen from '../../../components/KeyboardScreen';
 import Stack from '../../../components/Stack';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';

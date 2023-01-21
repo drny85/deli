@@ -2,13 +2,17 @@ import { Pressable, View } from 'react-native';
 import React from 'react';
 
 import Text from './Text';
-import { ORDER_TYPE, switchOrderType } from '../redux/consumer/ordersSlide';
+import {
+    ORDER_TYPE,
+    switchOrderType,
+    tooglePickupMap
+} from '../redux/consumer/ordersSlide';
 import { SIZES } from '../constants';
 import Row from './Row';
 import { Image, MotiView } from 'moti';
 import { useAppDispatch, useAppSelector } from '../redux/store';
 
-const WIDTH = 240;
+const WIDTH = 100;
 
 const OrderTypeSwitcher = () => {
     const dispatch = useAppDispatch();
@@ -50,12 +54,23 @@ const OrderTypeSwitcher = () => {
                             borderBottomLeftRadius: 20
                         }}
                     >
-                        <Text center>Delivery</Text>
+                        <Image
+                            style={{
+                                height: '100%',
+                                width: '100%',
+                                tintColor: theme.WHITE_COLOR
+                            }}
+                            resizeMode="contain"
+                            source={require('../assets/images/delivery.png')}
+                        />
                     </MotiView>
                 </Pressable>
                 <Pressable
                     style={{ width: WIDTH / 2 }}
-                    onPress={() => dispatch(switchOrderType(ORDER_TYPE.pickup))}
+                    onPress={() => {
+                        dispatch(tooglePickupMap(true));
+                        dispatch(switchOrderType(ORDER_TYPE.pickup));
+                    }}
                 >
                     <MotiView
                         style={{
@@ -67,7 +82,15 @@ const OrderTypeSwitcher = () => {
                             alignItems: 'center'
                         }}
                     >
-                        <Text center>Pick Up</Text>
+                        <Image
+                            style={{
+                                height: '100%',
+                                width: '100%',
+                                tintColor: theme.WHITE_COLOR
+                            }}
+                            resizeMode="contain"
+                            source={require('../assets/images/walking.png')}
+                        />
                     </MotiView>
                 </Pressable>
             </Row>
@@ -120,11 +143,11 @@ const OrderTypeSwitcher = () => {
                         resizeMode="contain"
                         style={{ width: 34, height: 34, tintColor: 'white' }}
                     />
-                    <Text lightText bold>
+                    {/* <Text lightText bold>
                         {orderType === ORDER_TYPE.delivery
                             ? 'Delivery'
                             : 'Pick Up'}
-                    </Text>
+                    </Text> */}
                 </Row>
             </MotiView>
         </View>

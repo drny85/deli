@@ -5,7 +5,7 @@ import {
     TouchableOpacity,
     View
 } from 'react-native';
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import Screen from '../../../components/Screen';
 import Text from '../../../components/Text';
 import { StripeProvider } from '@stripe/stripe-react-native';
@@ -26,7 +26,8 @@ import PaymentLoading from '../../../components/PaymentLoading';
 import { usePayment } from '../../../hooks/usePayment';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { ConsumerCartStackScreens } from '../../../navigation/consumer/typing';
-import { setOrderWasPlaced } from '../../../redux/consumer/ordersSlide';
+import { setPaymentSuccess } from '../../../redux/consumer/ordersSlide';
+import { placeOrder } from '../../../redux/consumer/ordersActions';
 
 export type CheckOutProps = NativeStackScreenProps<
     ConsumerCartStackScreens,
@@ -36,25 +37,46 @@ const Checkout = ({ navigation }: CheckOutProps) => {
     const theme = useAppSelector((state) => state.theme);
     const dispatch = useAppDispatch();
     //const navigation = useNavigation();
-    const { order, deliveryAdd, orderSuccess } = useAppSelector(
+    const { order, deliveryAdd, paymentSuccess } = useAppSelector(
         (state) => state.orders
     );
     const { total, items, quantity } = useAppSelector((state) => state.cart);
     const { loading, startPayment } = usePayment({ nav: navigation });
 
-    useEffect(() => {
-        if (!orderSuccess.success || !orderSuccess.orderId) return;
+    const handlePlaceOrder = useCallback(async () => {
+        try {
+            if (!order) return;
+            const { payload } = await dispatch(placeOrder({ ...order }));
 
-        if (orderSuccess.orderId) {
-            navigation.replace('OrderSuccess', {
-                orderId: orderSuccess.orderId
-            });
+            const { success, orderId } = payload as {
+                success: boolean;
+                orderId: string | null;
+            };
+
+            if (success && orderId) {
+                navigation.replace('OrderSuccess', {
+                    orderId
+                });
+            }
+        } catch (error) {
+            console.log(error);
         }
+    }, [paymentSuccess]);
+
+    useEffect(() => {
+        if (!paymentSuccess) return;
+
+        // if (orderSuccess.orderId) {
+        //     navigation.replace('OrderSuccess', {
+        //         orderId: orderSuccess.orderId
+        //     });
+        // }
+        handlePlaceOrder();
 
         return () => {
-            dispatch(setOrderWasPlaced({ success: false, orderId: undefined }));
+            dispatch(setPaymentSuccess(false));
         };
-    }, [orderSuccess.orderId, orderSuccess.success]);
+    }, [paymentSuccess]);
 
     if (loading) return <PaymentLoading />;
     return (

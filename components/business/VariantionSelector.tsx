@@ -1,12 +1,12 @@
 import { StyleProp, TouchableOpacity, ViewStyle } from 'react-native';
 import React from 'react';
 
-import Text from './Text';
+import Text from '../Text';
 import { AnimatePresence, MotiView } from 'moti';
-import Row from './Row';
+import Row from '../Row';
 import { FontAwesome } from '@expo/vector-icons';
-import { useAppSelector } from '../redux/store';
-import Button from './Button';
+import { useAppSelector } from '../../redux/store';
+import Button from '../Button';
 
 type Props = {
     show: boolean;

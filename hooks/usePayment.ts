@@ -1,14 +1,10 @@
-import { CommonActions, useNavigation } from '@react-navigation/native';
 import { useStripe } from '@stripe/stripe-react-native';
 import { useCallback, useState } from 'react';
 import { Alert } from 'react-native';
 
 import { fetchPaymentParams } from '../firebase';
 import { placeOrder } from '../redux/consumer/ordersActions';
-import {
-    saveDeliveryAddress,
-    setOrderWasPlaced
-} from '../redux/consumer/ordersSlide';
+import { setOrder, setPaymentSuccess } from '../redux/consumer/ordersSlide';
 import { useAppDispatch, useAppSelector } from '../redux/store';
 import { CheckOutProps } from '../screens/consumer/cart/Checkout';
 
@@ -68,25 +64,15 @@ export const usePayment = ({ nav }: Props) => {
                 return;
             } else {
                 if (!order) return;
-
-                const { payload } = await dispatch(
-                    placeOrder({
+                dispatch(
+                    setOrder({
                         ...order,
                         paymentIntent: paymentId,
                         address: deliveryAdd
                     })
                 );
-                const { success, orderId } = payload as {
-                    success: boolean;
-                    orderId: string | null;
-                };
 
-                if (!success || !orderId) return;
-                console.log('Order Placed Result', payload);
-
-                dispatch(saveDeliveryAddress(null));
-
-                dispatch(setOrderWasPlaced({ success, orderId }));
+                dispatch(setPaymentSuccess(true));
             }
         } catch (error) {
             console.log('error C', error);

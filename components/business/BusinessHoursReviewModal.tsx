@@ -1,14 +1,14 @@
 import { Modal, ScrollView, TouchableOpacity, View } from 'react-native';
 import React from 'react';
 
-import Text from './Text';
-import Screen from './Screen';
-import { BusinessDay } from '../types';
-import Row from './Row';
+import Text from '../Text';
+import Screen from '../Screen';
+import { BusinessDay } from '../../types';
+import Row from '../Row';
 import { FontAwesome } from '@expo/vector-icons';
-import { useAppSelector } from '../redux/store';
-import { SIZES } from '../constants';
-import Button from './Button';
+import { useAppSelector } from '../../redux/store';
+import { SIZES } from '../../constants';
+import Button from '../Button';
 
 type Props = {
     visisble: boolean;

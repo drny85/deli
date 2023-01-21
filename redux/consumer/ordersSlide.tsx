@@ -59,16 +59,18 @@ interface OrdersState {
     deliveryAdd: Order['address'] | null;
     order: Order | null;
     orderType: ORDER_TYPE;
+    showPickupMap: boolean;
     loading: boolean;
-    orderSuccess: { success: boolean; orderId: string | undefined };
+    paymentSuccess: boolean;
 }
 const initialState: OrdersState = {
     orders: [],
     order: null,
     orderType: ORDER_TYPE.delivery,
+    showPickupMap: false,
     deliveryAdd: null,
     loading: false,
-    orderSuccess: { success: false, orderId: undefined }
+    paymentSuccess: false
 };
 
 const ordersSlice = createSlice({
@@ -88,11 +90,11 @@ const ordersSlice = createSlice({
             state.orderType = payload;
         },
 
-        setOrderWasPlaced: (
-            state,
-            { payload }: PayloadAction<OrdersState['orderSuccess']>
-        ) => {
-            state.orderSuccess = payload;
+        setPaymentSuccess: (state, { payload }: PayloadAction<boolean>) => {
+            state.paymentSuccess = payload;
+        },
+        tooglePickupMap: (state, { payload }: PayloadAction<boolean>) => {
+            state.showPickupMap = payload;
         }
     }
 });
@@ -101,7 +103,8 @@ export const {
     setOrder,
     saveDeliveryAddress,
     switchOrderType,
-    setOrderWasPlaced
+    setPaymentSuccess,
+    tooglePickupMap
 } = ordersSlice.actions;
 
 export default ordersSlice.reducer;

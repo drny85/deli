@@ -1,23 +1,32 @@
-import { ImageBackground, StyleSheet, TouchableOpacity } from 'react-native';
+import {
+    ImageBackground,
+    StyleProp,
+    StyleSheet,
+    TouchableOpacity,
+    ViewStyle
+} from 'react-native';
 import React from 'react';
-import Text from './Text';
-import { SIZES } from '../constants';
+import Text from '../Text';
+import { SIZES } from '../../constants';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Business } from '../redux/business/businessSlide';
+import { Business } from '../../redux/business/businessSlide';
 import { AnimatePresence, MotiView } from 'moti';
 import { FontAwesome } from '@expo/vector-icons';
-import { usersCollection } from '../firebase';
-import { useAppSelector } from '../redux/store';
+import { useAppSelector } from '../../redux/store';
 
 type Props = {
     business: Business;
     onPress: () => void;
+    containerStyle?: StyleProp<ViewStyle>;
 };
 
-const BusinessCard = ({ business, onPress }: Props) => {
+const BusinessCard = ({ business, onPress, containerStyle }: Props) => {
     const { user } = useAppSelector((state) => state.auth);
     return (
-        <TouchableOpacity onPress={onPress} style={[styles.container]}>
+        <TouchableOpacity
+            onPress={onPress}
+            style={[styles.container, containerStyle]}
+        >
             <ImageBackground
                 resizeMode="cover"
                 style={[styles.image]}

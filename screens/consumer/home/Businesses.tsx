@@ -9,7 +9,7 @@ import {
     TouchableOpacity,
     View
 } from 'react-native';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import Screen from '../../../components/Screen';
 import Text from '../../../components/Text';
 import Loader from '../../../components/Loader';
@@ -17,7 +17,7 @@ import { Business, setBusiness } from '../../../redux/business/businessSlide';
 import { useAppDispatch, useAppSelector } from '../../../redux/store';
 
 import { useNavigation } from '@react-navigation/native';
-import BusinessCard from '../../../components/BusinessCard';
+import BusinessCard from '../../../components/business/BusinessCard';
 import { useLocation } from '../../../hooks/useLocation';
 import { FontAwesome } from '@expo/vector-icons';
 import { isTherePreviousRoute } from '../../../utils/checkForPreviousRoute';
@@ -42,6 +42,7 @@ import moment from 'moment';
 import ProductListItem from '../../../components/ProductListItem';
 import Header from '../../../components/Header';
 import useNotifications from '../../../hooks/useNotifications';
+import PickupMap from '../../../components/PickupMap';
 
 const Businesses = () => {
     useNotifications();
@@ -79,7 +80,7 @@ const Businesses = () => {
                         `${searchValue.toLowerCase()}`,
                         'gi'
                     );
-                    console.log(p.name.match(regex), p.businessId === b.id);
+
                     return (
                         p.businessId === b.id &&
                         p.name.toLowerCase().match(regex)
@@ -162,12 +163,12 @@ const Businesses = () => {
                         animate={{
                             opacity: 1,
                             translateY: 0,
-                            height: 80
+                            height: 60
                         }}
                         exit={{ opacity: 0, translateY: -50, height: 0 }}
                         transition={{ type: 'timing' }}
                     >
-                        <Row>
+                        <Row horizontalAlign="space-between">
                             <View style={{ marginRight: SIZES.base * 1.5 }}>
                                 <Text px_4>Deliver Now</Text>
 
@@ -194,44 +195,46 @@ const Businesses = () => {
                                     </Row>
                                 </TouchableOpacity>
                             </View>
-                            <View
-                                style={{
-                                    flexGrow: 1,
-                                    marginHorizontal: SIZES.base
-                                }}
-                            >
-                                <InputField
-                                    placeholder="What are you creaving right now?"
-                                    onChangeText={(text) => handleSearch(text)}
-                                    contentStyle={{
-                                        paddingVertical: SIZES.base * 1.5
-                                    }}
-                                    value={searchValue}
-                                    rightIcon={
-                                        searchValue.length > 0 && (
-                                            <TouchableOpacity
-                                                onPress={() => {
-                                                    setSearchValue('');
-                                                    setBusinesses(
-                                                        businessAvailable
-                                                    );
-                                                }}
-                                                style={{ marginRight: 6 }}
-                                            >
-                                                <FontAwesome
-                                                    name="close"
-                                                    size={18}
-                                                    color={theme.TEXT_COLOR}
-                                                />
-                                            </TouchableOpacity>
-                                        )
-                                    }
-                                />
-                            </View>
+                            <OrderTypeSwitcher />
                         </Row>
                     </MotiView>
                 )}
             </AnimatePresence>
+            <View
+                style={{
+                    marginHorizontal: SIZES.base
+                }}
+            >
+                <View style={{ marginTop: 5 }} />
+                <Text lobster medium center>
+                    What are you craving for right now?
+                </Text>
+                <InputField
+                    placeholder="Salad, Coffee, Patelito, Tostones, etc"
+                    onChangeText={(text) => handleSearch(text)}
+                    contentStyle={{
+                        paddingVertical: SIZES.base * 1.5
+                    }}
+                    value={searchValue}
+                    rightIcon={
+                        searchValue.length > 0 && (
+                            <TouchableOpacity
+                                onPress={() => {
+                                    setSearchValue('');
+                                    setBusinesses(businessAvailable);
+                                }}
+                                style={{ marginRight: 6 }}
+                            >
+                                <FontAwesome
+                                    name="close"
+                                    size={18}
+                                    color={theme.TEXT_COLOR}
+                                />
+                            </TouchableOpacity>
+                        )
+                    }
+                />
+            </View>
 
             <FloatingArrowUpButton
                 show={show}
@@ -243,7 +246,6 @@ const Businesses = () => {
                 }}
             />
 
-            <OrderTypeSwitcher />
             {user && (
                 <MostRecentOrders
                     businesses={businessAvailable}
@@ -446,6 +448,8 @@ const Businesses = () => {
                     </View>
                 </Modal>
             )}
+
+            <PickupMap businesses={businessAvailable} />
         </Screen>
     );
 };

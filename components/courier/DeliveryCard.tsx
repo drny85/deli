@@ -11,6 +11,8 @@ import { SIZES } from '../../constants';
 import { MotiView } from 'moti';
 import { STATUS_NAME } from '../../utils/orderStatus';
 import moment from 'moment';
+import Row from '../Row';
+import Divider from '../Divider';
 
 type Props = {
     order: Order;
@@ -43,20 +45,54 @@ const DeliveryCard = ({ order, business, onPress }: Props) => {
                 }}
             >
                 <Stack
-                    containerStyle={{ backgroundColor: theme.CARD_BACKGROUND }}
-                    center
+                    containerStyle={{
+                        backgroundColor: theme.CARD_BACKGROUND,
+                        width: '100%'
+                    }}
                 >
-                    <Text>
-                        {moment(order.orderDate).format('MMM DD, hh:mm a')}
-                    </Text>
-                    <Text bold medium py_4>
-                        {business.name}
-                    </Text>
-                    <Text>{business.address?.split(', ')[0]}</Text>
-                    <Text py_4 bold medium>
-                        To: {order.address?.street.split(', ')[0]}
-                    </Text>
-                    <Text>{STATUS_NAME(order.status)}</Text>
+                    <Row
+                        containerStyle={{ width: '100%' }}
+                        horizontalAlign="space-evenly"
+                    >
+                        <Text bold>
+                            {moment(order.orderDate).format('MMM DD, hh:mm a')}
+                        </Text>
+                        <Text bold>${order.total.toFixed(2)}</Text>
+                    </Row>
+                    <Divider />
+                    <Stack center>
+                        <Row horizontalAlign="space-between">
+                            <Text px_6>Pick up At </Text>
+                            <View>
+                                <Text bold py_4>
+                                    {business.name}
+                                </Text>
+                                <Text>{business.address?.split(', ')[0]}</Text>
+                            </View>
+                        </Row>
+                        <Row>
+                            <Text px_6>Deliver To</Text>
+                            <View>
+                                <Text bold py_4>
+                                    {business.name}
+                                </Text>
+                                <Text>
+                                    {order.address?.street.split(', ')[0]}
+                                </Text>
+                            </View>
+                        </Row>
+                    </Stack>
+                    <View
+                        style={{
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            width: '100%'
+                        }}
+                    >
+                        <Text center py_6 bold>
+                            {STATUS_NAME(order.status)}
+                        </Text>
+                    </View>
                 </Stack>
             </MotiView>
         </TouchableOpacity>
@@ -72,6 +108,7 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.5,
         overflow: 'hidden',
         shadowRadius: 8,
-        borderRadius: SIZES.padding
+        borderRadius: SIZES.padding,
+        marginVertical: SIZES.base
     }
 });

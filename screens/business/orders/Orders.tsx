@@ -9,7 +9,7 @@ import Loader from '../../../components/Loader';
 import { Order, ORDER_STATUS } from '../../../redux/consumer/ordersSlide';
 import moment from 'moment';
 import { SIZES } from '../../../constants';
-import BusinessOrderCard from '../../../components/BusinessOrderCard';
+import BusinessOrderCard from '../../../components/business/BusinessOrderCard';
 import { useNavigation } from '@react-navigation/native';
 import { STATUS_NAME } from '../../../utils/orderStatus';
 import Row from '../../../components/Row';

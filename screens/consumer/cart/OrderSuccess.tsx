@@ -1,15 +1,12 @@
-import React, { useEffect } from 'react';
-import Screen from '../../../components/Screen';
-import Text from '../../../components/Text';
+import React from 'react';
 import { CommonActions } from '@react-navigation/native';
-
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { ConsumerCartStackScreens } from '../../../navigation/consumer/typing';
 import Loader from '../../../components/Loader';
-import Button from '../../../components/Button';
 import { View } from 'react-native';
 import AnimatedLottieView from 'lottie-react-native';
-import { useAppSelector } from '../../../redux/store';
+import { useAppDispatch, useAppSelector } from '../../../redux/store';
+import { setOrder } from '../../../redux/consumer/ordersSlide';
 
 type Props = NativeStackScreenProps<ConsumerCartStackScreens, 'OrderSuccess'>;
 
@@ -21,6 +18,7 @@ const OrderSuccess = ({
 }: Props) => {
     //const navigation = useNavigation();
     const theme = useAppSelector((state) => state.theme);
+    const dispatch = useAppDispatch();
 
     const goToOrderDetails = () => {
         nav.dispatch((state) => {
@@ -35,6 +33,7 @@ const OrderSuccess = ({
                 index: 0
             });
         });
+        dispatch(setOrder(null));
         nav.navigate('OrdersScreen', {
             screen: 'Orders',
             params: { orderId: orderId }
