@@ -42,7 +42,9 @@ const OrderReview = () => {
     const { address, latitude, longitude } = useLocation();
     const [deliveryAddress, setDeliveryAddress] = useState<OrderAddress>();
     const { user } = useAppSelector((state) => state.auth);
-    const { order, deliveryAdd } = useAppSelector((state) => state.orders);
+    const { order, deliveryAdd, orderType } = useAppSelector(
+        (state) => state.orders
+    );
 
     const theme = useAppSelector((state) => state.theme);
     const dispatch = useDispatch();
@@ -146,95 +148,111 @@ const OrderReview = () => {
             />
 
             <View>
-                <Stack px={4}>
-                    <Text raleway_bold> From: {business?.name}</Text>
-                    <Text px_4 raleway>
-                        {business?.address?.substring(
-                            0,
-                            business.address.length - 5
-                        )}
-                    </Text>
-                </Stack>
-                <Stack px={4} py={1}>
-                    <Text raleway_bold py_4>
-                        {' '}
-                        To: You
-                    </Text>
+                {orderType === ORDER_TYPE.delivery && (
+                    <>
+                        <Stack px={4}>
+                            <Text raleway_bold> From: {business?.name}</Text>
+                            <Text px_4 raleway>
+                                {business?.address?.substring(
+                                    0,
+                                    business.address.length - 5
+                                )}
+                            </Text>
+                        </Stack>
+                        <Stack px={4} py={1}>
+                            <Text raleway_bold py_4>
+                                {' '}
+                                To: You
+                            </Text>
 
-                    <MotiView
-                        style={{ width: '100%' }}
-                        from={{ opacity: 0, translateY: -20 }}
-                        animate={{ opacity: 1, translateY: 0 }}
-                        exit={{ opacity: 0, translateY: -20 }}
-                        transition={{ type: 'timing' }}
-                    >
-                        <GoogleAutoComplete
-                            inputRadius={SIZES.radius}
-                            ref={googleRef}
-                            placeholder="Please type your delivery address"
-                            onPress={(_: any, details: GooglePlaceDetail) => {
-                                setDeliveryAddress({
-                                    ...deliveryAddress!,
-                                    street: details.formatted_address,
-                                    coors: {
-                                        ...details.geometry.location
-                                    },
-                                    addedOn: new Date().toISOString()
-                                });
-                                dispatch(
-                                    saveDeliveryAddress({
-                                        street: details.formatted_address,
-                                        coors: details.geometry.location,
-                                        addedOn: new Date().toISOString()
-                                    })
-                                );
-                            }}
-                        />
-                    </MotiView>
-                    <AnimatePresence>
-                        {deliveryAddress?.street && (
                             <MotiView
+                                style={{ width: '100%' }}
                                 from={{ opacity: 0, translateY: -20 }}
                                 animate={{ opacity: 1, translateY: 0 }}
-                                style={{ width: '100%' }}
+                                exit={{ opacity: 0, translateY: -20 }}
+                                transition={{ type: 'timing' }}
                             >
-                                <Row containerStyle={{ width: '100%' }}>
-                                    <View style={{ flexGrow: 1 }}>
-                                        <Text px_4 bold>
-                                            Apt #, Suite, Floor, etc
-                                        </Text>
-                                    </View>
-
-                                    <InputField
-                                        mainStyle={{
-                                            width: '50%'
-                                        }}
-                                        containerStyle={{
-                                            borderRadius: SIZES.radius
-                                        }}
-                                        contentStyle={{
-                                            textAlign: 'center'
-                                        }}
-                                        value={deliveryAddress?.apt!}
-                                        onChangeText={(text) => {
-                                            setDeliveryAddress({
-                                                ...deliveryAddress!,
-                                                apt: text.toUpperCase()
-                                            });
-                                            dispatch(
-                                                saveDeliveryAddress({
-                                                    ...deliveryAdd!,
-                                                    apt: text.toUpperCase()
-                                                })
-                                            );
-                                        }}
-                                        placeholder="Apt #, Suite, Floor, etc"
-                                    />
-                                </Row>
+                                <GoogleAutoComplete
+                                    inputRadius={SIZES.radius}
+                                    ref={googleRef}
+                                    placeholder="Please type your delivery address"
+                                    onPress={(
+                                        _: any,
+                                        details: GooglePlaceDetail
+                                    ) => {
+                                        setDeliveryAddress({
+                                            ...deliveryAddress!,
+                                            street: details.formatted_address,
+                                            coors: {
+                                                ...details.geometry.location
+                                            },
+                                            addedOn: new Date().toISOString()
+                                        });
+                                        dispatch(
+                                            saveDeliveryAddress({
+                                                street: details.formatted_address,
+                                                coors: details.geometry
+                                                    .location,
+                                                addedOn:
+                                                    new Date().toISOString()
+                                            })
+                                        );
+                                    }}
+                                />
                             </MotiView>
-                        )}
-                    </AnimatePresence>
-                </Stack>
+                            <AnimatePresence>
+                                {deliveryAddress?.street && (
+                                    <MotiView
+                                        from={{ opacity: 0, translateY: -20 }}
+                                        animate={{ opacity: 1, translateY: 0 }}
+                                        style={{ width: '100%' }}
+                                    >
+                                        <Row containerStyle={{ width: '100%' }}>
+                                            <View style={{ flexGrow: 1 }}>
+                                                <Text px_4 bold>
+                                                    Apt #, Suite, Floor, etc
+                                                </Text>
+                                            </View>
+
+                                            <InputField
+                                                mainStyle={{
+                                                    width: '50%'
+                                                }}
+                                                containerStyle={{
+                                                    borderRadius: SIZES.radius
+                                                }}
+                                                contentStyle={{
+                                                    textAlign: 'center'
+                                                }}
+                                                value={deliveryAddress?.apt!}
+                                                onChangeText={(text) => {
+                                                    setDeliveryAddress({
+                                                        ...deliveryAddress!,
+                                                        apt: text.toUpperCase()
+                                                    });
+                                                    dispatch(
+                                                        saveDeliveryAddress({
+                                                            ...deliveryAdd!,
+                                                            apt: text.toUpperCase()
+                                                        })
+                                                    );
+                                                }}
+                                                placeholder="Apt #, Suite, Floor, etc"
+                                            />
+                                        </Row>
+                                    </MotiView>
+                                )}
+                            </AnimatePresence>
+                        </Stack>
+                    </>
+                )}
+                {orderType === ORDER_TYPE.pickup && (
+                    <Stack>
+                        <Text bold>Picking Up At</Text>
+                        <Text py_4>{business.address?.slice(0, -10)}</Text>
+                        <Text>{business.phone}</Text>
+                    </Stack>
+                )}
 
                 <Divider small />
                 <ScrollView

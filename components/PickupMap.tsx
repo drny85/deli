@@ -5,6 +5,7 @@ import {
     ListRenderItem,
     Modal,
     Platform,
+    StatusBar,
     StyleSheet,
     TouchableOpacity,
     View
@@ -31,6 +32,9 @@ import { IMAGE_PLACEHOLDER, SIZES } from '../constants';
 import Stack from './Stack';
 import Button from './Button';
 import { MotiImage, MotiView } from 'moti';
+import Row from './Row';
+import { switchTheme } from '../redux/themeSlide';
+import { darkTheme, lightTheme } from '../Theme';
 
 const CARD_HEIGHT = 220;
 const CARD_WIDTH = SIZES.width * 0.8;
@@ -45,6 +49,7 @@ const PickupMap = ({ businesses }: Props) => {
     const navigation = useNavigation();
     const theme = useAppSelector((state) => state.theme);
     const dispatch = useAppDispatch();
+    const [mapTheme, setMapTheme] = useState<typeof theme.mode>('light');
     const mapRef = useRef<MapView>(null);
     const flatListRef = useRef<FlatList>(null);
     const { orderType, showPickupMap } = useAppSelector(
@@ -158,11 +163,6 @@ const PickupMap = ({ businesses }: Props) => {
             viewPosition: viewPosition
         });
 
-        if (index === businesses.length - 1) {
-            console.log('HERE');
-            // setViewPosition(0);
-        }
-
         // mapRef.current?.animateToRegion();
     }, [index, viewPosition]);
     useEffect(() => {
@@ -181,8 +181,19 @@ const PickupMap = ({ businesses }: Props) => {
             presentationStyle="overFullScreen"
             animationType="slide"
         >
+            <StatusBar
+                barStyle={
+                    mapTheme === 'dark' ? 'light-content' : 'dark-content'
+                }
+            />
             <View style={{ flex: 1 }}>
                 <Header
+                    iconColor={
+                        mapTheme === 'dark' ? theme.WHITE_COLOR : '#212121'
+                    }
+                    titleColor={
+                        mapTheme === 'dark' ? theme.WHITE_COLOR : '#212121'
+                    }
                     containerStyle={{
                         zIndex: 300,
                         position: 'absolute',
@@ -194,7 +205,7 @@ const PickupMap = ({ businesses }: Props) => {
                         dispatch(tooglePickupMap(false));
                     }}
                     rightIcon={
-                        <View>
+                        <Row>
                             <TouchableOpacity
                                 style={{ padding: 10 }}
                                 onPress={() => {
@@ -204,10 +215,36 @@ const PickupMap = ({ businesses }: Props) => {
                                 <Ionicons
                                     name="locate-outline"
                                     size={30}
-                                    color={theme.TEXT_COLOR}
+                                    color={
+                                        mapTheme === 'dark'
+                                            ? theme.WHITE_COLOR
+                                            : '#212121'
+                                    }
                                 />
                             </TouchableOpacity>
-                        </View>
+                            <TouchableOpacity
+                                style={{ padding: 10 }}
+                                onPress={() => {
+                                    setMapTheme((prev) =>
+                                        prev === 'dark' ? 'light' : 'dark'
+                                    );
+                                }}
+                            >
+                                <Ionicons
+                                    name={
+                                        theme.mode === 'dark'
+                                            ? 'sunny-outline'
+                                            : 'moon-outline'
+                                    }
+                                    size={30}
+                                    color={
+                                        mapTheme === 'dark'
+                                            ? theme.WHITE_COLOR
+                                            : '#212121'
+                                    }
+                                />
+                            </TouchableOpacity>
+                        </Row>
                     }
                 />
                 <View style={{ flex: 0.8 }}>
@@ -218,7 +255,7 @@ const PickupMap = ({ businesses }: Props) => {
                         zoomControlEnabled
                         showsUserLocation
                         customMapStyle={
-                            theme.mode === 'dark'
+                            mapTheme === 'dark'
                                 ? customMapStyleDark
                                 : customMapStyleLight
                         }
@@ -240,7 +277,6 @@ const PickupMap = ({ businesses }: Props) => {
                         }}
                     >
                         {businesses.map((b, i) => {
-                            console.log('IBDEX', index, i);
                             return (
                                 <Marker
                                     onPress={(e: MarkerPressEvent) => {
