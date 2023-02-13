@@ -71,7 +71,10 @@ export interface Business {
     minimumDelivery: number | null;
     milesRadius: number | null;
 }
-
+export interface Tip {
+    amount: number;
+    percentage: number;
+}
 export interface Order {
     id?: string;
     orderNumber?: number;
@@ -91,8 +94,9 @@ export interface Order {
     deliveredBy?: AppUser | null;
     pickedUpOn?: string | null;
     acceptedOn?: string | null;
+    tip?: Tip;
+    deliveryPaid: boolean;
 }
-
 export enum ORDER_TYPE {
     pickup = 'pickup',
     delivery = 'delivery'

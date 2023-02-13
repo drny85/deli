@@ -56,12 +56,15 @@ export const emailVerifiedFunc = (name: string) =>
 export const connectedStore = (name: string) =>
     httpsCallable<ConnectedAccountParams, Response>(functions, name);
 
+export const payCourier = (name: string) =>
+    httpsCallable<{ orderId: string }, Response>(functions, name);
+
 export const checkForConnectedAccount = (name: string) =>
     httpsCallable<{ accountId: string }, Response>(functions, name);
 
 export const fetchPaymentParams = (name: string) =>
     httpsCallable<
-        { connectedId: string; total: number },
+        { connectedId: string; total: number; orderId: string },
         { success: boolean; result: PaymentIntentParams }
     >(functions, name);
 

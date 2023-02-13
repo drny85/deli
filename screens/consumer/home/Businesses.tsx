@@ -1,4 +1,5 @@
 import {
+    Animated,
     FlatList,
     ListRenderItem,
     Modal,
@@ -42,7 +43,8 @@ import moment from 'moment';
 import ProductListItem from '../../../components/ProductListItem';
 import Header from '../../../components/Header';
 import useNotifications from '../../../hooks/useNotifications';
-import PickupMap from '../../../components/PickupMap';
+import PickupMap from '../../../components/modals/PickupMap';
+import HomeBusinessOrderDetails from '../../../components/modals/HomeBusinessOrderDetails';
 
 const Businesses = () => {
     useNotifications();
@@ -52,6 +54,9 @@ const Businesses = () => {
     // variables
     const { address, latitude, longitude } = useLocation();
     const navigation = useNavigation();
+    const currentOffset = useRef(0);
+    const transY = useRef(new Animated.Value(0)).current;
+    const currentDirection = useRef<'up' | 'down'>('up');
 
     const [nothingFound, setNothingFound] = useState(false);
     const { deliveryAdd } = useAppSelector((state) => state.orders);
@@ -66,7 +71,13 @@ const Businesses = () => {
     } = useAllProducts();
     const [businesses, setBusinesses] = useState<Business[]>([]);
     const onScroll = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
-        setShow(e.nativeEvent.contentOffset.y < 100);
+        const y = e.nativeEvent.contentOffset.y;
+        const direction = y > currentOffset.current && y > 0 ? 'down' : 'up';
+        if (currentDirection.current !== direction) {
+            currentDirection.current = direction;
+            setShow(currentDirection.current === 'up');
+        }
+        currentOffset.current = y;
     };
     const { user, loading } = useAppSelector((state) => state.auth);
 
@@ -157,9 +168,9 @@ const Businesses = () => {
     return (
         <Screen>
             <AnimatePresence>
-                {show && (
+                {currentDirection.current === 'up' && (
                     <MotiView
-                        from={{ height: 0, opacity: 1, translateY: -50 }}
+                        from={{ height: 0, opacity: 0, translateY: -50 }}
                         animate={{
                             opacity: 1,
                             translateY: 0,
@@ -210,7 +221,7 @@ const Businesses = () => {
                     What are you craving for right now?
                 </Text>
                 <InputField
-                    placeholder="Salad, Coffee, Patelito, Tostones, etc"
+                    placeholder="Salad, Coffee, Pastelito, Tostones, etc"
                     onChangeText={(text) => handleSearch(text)}
                     contentStyle={{
                         paddingVertical: SIZES.base * 1.5
@@ -274,179 +285,25 @@ const Businesses = () => {
                     <FlatList
                         ref={listRef}
                         onScroll={onScroll}
+                        bounces={false}
+                        alwaysBounceVertical={false}
                         scrollEventThrottle={16}
                         showsVerticalScrollIndicator={false}
-                        data={[...businesses]}
-                        keyExtractor={(item) => item.id!}
+                        ListFooterComponent={<View style={{ height: 40 }} />}
+                        data={[...businesses, ...businesses]}
+                        keyExtractor={(item, index) => index.toString()}
                         renderItem={renderBusinesses}
                     />
                 </>
             )}
 
-            {businessAvailable.length && (
-                <Modal
+            {businessAvailable.length && order && (
+                <HomeBusinessOrderDetails
+                    businesses={businessAvailable}
+                    order={order}
                     visible={visible}
-                    presentationStyle="pageSheet"
-                    animationType="slide"
-                    style={{ backgroundColor: theme.BACKGROUND_COLOR }}
-                >
-                    <View
-                        style={[
-                            styles.container,
-                            { backgroundColor: theme.BACKGROUND_COLOR }
-                        ]}
-                    >
-                        <View
-                            style={{
-                                position: 'absolute',
-                                top: 20,
-                                width: '100%',
-                                zIndex: 400,
-                                backgroundColor: theme.BACKGROUND_COLOR
-                            }}
-                        >
-                            <Header
-                                title="Order Details"
-                                rightIcon={
-                                    <TouchableOpacity
-                                        onPress={() => setVisible(false)}
-                                        style={{
-                                            padding: 10
-                                        }}
-                                    >
-                                        <FontAwesome
-                                            name="close"
-                                            color={theme.SECONDARY_BUTTON_COLOR}
-                                            size={20}
-                                        />
-                                    </TouchableOpacity>
-                                }
-                            />
-                        </View>
-
-                        <View>
-                            <Stack containerStyle={{ marginTop: 30 }}>
-                                <Divider bgColor={theme.TEXT_COLOR} />
-                                <Text bold>
-                                    From{' '}
-                                    <Text lobster medium>
-                                        {' '}
-                                        {
-                                            businessAvailable.find(
-                                                (b) =>
-                                                    b.id === order?.businessId
-                                            )?.name
-                                        }
-                                    </Text>
-                                </Text>
-                                <Text>
-                                    {businessAvailable.find(
-                                        (b) => b.id! === order?.businessId!
-                                    ) !== undefined
-                                        ? businessAvailable
-                                              .find(
-                                                  (b) =>
-                                                      b.id! ===
-                                                      order?.businessId!
-                                              )
-                                              ?.address?.slice(0, -15)
-                                        : ''}
-                                </Text>
-                                <View style={{ height: 10 }} />
-                                <Text bold>
-                                    To{' '}
-                                    <Text lobster medium>
-                                        {order?.contactPerson.name}
-                                    </Text>
-                                </Text>
-                                <Text>
-                                    {order?.address?.street?.split(', ')[0]}
-                                </Text>
-                                <Text py_4>
-                                    Order Date:{' '}
-                                    {moment(order?.orderDate).format('lll')}
-                                </Text>
-                                {order?.status === ORDER_STATUS.delivered && (
-                                    <Text py_4>
-                                        Delivered On:{' '}
-                                        {moment(order?.deliveredOn).format(
-                                            'lll'
-                                        )}
-                                    </Text>
-                                )}
-                            </Stack>
-                            <Divider
-                                thickness="medium"
-                                bgColor={theme.TEXT_COLOR}
-                                small
-                            />
-                            <View style={{ padding: SIZES.padding }}>
-                                <Text center bold>
-                                    Items
-                                </Text>
-                                <ScrollView
-                                    contentContainerStyle={{ maxHeight: 200 }}
-                                >
-                                    {order?.items.map((item, index) => (
-                                        <ProductListItem
-                                            key={index.toString()}
-                                            item={item}
-                                            index={index}
-                                        />
-                                    ))}
-                                </ScrollView>
-
-                                <Divider
-                                    thickness="medium"
-                                    bgColor={theme.TEXT_COLOR}
-                                    small
-                                />
-
-                                <View style={{ marginTop: 10 }}>
-                                    <Row
-                                        containerStyle={{ width: '100%' }}
-                                        horizontalAlign="space-between"
-                                    >
-                                        <Text capitalize>Sub Total</Text>
-                                        <Text capitalize>
-                                            ${order?.total.toFixed(2)}
-                                        </Text>
-                                    </Row>
-                                    <Row
-                                        containerStyle={{ width: '100%' }}
-                                        horizontalAlign="space-between"
-                                    >
-                                        <Text py_4 capitalize>
-                                            Service Fee
-                                        </Text>
-                                        <Text capitalize>
-                                            $
-                                            {stripeFee(order?.total!).toFixed(
-                                                2
-                                            )}
-                                        </Text>
-                                    </Row>
-                                    <Divider small />
-                                    <Row
-                                        containerStyle={{ width: '100%' }}
-                                        horizontalAlign="space-between"
-                                    >
-                                        <Text py_4 bold large capitalize>
-                                            Total
-                                        </Text>
-                                        <Text bold large capitalize>
-                                            $
-                                            {(
-                                                order?.total! +
-                                                stripeFee(order?.total!)
-                                            ).toFixed(2)}
-                                        </Text>
-                                    </Row>
-                                </View>
-                            </View>
-                        </View>
-                    </View>
-                </Modal>
+                    setVisible={setVisible}
+                />
             )}
 
             <PickupMap businesses={businessAvailable} />
@@ -455,11 +312,3 @@ const Businesses = () => {
 };
 
 export default Businesses;
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        padding: 24,
-        paddingTop: SIZES.padding
-    }
-});

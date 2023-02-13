@@ -68,7 +68,7 @@ const OrderReview = () => {
                 total: +total.toFixed(2),
                 paymentIntent: '',
                 status: ORDER_STATUS.new,
-                orderType: ORDER_TYPE.delivery,
+                orderType: orderType,
                 deliveryInstructions: deliveryInstructions,
                 address: deliveryAddress || null
             };

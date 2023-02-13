@@ -56,6 +56,8 @@ const OrderDetails = ({
     const snapPoints = useMemo(() => ['13%', '25%', '50%', '90%'], []);
     const bottomSheetRef = useRef<BottomSheet>(null);
 
+    console.log(orderId);
+
     const mapRef = useRef<MapView>(null);
 
     useEffect(() => {
@@ -550,6 +552,15 @@ const OrderDetails = ({
                                     ${stripeFee(order.total).toFixed(2)}
                                 </Text>
                             </Row>
+                            <Row
+                                containerStyle={{ width: '100%' }}
+                                horizontalAlign="space-between"
+                            >
+                                <Text capitalize>Tips</Text>
+                                <Text capitalize>
+                                    ${order.tip?.amount.toFixed(2)}
+                                </Text>
+                            </Row>
                             <Divider small />
                             <Row
                                 containerStyle={{ width: '100%' }}
@@ -561,7 +572,9 @@ const OrderDetails = ({
                                 <Text bold large capitalize>
                                     $
                                     {(
-                                        order.total + stripeFee(order.total)
+                                        order.total +
+                                        order.tip?.amount! +
+                                        stripeFee(order.total)
                                     ).toFixed(2)}
                                 </Text>
                             </Row>

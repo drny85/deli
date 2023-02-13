@@ -3,6 +3,7 @@ import { Courier } from '../../types';
 import { AppUser } from '../auth/authSlide';
 import { Coors } from '../business/businessSlide';
 import { CartItem } from './cartSlide';
+import { placePendingOrder } from './ordersActions';
 
 export interface ContactPerson {
     name: string;
@@ -33,6 +34,11 @@ export interface OrderAddress {
     coors: Coors;
     addedOn: string;
 }
+
+export interface Tip {
+    amount: number;
+    percentage: number;
+}
 export interface Order {
     id?: string;
     orderNumber?: number;
@@ -52,6 +58,8 @@ export interface Order {
     deliveredBy?: AppUser | null;
     pickedUpOn?: string | null;
     acceptedOn?: string | null;
+    tip?: Tip;
+    deliveryPaid: boolean;
 }
 
 interface OrdersState {
@@ -62,6 +70,8 @@ interface OrdersState {
     showPickupMap: boolean;
     loading: boolean;
     paymentSuccess: boolean;
+    tip: Tip;
+    grandTotal: number;
 }
 const initialState: OrdersState = {
     orders: [],
@@ -70,7 +80,9 @@ const initialState: OrdersState = {
     showPickupMap: false,
     deliveryAdd: null,
     loading: false,
-    paymentSuccess: false
+    paymentSuccess: false,
+    tip: { amount: 0, percentage: 0 },
+    grandTotal: 0
 };
 
 const ordersSlice = createSlice({
@@ -95,7 +107,29 @@ const ordersSlice = createSlice({
         },
         tooglePickupMap: (state, { payload }: PayloadAction<boolean>) => {
             state.showPickupMap = payload;
+        },
+        setTipAmount: (
+            state,
+            { payload }: PayloadAction<OrdersState['tip']>
+        ) => {
+            state.tip = payload;
+        },
+        setGrandTotal: (state, { payload }: PayloadAction<number>) => {
+            state.grandTotal = payload;
         }
+    },
+    extraReducers: (builder) => {
+        builder
+            .addCase(placePendingOrder.pending, (state) => {
+                state.loading = true;
+            })
+            .addCase(placePendingOrder.rejected, (state) => {
+                state.loading = false;
+            })
+            .addCase(placePendingOrder.fulfilled, (state, { payload }) => {
+                state.loading = false;
+                state.order = payload.pendingOrder;
+            });
     }
 });
 
@@ -104,7 +138,9 @@ export const {
     saveDeliveryAddress,
     switchOrderType,
     setPaymentSuccess,
-    tooglePickupMap
+    tooglePickupMap,
+    setTipAmount,
+    setGrandTotal
 } = ordersSlice.actions;
 
 export default ordersSlice.reducer;

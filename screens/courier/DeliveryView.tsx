@@ -10,7 +10,12 @@ import Communications from 'react-native-communications';
 import { runTransaction } from 'firebase/firestore';
 
 import Text from '../../components/Text';
-import { businessCollection, db, ordersCollection } from '../../firebase';
+import {
+    businessCollection,
+    db,
+    ordersCollection,
+    payCourier
+} from '../../firebase';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { useLocation } from '../../hooks/useLocation';
 import { useAppDispatch, useAppSelector } from '../../redux/store';
@@ -178,6 +183,10 @@ const DeliveryView = ({
                     })
                 );
                 if (payload) {
+                    const funcP = payCourier('payCourier');
+                    await funcP({
+                        orderId: order.id!
+                    });
                     sheetRef.current?.snapToIndex(0);
                     mapViewRef.current?.animateToRegion({
                         latitude: origin?.lat!,

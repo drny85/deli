@@ -12,13 +12,13 @@ import {
 } from 'react-native';
 import React, { useEffect, useRef, useState } from 'react';
 
-import Text from './Text';
-import Header from './Header';
+import Text from '../Text';
+import Header from '../Header';
 import { useNavigation } from '@react-navigation/native';
-import { useAppDispatch, useAppSelector } from '../redux/store';
-import { ORDER_TYPE, tooglePickupMap } from '../redux/consumer/ordersSlide';
+import { useAppDispatch, useAppSelector } from '../../redux/store';
+import { ORDER_TYPE, tooglePickupMap } from '../../redux/consumer/ordersSlide';
 
-import { Business, setBusiness } from '../redux/business/businessSlide';
+import { Business, setBusiness } from '../../redux/business/businessSlide';
 import MapView, {
     Marker,
     MarkerPressEvent,
@@ -27,14 +27,14 @@ import MapView, {
 } from 'react-native-maps';
 import { Ionicons } from '@expo/vector-icons';
 
-import { customMapStyleDark, customMapStyleLight } from '../utils/customMap';
-import { IMAGE_PLACEHOLDER, SIZES } from '../constants';
-import Stack from './Stack';
-import Button from './Button';
+import { customMapStyleDark, customMapStyleLight } from '../../utils/customMap';
+import { IMAGE_PLACEHOLDER, SIZES } from '../../constants';
+import Stack from '../Stack';
+import Button from '../Button';
 import { MotiImage, MotiView } from 'moti';
-import Row from './Row';
-import { switchTheme } from '../redux/themeSlide';
-import { darkTheme, lightTheme } from '../Theme';
+import Row from '../Row';
+import { switchTheme } from '../../redux/themeSlide';
+import { darkTheme, lightTheme } from '../../Theme';
 
 const CARD_HEIGHT = 220;
 const CARD_WIDTH = SIZES.width * 0.8;

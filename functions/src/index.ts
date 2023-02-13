@@ -5,9 +5,11 @@ import fetch from 'node-fetch';
 dotenv.config();
 admin.initializeApp();
 
+import { v4 as UUID } from 'uuid';
+
 import Stripe from 'stripe';
 
-import { assignUserType, stripeFee } from './shared';
+import { assignUserType } from './shared';
 
 import { UserRecord } from 'firebase-functions/v1/auth';
 import { AppUser, Business, CartItem, Order, ORDER_STATUS } from './typing';
@@ -217,6 +219,139 @@ exports.webhook = functions.https.onRequest(
     }
 );
 
+exports.deli = functions.https.onRequest(
+    async (
+        req: functions.https.Request,
+        res: functions.Response<any>
+    ): Promise<any> => {
+        const webhookSecret = process.env.WEBHOOK_DELI;
+        const signature = req.headers['stripe-signature'];
+        const payloadData = req.rawBody;
+        const payloadString = payloadData.toString();
+        let event;
+
+        try {
+            if (!webhookSecret || !signature) return;
+            event = stripe.webhooks.constructEvent(
+                payloadString,
+                signature,
+                webhookSecret
+            );
+            const webhookRef = admin
+                .firestore()
+                .collection('deli')
+                .doc(event.id);
+
+            const exists = (await webhookRef.get()).exists;
+            if (exists) return res.status(400).send('Already exists');
+            const wkType = { type: event.type };
+            const wkStatus = { status: 'new' };
+            const eventType = { event_type: 'deli' };
+            const data = {
+                ...wkStatus,
+                ...wkType,
+                ...eventType,
+                ...event.data.object
+            };
+
+            await webhookRef.set(data);
+            // Handle the event
+            switch (event.type) {
+                case 'payment_intent.payment_failed':
+                    const paymentIntent_failed = event.data
+                        .object as Stripe.PaymentIntent;
+                    // Then define and call a function to handle the event payment_intent.payment_failed
+                    console.log(paymentIntent_failed);
+                    break;
+                case 'payment_intent.requires_action':
+                    const paymentIntent_actions = event.data.object;
+                    console.log(paymentIntent_actions);
+                    // Then define and call a function to handle the event payment_intent.requires_action
+                    break;
+                case 'payment_intent.succeeded':
+                    const { id, transfer_group, latest_charge, metadata } =
+                        event.data.object as Stripe.PaymentIntent;
+                    console.log('PAYMENT ID =>', id);
+                    const { orderId } = metadata;
+                    const order = await admin
+                        .firestore()
+                        .collection('pendingOrders')
+                        .doc(orderId)
+                        .get();
+                    if (!order.exists) {
+                        console.log('No Order with ID => ', order.id);
+                        return res.status(404).send('no order found');
+                    }
+
+                    const { total, businessId } = order.data() as Order;
+                    const business = await admin
+                        .firestore()
+                        .collection('business')
+                        .doc(businessId)
+                        .get();
+                    const { stripeAccount } = business.data() as Business;
+                    if (!stripeAccount) {
+                        console.log('No Stripe Account', stripeAccount);
+                        return res.status(404).send('no order found');
+                    }
+
+                    let myFee = (total * 1.1) / 100;
+                    if (myFee >= 2) {
+                        myFee = 2;
+                    }
+
+                    const amountTobePaid = total - +myFee.toFixed(2);
+                    const fee = Math.round(+amountTobePaid.toFixed(2) * 100);
+
+                    const transf = await stripe.transfers.create({
+                        amount: fee,
+                        currency: 'usd',
+                        destination: stripeAccount!,
+                        transfer_group: transfer_group!,
+                        source_transaction: latest_charge?.toString(),
+                        metadata: {
+                            orderId
+                        }
+                    });
+
+                    await order.ref.delete();
+
+                    return res.status(200).send(transf.id);
+                // Then define and call a function to handle the event payment_intent.succeeded
+
+                case 'transfer.created':
+                    const eventT = event.data.object as Stripe.Transfer;
+
+                    return res.status(200).send(eventT.id);
+
+                // Then define and call a function to handle the event transfer.created
+
+                case 'transfer.reversed':
+                    const { id: tReversed } = event.data
+                        .object as Stripe.Transfer;
+                    // Then define and call a function to handle the event transfer.reversed
+                    console.log(tReversed);
+                    break;
+                case 'transfer.updated':
+                    const transfer = event.data.object as Stripe.Transfer;
+                    console.log(transfer.id);
+                    // Then define and call a function to handle the event transfer.updated
+                    break;
+                // ... handle other event types
+                default:
+                    console.log(`Unhandled event type ${event.type}`);
+            }
+
+            return res.status(200).send('Success');
+        } catch (error) {
+            console.log(error);
+            const err = error as any;
+            functions.logger.error('Error message', err.message);
+            return res.status(400).send(`Webhook Deli Error:' ${err.message}`);
+        }
+    }
+);
+
 exports.checkIfEmailIsVerified = functions.https.onCall(
     async (data: { email: string }, context): Promise<UserRecord | null> => {
         try {
@@ -343,7 +478,7 @@ exports.checkForStoreReady = functions.firestore
 
 exports.createPaymentIntent = functions.https.onCall(
     async (
-        data: { connectedId: string; total: number },
+        data: { connectedId: string; total: number; orderId: string },
         context
     ): Promise<{ success: boolean; result: any }> => {
         try {
@@ -369,29 +504,27 @@ exports.createPaymentIntent = functions.https.onCall(
                 { customer: customer_id },
                 { apiVersion: '2022-11-15' }
             );
-            console.log(
-                'AMOUNT',
-                data.total,
-                Math.round(data.total * 100),
-                typeof stripeFee(data.total),
-                stripeFee(data.total)
-            );
+
+            console.log('ORDER-ID =>', data.orderId, 'TOTAL =>', data.total);
             const paymentIntent = await stripe.paymentIntents.create({
-                amount: stripeFee(data.total),
+                amount: Math.round(+data.total.toFixed(2) * 100),
                 currency: 'usd',
                 customer: customer_id,
                 receipt_email: email,
                 automatic_payment_methods: {
                     enabled: true
                 },
-                transfer_data: {
-                    destination: data.connectedId
-                },
+                // transfer_data: {
+                //     destination: data.connectedId
+                // },
+                on_behalf_of: data.connectedId,
+                transfer_group: UUID(),
 
-                application_fee_amount: +(data.total * 100 * 0.08).toFixed(0),
+                // application_fee_amount: +(data.total * 100 * 0.08).toFixed(0),
                 metadata: {
                     userId: context.auth.uid,
-                    userEmail: email
+                    userEmail: email,
+                    orderId: data.orderId
                 }
             });
 
@@ -563,6 +696,51 @@ exports.sendOrderStatusUpdates = functions.firestore
             }
         }
     );
+
+exports.payCourier = functions.https.onCall(
+    async (data: { orderId: string }, context) => {
+        try {
+            const orderRef = await admin
+                .firestore()
+                .collection('orders')
+                .doc(data.orderId)
+                .get();
+            if (!orderRef.exists) return;
+
+            const order = orderRef.data() as Order;
+            if (!order.tip?.amount || order.deliveryPaid) return;
+
+            const { transfer_group } = await stripe.paymentIntents.retrieve(
+                order.paymentIntent
+            );
+            console.log('TIP =>', order.tip.amount);
+            await stripe.transfers.create({
+                amount: Math.round(+order.tip?.amount.toFixed(2) * 100),
+                currency: 'usd',
+                destination: 'acct_1MMGYfCGpz9ntd7c',
+                transfer_group: transfer_group!,
+                metadata: {
+                    orderId: order.id!
+                }
+            });
+
+            await admin
+                .firestore()
+                .collection('orders')
+                .doc(data.orderId)
+                .set({ ...data, deliveryPaid: true }, { merge: true });
+
+            console.log('COURIER PAID =>', order.tip.amount);
+        } catch (error) {
+            const err = error as any;
+            console.log(err.message);
+            throw new functions.https.HttpsError(
+                'aborted',
+                'error sending notification'
+            );
+        }
+    }
+);
 
 export async function isAuthorizedToGrantAccess(
     email: string
