@@ -50,7 +50,7 @@ const FloatingArrowUpButton = ({ show, onPress }: Props) => {
                         <FontAwesome
                             name="arrow-up"
                             size={22}
-                            color={theme.TEXT_COLOR}
+                            color={theme.WHITE_COLOR}
                         />
                     </TouchableOpacity>
                 </MotiView>

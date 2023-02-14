@@ -34,6 +34,7 @@ import {
 } from '../../../redux/consumer/ordersActions';
 import { db, fetchPaymentParams } from '../../../firebase';
 import { collection, deleteDoc, doc } from 'firebase/firestore';
+import InputField from '../../../components/InputField';
 
 export type CheckOutProps = NativeStackScreenProps<
     ConsumerCartStackScreens,
@@ -45,6 +46,7 @@ const Checkout = ({ navigation }: CheckOutProps) => {
     const [paymentId, setPaymentId] = useState('');
     const { user } = useAppSelector((state) => state.auth);
     const [showCustomTip, setShowCustomTip] = useState(false);
+    const [customTip, setCustomTip] = useState('');
     const { initPaymentSheet, presentPaymentSheet } = useStripe();
     const { total, items, quantity } = useAppSelector((state) => state.cart);
     const dispatch = useAppDispatch();
@@ -84,7 +86,12 @@ const Checkout = ({ navigation }: CheckOutProps) => {
             const o: Order = {
                 ...order,
                 deliveryPaid: false,
-                tip: { amount: +amount.toFixed(2), percentage },
+                tip: {
+                    amount: customTip
+                        ? +parseInt(customTip).toFixed(2)
+                        : +amount.toFixed(2),
+                    percentage
+                },
                 orderType: orderType,
                 paymentIntent: paymentId
             };
@@ -97,9 +104,13 @@ const Checkout = ({ navigation }: CheckOutProps) => {
             if (success && pendingOrder && pendingOrder.id) {
                 //dispatch(setGrandTotal(grandTotal));
                 setPendingOrder({ ...pendingOrder });
-                console.log('Pending ID A =>', order.id, pendingOrder?.id);
-                //dispatch(setPaymentSuccess(success));
-                startPayment(pendingOrder.id, +grandTotal.toFixed(2));
+                const tAmount = +(
+                    total +
+                    stripeFee(total) +
+                    (customTip ? +parseInt(customTip).toFixed(2) : amount)
+                ).toFixed(2);
+
+                startPayment(pendingOrder.id, tAmount);
             }
         } catch (error) {
             console.log(error);
@@ -108,9 +119,7 @@ const Checkout = ({ navigation }: CheckOutProps) => {
 
     const completeOrder = async (order: Order) => {
         try {
-            console.log('Started', order.id);
             if (!order.id) return;
-            console.log('Started A');
 
             const { payload } = await dispatch(
                 placeOrder({ ...order, paymentIntent: paymentId })
@@ -120,7 +129,6 @@ const Checkout = ({ navigation }: CheckOutProps) => {
                 success: boolean;
                 orderId: string | null;
             };
-            console.log('HERE', success, orderId);
 
             if (success && orderId) {
                 navigation.replace('OrderSuccess', {
@@ -139,7 +147,6 @@ const Checkout = ({ navigation }: CheckOutProps) => {
             if (!business || !business.stripeAccount) return;
 
             const func = fetchPaymentParams('createPaymentIntent');
-            console.log(Math.round(+amount.toFixed(2) * 100));
 
             const {
                 data: { success, result }
@@ -181,7 +188,6 @@ const Checkout = ({ navigation }: CheckOutProps) => {
 
                 return;
             } else {
-                console.log('DATE', order?.orderDate);
                 if (!order) return;
                 dispatch(
                     setOrder({
@@ -265,19 +271,6 @@ const Checkout = ({ navigation }: CheckOutProps) => {
         }
     };
 
-    const delelePendingOrder = async (orderId: string) => {
-        try {
-            console.log('HERE =>', orderId);
-            const d = collection(db, 'pendingOrders');
-            const ref = doc(d, orderId);
-            await deleteDoc(ref);
-        } catch (error) {
-            console.log('Error deleting pending order', error);
-        } finally {
-            console.log('DELETED');
-        }
-    };
-
     useEffect(() => {
         dispatch(
             setTipAmount({
@@ -297,7 +290,7 @@ const Checkout = ({ navigation }: CheckOutProps) => {
                 ).toFixed(2)
             )
         );
-    }, [percentage, total]);
+    }, [percentage, total, customTip]);
 
     useEffect(() => {
         if (!paymentSuccess || !pOrder) return;
@@ -477,11 +470,13 @@ const Checkout = ({ navigation }: CheckOutProps) => {
                             >
                                 <Text>Add a tip for your driver</Text>
                                 <Text>
-                                    {percentage}
-                                    {' % '}
+                                    {!customTip ? percentage + '% ' : ''}
+
                                     <Text bold px_4>
-                                        {' '}
-                                        ${amount.toFixed(2)}
+                                        $
+                                        {customTip
+                                            ? customTip
+                                            : amount.toFixed(2)}
                                     </Text>
                                 </Text>
                             </Row>
@@ -516,11 +511,13 @@ const Checkout = ({ navigation }: CheckOutProps) => {
                                                         ).toFixed(2)
                                                     )
                                                 );
+                                                setCustomTip('');
                                             }}
                                             style={{
                                                 justifyContent: 'center',
                                                 backgroundColor:
-                                                    percentage === p
+                                                    percentage === p &&
+                                                    !customTip
                                                         ? theme.ASCENT
                                                         : theme.SECONDARY_BUTTON_COLOR,
                                                 alignItems: 'center',
@@ -537,8 +534,14 @@ const Checkout = ({ navigation }: CheckOutProps) => {
                                             key={p}
                                         >
                                             <Text
-                                                lightText={percentage === p}
-                                                bold={percentage === p}
+                                                lightText={
+                                                    percentage === p &&
+                                                    !customTip
+                                                }
+                                                bold={
+                                                    percentage === p &&
+                                                    !customTip
+                                                }
                                                 center
                                             >
                                                 {p}%
@@ -565,7 +568,9 @@ const Checkout = ({ navigation }: CheckOutProps) => {
                         </Row>
                         <Row horizontalAlign="space-between">
                             <Text>Tip Amount</Text>
-                            <Text>${amount.toFixed(2)}</Text>
+                            <Text>
+                                ${customTip ? customTip : amount.toFixed(2)}{' '}
+                            </Text>
                         </Row>
                         <Row horizontalAlign="space-between">
                             <Text bold medium>
@@ -574,7 +579,13 @@ const Checkout = ({ navigation }: CheckOutProps) => {
                             </Text>
                             <Text py_4 left bold medium>
                                 $
-                                {(total + amount + stripeFee(total)).toFixed(2)}
+                                {(
+                                    total +
+                                    (customTip
+                                        ? +parseInt(customTip).toFixed(2)
+                                        : amount) +
+                                    stripeFee(total)
+                                ).toFixed(2)}
                             </Text>
                         </Row>
                     </Princing>
@@ -600,11 +611,74 @@ const Checkout = ({ navigation }: CheckOutProps) => {
                 animationType="slide"
                 presentationStyle="formSheet"
             >
-                <View style={{ marginTop: 20 }}>
+                <View style={{ marginTop: 20, flex: 1 }}>
                     <Header
-                        title="Custom Tip"
+                        title="Enter a custom tip"
                         onPressBack={() => setShowCustomTip(false)}
                     />
+                    <View
+                        style={{
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            padding: 20
+                        }}
+                    >
+                        <Stack>
+                            <Text>
+                                Show your appreciation by tipping the courier.
+                                100% of your tips go to the driver
+                            </Text>
+                        </Stack>
+                        <View style={{ marginVertical: 20 }} />
+                        <InputField
+                            label="How much would you like to tip your driver?"
+                            value={customTip}
+                            leftIcon={
+                                <FontAwesome
+                                    name="dollar"
+                                    size={18}
+                                    color={theme.TEXT_COLOR}
+                                />
+                            }
+                            placeholder="Custom Tip"
+                            contentStyle={{
+                                fontSize: 18,
+                                fontFamily: 'montserrat-bold'
+                            }}
+                            onChangeText={(text) => {
+                                setCustomTip(text);
+                                // dispatch(
+                                //     setTipAmount({
+                                //         amount: +text,
+                                //         percentage: 0
+                                //     })
+                                // );
+                            }}
+                        />
+
+                        <Button
+                            outlined
+                            title="Update Tip"
+                            onPress={() => {
+                                dispatch(
+                                    setTipAmount({
+                                        amount: +customTip,
+                                        percentage: 0
+                                    })
+                                );
+                                dispatch(
+                                    setGrandTotal(
+                                        +(
+                                            total +
+                                            +parseInt(customTip).toFixed(2) +
+                                            stripeFee(total)
+                                        ).toFixed(2)
+                                    )
+                                );
+                                setShowCustomTip(false);
+                            }}
+                        />
+                    </View>
                 </View>
             </Modal>
         </Screen>

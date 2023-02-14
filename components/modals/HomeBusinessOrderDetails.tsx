@@ -67,7 +67,7 @@ const HomeBusinessOrderDetails = ({
                             >
                                 <FontAwesome
                                     name="close"
-                                    color={theme.SECONDARY_BUTTON_COLOR}
+                                    color={theme.TEXT_COLOR}
                                     size={20}
                                 />
                             </TouchableOpacity>
@@ -162,6 +162,15 @@ const HomeBusinessOrderDetails = ({
                                     ${stripeFee(order?.total!).toFixed(2)}
                                 </Text>
                             </Row>
+                            <Row
+                                containerStyle={{ width: '100%' }}
+                                horizontalAlign="space-between"
+                            >
+                                <Text capitalize>Tips</Text>
+                                <Text capitalize>
+                                    $ {order.tip?.amount.toFixed(2)}
+                                </Text>
+                            </Row>
                             <Divider small />
                             <Row
                                 containerStyle={{ width: '100%' }}
@@ -173,7 +182,9 @@ const HomeBusinessOrderDetails = ({
                                 <Text bold large capitalize>
                                     $
                                     {(
-                                        order?.total! + stripeFee(order?.total!)
+                                        order?.total! +
+                                        order.tip?.amount! +
+                                        stripeFee(order?.total!)
                                     ).toFixed(2)}
                                 </Text>
                             </Row>

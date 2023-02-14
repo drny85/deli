@@ -2,7 +2,6 @@ import { createAsyncThunk } from '@reduxjs/toolkit';
 import {
     addDoc,
     collection,
-    deleteDoc,
     doc,
     getDoc,
     setDoc,
@@ -11,7 +10,7 @@ import {
 import { db, ordersCollection } from '../../firebase';
 import { resetCart } from '../../utils/saveCart';
 import { setCart } from './cartSlide';
-import { Order, setOrder } from './ordersSlide';
+import { Order } from './ordersSlide';
 
 export const placePendingOrder = createAsyncThunk(
     'orders/placePendingOrder',
@@ -26,7 +25,6 @@ export const placePendingOrder = createAsyncThunk(
             const { id } = await addDoc(orderRef, { ...order });
             const docRef = doc(orderRef, id);
             const data = await getDoc(docRef);
-            console.log('DATA P =>', data.id, data.data());
 
             if (!data.exists()) return { success: false, pendingOrder: null };
             return {
@@ -46,7 +44,6 @@ export const placeOrder = createAsyncThunk(
         { dispatch }
     ): Promise<{ success: boolean; orderId: string | null }> => {
         try {
-            console.log('ORDER_ID =>', order.id);
             if (!order.items.length) return { success: false, orderId: null };
             const docRef = doc(ordersCollection, order.id);
             await setDoc(docRef, { ...order });
