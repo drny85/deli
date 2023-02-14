@@ -58,8 +58,7 @@ const Checkout = ({ navigation }: CheckOutProps) => {
         paymentSuccess,
         loading: loadingOrder,
         orderType,
-        tip: { amount, percentage },
-        grandTotal
+        tip: { amount, percentage }
     } = useAppSelector((state) => state.orders);
     const { business } = useAppSelector((state) => state.business);
 
@@ -86,12 +85,15 @@ const Checkout = ({ navigation }: CheckOutProps) => {
             const o: Order = {
                 ...order,
                 deliveryPaid: false,
-                tip: {
-                    amount: customTip
-                        ? +parseInt(customTip).toFixed(2)
-                        : +amount.toFixed(2),
-                    percentage
-                },
+                tip:
+                    orderType === ORDER_TYPE.delivery
+                        ? {
+                              amount: customTip
+                                  ? +parseInt(customTip).toFixed(2)
+                                  : +amount.toFixed(2),
+                              percentage
+                          }
+                        : { amount: 0, percentage: 0 },
                 orderType: orderType,
                 paymentIntent: paymentId
             };
@@ -272,13 +274,22 @@ const Checkout = ({ navigation }: CheckOutProps) => {
     };
 
     useEffect(() => {
-        dispatch(
-            setTipAmount({
-                amount: (total * percentage) / 100,
-                percentage: percentage > 0 ? percentage : 20
-            })
-        );
-    }, [percentage, amount]);
+        if (orderType === ORDER_TYPE.delivery) {
+            dispatch(
+                setTipAmount({
+                    amount: (total * percentage) / 100,
+                    percentage: percentage > 0 ? percentage : 20
+                })
+            );
+        } else {
+            dispatch(
+                setTipAmount({
+                    amount: 0,
+                    percentage: 0
+                })
+            );
+        }
+    }, [percentage, amount, orderType]);
 
     useEffect(() => {
         dispatch(
@@ -295,20 +306,14 @@ const Checkout = ({ navigation }: CheckOutProps) => {
     useEffect(() => {
         if (!paymentSuccess || !pOrder) return;
 
-        // if (orderSuccess.orderId) {
-        //     navigation.replace('OrderSuccess', {
-        //         orderId: orderSuccess.orderId
-        //     });
-        // }
         completeOrder(pOrder);
-        console.log('Completing order');
 
         return () => {
             dispatch(setPaymentSuccess(false));
         };
     }, [paymentSuccess, pOrder]);
 
-    if (loading || !amount || loadingOrder) return <PaymentLoading />;
+    if (loading || loadingOrder) return <PaymentLoading />;
     return (
         <Screen>
             <StripeProvider
@@ -454,109 +459,116 @@ const Checkout = ({ navigation }: CheckOutProps) => {
                             </View>
                         </View>
                     </ScrollView>
+
                     <Princing>
-                        <Stack
-                            containerStyle={{
-                                width: '100%',
-                                alignSelf: 'center'
-                            }}
-                        >
-                            <Row
+                        {orderType === ORDER_TYPE.delivery && (
+                            <Stack
                                 containerStyle={{
                                     width: '100%',
-                                    marginVertical: SIZES.base
+                                    alignSelf: 'center'
                                 }}
-                                horizontalAlign="space-between"
                             >
-                                <Text>Add a tip for your driver</Text>
-                                <Text>
-                                    {!customTip ? percentage + '% ' : ''}
-
-                                    <Text bold px_4>
-                                        $
-                                        {customTip
-                                            ? customTip
-                                            : amount.toFixed(2)}
-                                    </Text>
-                                </Text>
-                            </Row>
-                            <Row containerStyle={{ width: '100%' }}>
                                 <Row
                                     containerStyle={{
-                                        width: '85%',
-                                        alignSelf: 'center',
-                                        overflow: 'hidden',
-                                        backgroundColor:
-                                            theme.SECONDARY_BUTTON_COLOR,
-                                        borderRadius: SIZES.radius
+                                        width: '100%',
+                                        marginVertical: SIZES.base
                                     }}
-                                    horizontalAlign="space-around"
+                                    horizontalAlign="space-between"
                                 >
-                                    {[10, 15, 20, 25].map((p, index) => (
-                                        <TouchableOpacity
-                                            onPress={() => {
-                                                dispatch(
-                                                    setTipAmount({
-                                                        percentage: p,
-                                                        amount:
-                                                            (total * p) / 100
-                                                    })
-                                                );
-                                                dispatch(
-                                                    setGrandTotal(
-                                                        +(
-                                                            total +
-                                                            (total * p) / 100 +
-                                                            stripeFee(total)
-                                                        ).toFixed(2)
-                                                    )
-                                                );
-                                                setCustomTip('');
-                                            }}
-                                            style={{
-                                                justifyContent: 'center',
-                                                backgroundColor:
-                                                    percentage === p &&
-                                                    !customTip
-                                                        ? theme.ASCENT
-                                                        : theme.SECONDARY_BUTTON_COLOR,
-                                                alignItems: 'center',
-                                                width: '25%',
+                                    <Text>Add a tip for your driver</Text>
+                                    <Text>
+                                        {!customTip ? percentage + '% ' : ''}
 
-                                                paddingVertical:
-                                                    SIZES.padding * 0.5,
-
-                                                borderLeftColor:
-                                                    theme.TEXT_COLOR,
-                                                borderLeftWidth:
-                                                    index === 0 ? 0 : 0.5
-                                            }}
-                                            key={p}
-                                        >
-                                            <Text
-                                                lightText={
-                                                    percentage === p &&
-                                                    !customTip
-                                                }
-                                                bold={
-                                                    percentage === p &&
-                                                    !customTip
-                                                }
-                                                center
-                                            >
-                                                {p}%
-                                            </Text>
-                                        </TouchableOpacity>
-                                    ))}
+                                        <Text bold px_4>
+                                            $
+                                            {customTip
+                                                ? customTip
+                                                : amount.toFixed(2)}
+                                        </Text>
+                                    </Text>
                                 </Row>
-                                <TouchableOpacity
-                                    style={{ flexGrow: 1 }}
-                                    onPress={() => setShowCustomTip(true)}
-                                >
-                                    <Text px_4>Custom</Text>
-                                </TouchableOpacity>
-                            </Row>
-                        </Stack>
+
+                                <Row containerStyle={{ width: '100%' }}>
+                                    <Row
+                                        containerStyle={{
+                                            width: '85%',
+                                            alignSelf: 'center',
+                                            overflow: 'hidden',
+                                            backgroundColor:
+                                                theme.SECONDARY_BUTTON_COLOR,
+                                            borderRadius: SIZES.radius
+                                        }}
+                                        horizontalAlign="space-around"
+                                    >
+                                        {[10, 15, 20, 25].map((p, index) => (
+                                            <TouchableOpacity
+                                                onPress={() => {
+                                                    dispatch(
+                                                        setTipAmount({
+                                                            percentage: p,
+                                                            amount:
+                                                                (total * p) /
+                                                                100
+                                                        })
+                                                    );
+                                                    dispatch(
+                                                        setGrandTotal(
+                                                            +(
+                                                                total +
+                                                                (total * p) /
+                                                                    100 +
+                                                                stripeFee(total)
+                                                            ).toFixed(2)
+                                                        )
+                                                    );
+                                                    setCustomTip('');
+                                                }}
+                                                style={{
+                                                    justifyContent: 'center',
+                                                    backgroundColor:
+                                                        percentage === p &&
+                                                        !customTip
+                                                            ? theme.ASCENT
+                                                            : theme.SECONDARY_BUTTON_COLOR,
+                                                    alignItems: 'center',
+                                                    width: '25%',
+
+                                                    paddingVertical:
+                                                        SIZES.padding * 0.5,
+
+                                                    borderLeftColor:
+                                                        theme.TEXT_COLOR,
+                                                    borderLeftWidth:
+                                                        index === 0 ? 0 : 0.5
+                                                }}
+                                                key={p}
+                                            >
+                                                <Text
+                                                    lightText={
+                                                        percentage === p &&
+                                                        !customTip
+                                                    }
+                                                    bold={
+                                                        percentage === p &&
+                                                        !customTip
+                                                    }
+                                                    center
+                                                >
+                                                    {p}%
+                                                </Text>
+                                            </TouchableOpacity>
+                                        ))}
+                                    </Row>
+                                    <TouchableOpacity
+                                        style={{ flexGrow: 1 }}
+                                        onPress={() => setShowCustomTip(true)}
+                                    >
+                                        <Text px_4>Custom</Text>
+                                    </TouchableOpacity>
+                                </Row>
+                            </Stack>
+                        )}
+
                         <Row horizontalAlign="space-between">
                             <Text left>Sub-Total </Text>
                             <Text>${total.toFixed(2)}</Text>
@@ -566,12 +578,19 @@ const Checkout = ({ navigation }: CheckOutProps) => {
                             <Text>Service Fee</Text>
                             <Text>${stripeFee(total)}</Text>
                         </Row>
-                        <Row horizontalAlign="space-between">
-                            <Text>Tip Amount</Text>
-                            <Text>
-                                ${customTip ? customTip : amount.toFixed(2)}{' '}
-                            </Text>
-                        </Row>
+                        {orderType === ORDER_TYPE.delivery && (
+                            <Row horizontalAlign="space-between">
+                                <Text>Tip Amount</Text>
+                                <Text>
+                                    $
+                                    {customTip &&
+                                    orderType === ORDER_TYPE.delivery
+                                        ? customTip
+                                        : amount.toFixed(2)}{' '}
+                                </Text>
+                            </Row>
+                        )}
+
                         <Row horizontalAlign="space-between">
                             <Text bold medium>
                                 {' '}
@@ -581,7 +600,8 @@ const Checkout = ({ navigation }: CheckOutProps) => {
                                 $
                                 {(
                                     total +
-                                    (customTip
+                                    (customTip &&
+                                    orderType === ORDER_TYPE.delivery
                                         ? +parseInt(customTip).toFixed(2)
                                         : amount) +
                                     stripeFee(total)

@@ -15,7 +15,11 @@ import ProductListItem from '../../../components/ProductListItem';
 import Button from '../../../components/Button';
 import Divider from '../../../components/Divider';
 import { STATUS_NAME } from '../../../utils/orderStatus';
-import { Order, ORDER_STATUS } from '../../../redux/consumer/ordersSlide';
+import {
+    Order,
+    ORDER_STATUS,
+    ORDER_TYPE
+} from '../../../redux/consumer/ordersSlide';
 import { FontAwesome } from '@expo/vector-icons';
 import RadioButton from '../../../components/RadioButton';
 import { updateOrder } from '../../../redux/consumer/ordersActions';
@@ -83,6 +87,7 @@ const BusinessOrderDetails = ({
             setUpdating(false);
         }
     };
+    console.log(order?.status);
     useEffect(() => {
         if (!order) return;
         setNewStatus(order.status);
@@ -120,21 +125,31 @@ const BusinessOrderDetails = ({
                         </Text>
                         <Text>Phone: {order?.contactPerson.phone}</Text>
                     </View>
-                    <View>
-                        <Text bold>Delivery Address</Text>
-                        <Text>{order?.address?.street}</Text>
-                        {order.address?.apt && (
-                            <Text>APT: {order.address.apt}</Text>
-                        )}
-                        {order?.deliveryInstructions && (
-                            <>
-                                <Text py_4 bold>
-                                    Delivery Instructions
-                                </Text>
-                                <Text>{order.deliveryInstructions}</Text>
-                            </>
-                        )}
-                    </View>
+                    {order.orderType === ORDER_TYPE.delivery ? (
+                        <View>
+                            <Text bold>Delivery Address</Text>
+                            <Text>{order?.address?.street}</Text>
+                            {order.address?.apt && (
+                                <Text>APT: {order.address.apt}</Text>
+                            )}
+                            {order?.deliveryInstructions && (
+                                <>
+                                    <Text py_4 bold>
+                                        Delivery Instructions
+                                    </Text>
+                                    <Text>{order.deliveryInstructions}</Text>
+                                </>
+                            )}
+                        </View>
+                    ) : (
+                        <View>
+                            <Text bold>Pick Up Order</Text>
+                            <Text caption py_4>
+                                Order was already paid
+                            </Text>
+                            <Text bold>DO NOT charge the customer again</Text>
+                        </View>
+                    )}
                 </Row>
             </Stack>
             <AnimatePresence>
@@ -213,17 +228,19 @@ const BusinessOrderDetails = ({
                         ${order.total.toFixed(2)}
                     </Text>
                 </Row>
-                <Row
-                    containerStyle={{ width: '100%' }}
-                    horizontalAlign="space-between"
-                >
-                    <Text py_4 darkText capitalize>
-                        Tip for Courier
-                    </Text>
-                    <Text darkText capitalize>
-                        ${order.tip?.amount.toFixed(2)}
-                    </Text>
-                </Row>
+                {order.orderType === ORDER_TYPE.delivery && (
+                    <Row
+                        containerStyle={{ width: '100%' }}
+                        horizontalAlign="space-between"
+                    >
+                        <Text py_4 darkText capitalize>
+                            Tip for Courier
+                        </Text>
+                        <Text darkText capitalize>
+                            ${order.tip?.amount.toFixed(2)}
+                        </Text>
+                    </Row>
+                )}
 
                 <Divider small />
                 <Row
@@ -285,16 +302,34 @@ const BusinessOrderDetails = ({
                         </Text>
                         <Stack>
                             {Object.values(ORDER_STATUS).map((status) => {
-                                if (
-                                    status === ORDER_STATUS.new ||
-                                    status === ORDER_STATUS.all ||
-                                    status ===
-                                        ORDER_STATUS.accepted_by_driver ||
-                                    status ===
-                                        ORDER_STATUS.picked_up_by_driver ||
-                                    status === ORDER_STATUS.picked_up_by_client
-                                )
-                                    return;
+                                if (order.orderType === ORDER_TYPE.delivery) {
+                                    if (
+                                        status === ORDER_STATUS.new ||
+                                        status === ORDER_STATUS.all ||
+                                        status ===
+                                            ORDER_STATUS.accepted_by_driver ||
+                                        status ===
+                                            ORDER_STATUS.picked_up_by_driver ||
+                                        status ===
+                                            ORDER_STATUS.picked_up_by_client
+                                    )
+                                        return;
+                                }
+
+                                if (order.orderType === ORDER_TYPE.pickup) {
+                                    if (
+                                        status === ORDER_STATUS.delivered ||
+                                        status === ORDER_STATUS.new ||
+                                        status === ORDER_STATUS.all ||
+                                        status ===
+                                            ORDER_STATUS.picked_up_by_driver ||
+                                        status ===
+                                            ORDER_STATUS.accepted_by_driver ||
+                                        status ===
+                                            ORDER_STATUS.marked_ready_for_delivery
+                                    )
+                                        return;
+                                }
                                 return (
                                     <Row
                                         containerStyle={{

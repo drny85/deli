@@ -1,16 +1,13 @@
 import {
-    Animated,
     FlatList,
+    TextInput,
     ListRenderItem,
-    Modal,
     NativeScrollEvent,
     NativeSyntheticEvent,
-    ScrollView,
-    StyleSheet,
     TouchableOpacity,
     View
 } from 'react-native';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Screen from '../../../components/Screen';
 import Text from '../../../components/Text';
 import Loader from '../../../components/Loader';
@@ -26,7 +23,6 @@ import { AnimatePresence, MotiView } from 'moti';
 import Row from '../../../components/Row';
 import {
     Order,
-    ORDER_STATUS,
     saveDeliveryAddress
 } from '../../../redux/consumer/ordersSlide';
 
@@ -36,12 +32,7 @@ import { useAllProducts } from '../../../hooks/useAllProducts';
 import OrderTypeSwitcher from '../../../components/OrderTypeSwitcher';
 import MostRecentOrders from '../../../components/MostRecentOrders';
 import FloatingArrowUpButton from '../../../components/FloatingArrowUpButton';
-import Divider from '../../../components/Divider';
-import { stripeFee } from '../../../utils/stripeFee';
-import Stack from '../../../components/Stack';
-import moment from 'moment';
-import ProductListItem from '../../../components/ProductListItem';
-import Header from '../../../components/Header';
+
 import useNotifications from '../../../hooks/useNotifications';
 import PickupMap from '../../../components/modals/PickupMap';
 import HomeBusinessOrderDetails from '../../../components/modals/HomeBusinessOrderDetails';
@@ -52,12 +43,12 @@ const Businesses = () => {
     const [visible, setVisible] = useState(false);
     const [order, setOrder] = useState<Order>();
     // variables
+
     const { address, latitude, longitude } = useLocation();
     const navigation = useNavigation();
     const currentOffset = useRef(0);
-    const transY = useRef(new Animated.Value(0)).current;
     const currentDirection = useRef<'up' | 'down'>('up');
-
+    const inputRef = useRef<TextInput>(null);
     const [nothingFound, setNothingFound] = useState(false);
     const { deliveryAdd } = useAppSelector((state) => state.orders);
     const theme = useAppSelector((state) => state.theme);
@@ -91,7 +82,6 @@ const Businesses = () => {
                         `${searchValue.toLowerCase()}`,
                         'gi'
                     );
-                    console.log(regex);
 
                     return (
                         p.businessId === b.id &&
@@ -171,17 +161,29 @@ const Businesses = () => {
             <AnimatePresence>
                 {currentDirection.current === 'up' && (
                     <MotiView
-                        from={{ height: 0, opacity: 0, translateY: -50 }}
+                        from={{
+                            height: 0,
+                            opacity: 0,
+                            translateY: -50
+                        }}
                         animate={{
                             opacity: 1,
                             translateY: 0,
                             height: 60
                         }}
-                        exit={{ opacity: 0, translateY: -50, height: 0 }}
+                        exit={{
+                            opacity: 0,
+                            translateY: -50,
+                            height: 0
+                        }}
                         transition={{ type: 'timing' }}
                     >
                         <Row horizontalAlign="space-between">
-                            <View style={{ marginRight: SIZES.base * 1.5 }}>
+                            <View
+                                style={{
+                                    marginRight: SIZES.base * 1.5
+                                }}
+                            >
                                 <Text px_4>Deliver Now</Text>
 
                                 <TouchableOpacity
@@ -222,6 +224,7 @@ const Businesses = () => {
                     What are you craving for right now?
                 </Text>
                 <InputField
+                    ref={inputRef}
                     placeholder="Salad, Coffee, Pastelito, Tostones, etc"
                     onChangeText={(text) => handleSearch(text)}
                     contentStyle={{
@@ -232,6 +235,7 @@ const Businesses = () => {
                         searchValue.length > 0 && (
                             <TouchableOpacity
                                 onPress={() => {
+                                    inputRef.current?.blur();
                                     setSearchValue('');
                                     setBusinesses(businessAvailable);
                                 }}

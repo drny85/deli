@@ -212,7 +212,10 @@ const ProductDetails = ({
                     {product.sizes && product.sizes.length > 0 && (
                         <View>
                             <Text raleway_bold medium center>
-                                Pick One
+                                Pick One{' '}
+                                <Text textColor={theme.ASCENT} small>
+                                    (required)
+                                </Text>
                             </Text>
                             <Row
                                 horizontalAlign="space-evenly"

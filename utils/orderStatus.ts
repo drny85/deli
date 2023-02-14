@@ -18,6 +18,8 @@ export const STATUS_NAME = (status: ORDER_STATUS) => {
             return 'Accepted by Driver';
         case ORDER_STATUS.picked_up_by_driver:
             return 'Picked Up By Driver';
+        case ORDER_STATUS.picked_up_by_client:
+            return 'Picked Up By Client';
         default:
             return status;
     }

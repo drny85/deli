@@ -18,7 +18,7 @@ import BottomSheet, { BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { Coors } from '../../../redux/business/businessSlide';
 import { FontAwesome } from '@expo/vector-icons';
 import AnimatedLottieView from 'lottie-react-native';
-import { ORDER_STATUS } from '../../../redux/consumer/ordersSlide';
+import { ORDER_STATUS, ORDER_TYPE } from '../../../redux/consumer/ordersSlide';
 import { Image } from 'moti';
 import ProductListItem from '../../../components/ProductListItem';
 import Stack from '../../../components/Stack';
@@ -320,6 +320,56 @@ const OrderDetails = ({
         );
     };
 
+    const renderReadyForPickup = (): JSX.Element => {
+        return (
+            <View style={{ flex: 1, justifyContent: 'center' }}>
+                <Stack center>
+                    <Text lobster large animation={'fadeInDown'}>
+                        Thank you for doing business with us
+                    </Text>
+                    <Text lobster large py_8 animation={'fadeInUp'} delay={600}>
+                        Have a wonderful day {user?.name}
+                    </Text>
+                    <Text py_8 large animation={'fadeInLeft'} delay={800}>
+                        Your order is ready for pickup{' '}
+                    </Text>
+                </Stack>
+                <Stack center>
+                    <Text numberOfLines={1} ellipsizeMode="tail" large>
+                        Stop By {business.name}
+                    </Text>
+                    <Text capitalize py_6>
+                        at {business.address?.slice(0, -11)}
+                    </Text>
+                    <Text>To pick up your order</Text>
+                </Stack>
+            </View>
+        );
+    };
+    const renderAlreadyPickedByClient = (): JSX.Element => {
+        return (
+            <View style={{ flex: 1, justifyContent: 'center' }}>
+                <Stack center>
+                    <Text lobster large animation={'fadeInDown'}>
+                        Thank you for doing business with us
+                    </Text>
+                    <Text lobster large py_8 animation={'fadeInUp'} delay={600}>
+                        Have a wonderful day {user?.name}
+                    </Text>
+                    <Text py_8 large animation={'fadeInLeft'} delay={800}>
+                        Your order was picked up
+                    </Text>
+                </Stack>
+                <Stack center>
+                    <Text numberOfLines={1} ellipsizeMode="tail">
+                        We hope to see you soon!
+                    </Text>
+                    <Text py_6>{business.name} always appreciate you!</Text>
+                </Stack>
+            </View>
+        );
+    };
+
     const renderDeliveredOrder = (): JSX.Element => {
         return (
             <View style={{ flex: 1, justifyContent: 'center' }}>
@@ -413,6 +463,8 @@ const OrderDetails = ({
             </View>
             {order.status === ORDER_STATUS.new && renderNewOrder()}
             {order.status === ORDER_STATUS.delivered && renderDeliveredOrder()}
+            {order.status === ORDER_STATUS.marked_ready_for_pickup &&
+                renderReadyForPickup()}
             {order.status === ORDER_STATUS.in_progress && renderNewOrder()}
             {order.status === ORDER_STATUS.marked_ready_for_delivery &&
                 renderSearchingDriver()}
@@ -420,6 +472,8 @@ const OrderDetails = ({
                 renderAcceptedByDriver()}
             {order.status === ORDER_STATUS.picked_up_by_driver &&
                 renderOrderMarkedForDelivery()}
+            {order.status === ORDER_STATUS.picked_up_by_client &&
+                renderAlreadyPickedByClient()}
             <BottomSheet
                 ref={bottomSheetRef}
                 index={0}
@@ -498,6 +552,11 @@ const OrderDetails = ({
                         {order.status ===
                             ORDER_STATUS.marked_ready_for_delivery &&
                             `Your order is ready for delivery`}
+                        {order.status ===
+                            ORDER_STATUS.marked_ready_for_pickup &&
+                            `Your order is ready for pickup`}
+                        {order.status === ORDER_STATUS.picked_up_by_client &&
+                            `Picked Up`}
 
                         {order.status === ORDER_STATUS.accepted_by_driver &&
                             `${
@@ -506,11 +565,20 @@ const OrderDetails = ({
                     </Text>
 
                     <Stack containerStyle={{ marginTop: 30 }}>
-                        <Text bold>From</Text>
-                        <Text>{business.address?.split(', ')[0]}</Text>
-                        <View style={{ height: 10 }} />
+                        {order.orderType === ORDER_TYPE.delivery && (
+                            <>
+                                <Text bold>From</Text>
+                                <Text>{business.address?.split(', ')[0]}</Text>
+                                <View style={{ height: 10 }} />
+                            </>
+                        )}
                         <Text bold>To</Text>
-                        <Text>{order.address?.street?.split(', ')[0]}</Text>
+                        {order.orderType === ORDER_TYPE.delivery ? (
+                            <Text>{order.address?.street?.split(', ')[0]}</Text>
+                        ) : (
+                            <Text>Pick Up</Text>
+                        )}
+
                         <Text py_4>
                             Order Date: {moment(order.orderDate).format('lll')}
                         </Text>

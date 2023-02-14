@@ -9,6 +9,7 @@ interface TextProp extends TextProps {
     large?: boolean;
     title?: boolean;
     caption?: boolean;
+    textColor?: string;
     center?: boolean;
     left?: boolean;
     bold?: boolean;
@@ -37,7 +38,8 @@ interface TextProp extends TextProps {
 }
 
 const Text = styled(Animatable.Text)<TextProp>`
-    color: ${({ theme }) => (theme.mode === 'dark' ? 'white' : 'black')};
+    color: ${({ theme, textColor }) =>
+        textColor ? textColor : theme.mode === 'dark' ? 'white' : 'black'};
     font-family: ${({
         tange,
         lobster,

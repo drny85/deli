@@ -70,7 +70,7 @@ const Orders = ({}: Props) => {
                     o.status === status
             )
         );
-    }, [orders.length, from, status]);
+    }, [orders, from, status]);
 
     if (loading) return <Loader />;
     return (

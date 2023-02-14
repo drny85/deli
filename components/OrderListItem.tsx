@@ -23,7 +23,6 @@ import { STATUS_NAME } from '../utils/orderStatus';
 import Loader from './Loader';
 import { resetCart } from '../utils/saveCart';
 import { setCart } from '../redux/consumer/cartSlide';
-import { osVersion } from 'expo-device';
 
 type Props = {
     order: Order;
@@ -36,7 +35,7 @@ const OrderListItem = ({ order, onPress }: Props) => {
     const navigation = useNavigation();
     const { businessAvailable, isLoading } = useBusinessAvailable();
     const { items } = useAppSelector((state) => state.cart);
-
+    console.log(order.status);
     const qty = order.items.reduce((sum, item) => sum + item.quantity, 0);
     const business = businessAvailable.find(
         (business) => business.id === order.businessId
