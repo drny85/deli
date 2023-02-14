@@ -1,4 +1,10 @@
-import { FlatList, ListRenderItem, Pressable, View } from 'react-native';
+import {
+    FlatList,
+    ListRenderItem,
+    Pressable,
+    TouchableOpacity,
+    View
+} from 'react-native';
 import React, { useEffect, useState } from 'react';
 import Screen from '../../../components/Screen';
 import Text from '../../../components/Text';
@@ -15,6 +21,8 @@ import { STATUS_NAME } from '../../../utils/orderStatus';
 import Row from '../../../components/Row';
 import { MotiView } from 'moti';
 import { useAppSelector } from '../../../redux/store';
+import Stack from '../../../components/Stack';
+import { FontAwesome } from '@expo/vector-icons';
 
 type Props = {};
 
@@ -23,7 +31,7 @@ const Orders = ({}: Props) => {
     const { loading, orders } = useBusinessOrders();
     const theme = useAppSelector((state) => state.theme);
     const [status, setStatus] = useState<ORDER_STATUS>(ORDER_STATUS.all);
-    const [from, setFrom] = useState<string>(new Date().toISOString());
+    const [from, setFrom] = useState(moment().format('ll'));
     const [filteredOrders, setFilteredOrders] = React.useState<Order[]>([]);
 
     const renderOrders: ListRenderItem<Order> = ({ item, index }) => {
@@ -42,8 +50,27 @@ const Orders = ({}: Props) => {
     };
 
     useEffect(() => {
-        setFilteredOrders(orders);
-    }, [orders.length]);
+        if (status === ORDER_STATUS.all) {
+            setFilteredOrders(
+                orders.filter((o) =>
+                    moment(o.orderDate)
+                        .startOf('day')
+                        .isSame(moment(from).startOf('day'))
+                )
+            );
+
+            return;
+        }
+        setFilteredOrders(
+            orders.filter(
+                (o) =>
+                    moment(o.orderDate)
+                        .startOf('day')
+                        .isSame(moment(from).startOf('day')) &&
+                    o.status === status
+            )
+        );
+    }, [orders.length, from, status]);
 
     if (loading) return <Loader />;
     return (
@@ -68,7 +95,17 @@ const Orders = ({}: Props) => {
                                         setFilteredOrders(orders);
                                     } else {
                                         setFilteredOrders(
-                                            orders.filter((o) => o.status === s)
+                                            orders.filter(
+                                                (o) =>
+                                                    o.status === s &&
+                                                    moment(o.orderDate)
+                                                        .startOf('day')
+                                                        .isSame(
+                                                            moment(
+                                                                from
+                                                            ).startOf('day')
+                                                        )
+                                            )
                                         );
                                     }
                                 }}
@@ -104,6 +141,60 @@ const Orders = ({}: Props) => {
             <Text title center py_6>
                 Orders {filteredOrders.length}
             </Text>
+            <Stack center>
+                <Row
+                    containerStyle={{ width: '50%' }}
+                    horizontalAlign="space-between"
+                >
+                    <TouchableOpacity
+                        onPress={() => {
+                            setFrom(
+                                moment(from).subtract(1, 'day').toISOString()
+                            );
+                        }}
+                    >
+                        <FontAwesome
+                            name="chevron-left"
+                            size={24}
+                            color={theme.TEXT_COLOR}
+                        />
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        onPress={() => setFrom(moment().toISOString())}
+                    >
+                        <Text
+                            bold={moment(from)
+                                .startOf('day')
+                                .isSame(moment().startOf('day'))}
+                        >
+                            {moment(from)
+                                .startOf('day')
+                                .isSame(moment().startOf('day'))
+                                ? 'Today'
+                                : moment(from).format('ll')}
+                        </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        onPress={() => {
+                            setFrom((prev) => {
+                                if (
+                                    moment(prev)
+                                        .startOf('day')
+                                        .isSame(moment().startOf('day'))
+                                )
+                                    return moment().toISOString();
+                                return moment(from).add(1, 'day').toISOString();
+                            });
+                        }}
+                    >
+                        <FontAwesome
+                            name="chevron-right"
+                            size={24}
+                            color={theme.TEXT_COLOR}
+                        />
+                    </TouchableOpacity>
+                </Row>
+            </Stack>
             <FlatList
                 contentContainerStyle={{
                     width: '100%'

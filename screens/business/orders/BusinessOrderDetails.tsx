@@ -129,7 +129,7 @@ const BusinessOrderDetails = ({
                         {order?.deliveryInstructions && (
                             <>
                                 <Text py_4 bold>
-                                    Delivery Intructions
+                                    Delivery Instructions
                                 </Text>
                                 <Text>{order.deliveryInstructions}</Text>
                             </>
@@ -211,6 +211,17 @@ const BusinessOrderDetails = ({
                     </Text>
                     <Text darkText capitalize>
                         ${order.total.toFixed(2)}
+                    </Text>
+                </Row>
+                <Row
+                    containerStyle={{ width: '100%' }}
+                    horizontalAlign="space-between"
+                >
+                    <Text py_4 darkText capitalize>
+                        Tip for Courier
+                    </Text>
+                    <Text darkText capitalize>
+                        ${order.tip?.amount.toFixed(2)}
                     </Text>
                 </Row>
 

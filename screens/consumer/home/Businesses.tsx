@@ -91,6 +91,7 @@ const Businesses = () => {
                         `${searchValue.toLowerCase()}`,
                         'gi'
                     );
+                    console.log(regex);
 
                     return (
                         p.businessId === b.id &&
@@ -290,7 +291,7 @@ const Businesses = () => {
                         scrollEventThrottle={16}
                         showsVerticalScrollIndicator={false}
                         ListFooterComponent={<View style={{ height: 40 }} />}
-                        data={[...businesses, ...businesses]}
+                        data={[...businesses]}
                         keyExtractor={(item, index) => index.toString()}
                         renderItem={renderBusinesses}
                     />

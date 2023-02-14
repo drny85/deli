@@ -81,6 +81,7 @@ const CourierDeliveries = ({ navigation }: Props) => {
             />
             <FlatList
                 data={orders}
+                showsVerticalScrollIndicator={false}
                 keyExtractor={(item) => item.id!}
                 renderItem={renderOrders}
             />

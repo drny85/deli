@@ -710,10 +710,10 @@ exports.payCourier = functions.https.onCall(
             const order = orderRef.data() as Order;
             if (!order.tip?.amount || order.deliveryPaid) return;
 
-            const { transfer_group } = await stripe.paymentIntents.retrieve(
-                order.paymentIntent
-            );
+            const { transfer_group, status } =
+                await stripe.paymentIntents.retrieve(order.paymentIntent);
             console.log('TIP =>', order.tip.amount);
+            if (status !== 'succeeded') return;
             await stripe.transfers.create({
                 amount: Math.round(+order.tip?.amount.toFixed(2) * 100),
                 currency: 'usd',

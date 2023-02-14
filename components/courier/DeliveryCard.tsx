@@ -45,21 +45,28 @@ const DeliveryCard = ({ order, business, onPress }: Props) => {
                 }}
             >
                 <Stack
+                    center
                     containerStyle={{
                         backgroundColor: theme.CARD_BACKGROUND,
                         width: '100%'
                     }}
                 >
+                    <Text center bold>
+                        {moment(order.orderDate).format('MMM DD, hh:mm a')}
+                    </Text>
+                    <Divider />
                     <Row
                         containerStyle={{ width: '100%' }}
                         horizontalAlign="space-evenly"
                     >
-                        <Text bold>
-                            {moment(order.orderDate).format('MMM DD, hh:mm a')}
+                        <Text bold medium center>
+                            TIPS ${order.tip?.amount}
                         </Text>
-                        <Text bold>${order.total.toFixed(2)}</Text>
+
+                        <Text bold>Total ${order.total.toFixed(2)}</Text>
                     </Row>
                     <Divider />
+
                     <Stack center>
                         <Row horizontalAlign="space-between">
                             <Text px_6>Pick up At </Text>

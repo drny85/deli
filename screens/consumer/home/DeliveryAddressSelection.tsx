@@ -116,7 +116,7 @@ const DeliveryAddressSelection = ({}: Props) => {
                         onPress={handleSave}
                     />
                 </View>
-                <Stack center>
+                <Stack center containerStyle={{ width: '100%' }}>
                     <ScrollView contentContainerStyle={{ width: '100%' }}>
                         {user &&
                             user.deliveryAddresses.length > 0 &&
