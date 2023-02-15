@@ -35,7 +35,7 @@ const OrderListItem = ({ order, onPress }: Props) => {
     const navigation = useNavigation();
     const { businessAvailable, isLoading } = useBusinessAvailable();
     const { items } = useAppSelector((state) => state.cart);
-    console.log(order.status);
+
     const qty = order.items.reduce((sum, item) => sum + item.quantity, 0);
     const business = businessAvailable.find(
         (business) => business.id === order.businessId

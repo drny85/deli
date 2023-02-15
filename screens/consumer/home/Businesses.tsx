@@ -285,7 +285,7 @@ const Businesses = () => {
             ) : (
                 <>
                     <Text lobster medium px_4>
-                        Groceries
+                        Stores / Groceries
                     </Text>
                     <FlatList
                         ref={listRef}

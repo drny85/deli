@@ -32,6 +32,7 @@ import {
     customMapStyleDark,
     customMapStyleLight
 } from '../../../utils/customMap';
+import { orderTotal } from '../../../utils/orderTotal';
 
 type Props = NativeStackScreenProps<ConsumerOrdersStackScreens, 'OrderDetails'>;
 
@@ -55,8 +56,6 @@ const OrderDetails = ({
 
     const snapPoints = useMemo(() => ['13%', '25%', '50%', '90%'], []);
     const bottomSheetRef = useRef<BottomSheet>(null);
-
-    console.log(orderId);
 
     const mapRef = useRef<MapView>(null);
 
@@ -480,7 +479,7 @@ const OrderDetails = ({
                 snapPoints={snapPoints}
                 handleIndicatorStyle={{ backgroundColor: theme.TEXT_COLOR }}
                 backgroundStyle={{
-                    backgroundColor: theme.SECONDARY_BUTTON_COLOR
+                    backgroundColor: theme.ASCENT
                 }}
             >
                 {order.status === ORDER_STATUS.picked_up_by_driver && (
@@ -639,11 +638,16 @@ const OrderDetails = ({
                                 </Text>
                                 <Text bold large capitalize>
                                     $
-                                    {(
+                                    {/* {(
                                         order.total +
                                         order.tip?.amount! +
                                         stripeFee(order.total)
-                                    ).toFixed(2)}
+                                    ).toFixed(2)} */}
+                                    {orderTotal(
+                                        order.total,
+                                        order.tip?.amount!,
+                                        order.orderType
+                                    )}
                                 </Text>
                             </Row>
                         </Stack>

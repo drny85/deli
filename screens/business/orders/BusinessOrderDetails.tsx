@@ -87,7 +87,7 @@ const BusinessOrderDetails = ({
             setUpdating(false);
         }
     };
-    console.log(order?.status);
+
     useEffect(() => {
         if (!order) return;
         setNewStatus(order.status);
@@ -186,7 +186,11 @@ const BusinessOrderDetails = ({
                 </Text>
                 <Button
                     isLoading={updating}
-                    disabled={updating}
+                    disabled={
+                        updating ||
+                        order.status === ORDER_STATUS.delivered ||
+                        order.status === ORDER_STATUS.picked_up_by_client
+                    }
                     title="Update Status"
                     onPress={() => {
                         setVisible(true);
@@ -209,7 +213,6 @@ const BusinessOrderDetails = ({
                 <Divider small />
                 {order.items.map((item, index) => (
                     <ProductListItem
-                        themeTextColor
                         key={index.toString()}
                         item={item}
                         index={index}
@@ -221,24 +224,18 @@ const BusinessOrderDetails = ({
                     containerStyle={{ width: '100%' }}
                     horizontalAlign="space-between"
                 >
-                    <Text darkText capitalize>
-                        Sub Total
-                    </Text>
-                    <Text darkText capitalize>
-                        ${order.total.toFixed(2)}
-                    </Text>
+                    <Text capitalize>Sub Total</Text>
+                    <Text capitalize>${order.total.toFixed(2)}</Text>
                 </Row>
                 {order.orderType === ORDER_TYPE.delivery && (
                     <Row
                         containerStyle={{ width: '100%' }}
                         horizontalAlign="space-between"
                     >
-                        <Text py_4 darkText capitalize>
+                        <Text py_4 capitalize>
                             Tip for Courier
                         </Text>
-                        <Text darkText capitalize>
-                            ${order.tip?.amount.toFixed(2)}
-                        </Text>
+                        <Text capitalize>${order.tip?.amount.toFixed(2)}</Text>
                     </Row>
                 )}
 
@@ -247,10 +244,10 @@ const BusinessOrderDetails = ({
                     containerStyle={{ width: '100%' }}
                     horizontalAlign="space-between"
                 >
-                    <Text py_4 darkText bold large capitalize>
+                    <Text py_4 bold large capitalize>
                         Total
                     </Text>
-                    <Text darkText bold large capitalize>
+                    <Text bold large capitalize>
                         ${order.total.toFixed(2)}
                     </Text>
                 </Row>
@@ -306,6 +303,8 @@ const BusinessOrderDetails = ({
                                     if (
                                         status === ORDER_STATUS.new ||
                                         status === ORDER_STATUS.all ||
+                                        status ===
+                                            ORDER_STATUS.marked_ready_for_pickup ||
                                         status ===
                                             ORDER_STATUS.accepted_by_driver ||
                                         status ===

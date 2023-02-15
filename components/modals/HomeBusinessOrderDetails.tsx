@@ -13,7 +13,11 @@ import Stack from '../Stack';
 import { useAppSelector } from '../../redux/store';
 import { FontAwesome } from '@expo/vector-icons';
 import { Business } from '../../redux/business/businessSlide';
-import { Order, ORDER_STATUS } from '../../redux/consumer/ordersSlide';
+import {
+    Order,
+    ORDER_STATUS,
+    ORDER_TYPE
+} from '../../redux/consumer/ordersSlide';
 import moment from 'moment';
 import { SIZES } from '../../constants';
 import ProductListItem from '../ProductListItem';
@@ -108,6 +112,12 @@ const HomeBusinessOrderDetails = ({
                         <Text>{order?.address?.street?.split(', ')[0]}</Text>
                         <Text py_4>
                             Order Date: {moment(order?.orderDate).format('lll')}
+                        </Text>
+                        <Text>
+                            Order Type:{' '}
+                            {order.orderType === ORDER_TYPE.delivery
+                                ? 'Delivery'
+                                : 'Pick Up'}
                         </Text>
                         {order?.status === ORDER_STATUS.delivered && (
                             <Text py_4>

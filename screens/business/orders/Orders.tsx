@@ -31,7 +31,7 @@ const Orders = ({}: Props) => {
     const { loading, orders } = useBusinessOrders();
     const theme = useAppSelector((state) => state.theme);
     const [status, setStatus] = useState<ORDER_STATUS>(ORDER_STATUS.all);
-    const [from, setFrom] = useState(moment().format('ll'));
+    const [from, setFrom] = useState(moment().toISOString());
     const [filteredOrders, setFilteredOrders] = React.useState<Order[]>([]);
 
     const renderOrders: ListRenderItem<Order> = ({ item, index }) => {
