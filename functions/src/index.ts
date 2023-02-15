@@ -314,6 +314,12 @@ exports.deli = functions.https.onRequest(
                         }
                     });
 
+                    await admin
+                        .firestore()
+                        .collection('orders')
+                        .doc(order.id)
+                        .update({ transferId: transf.id });
+
                     await order.ref.delete();
 
                     return res.status(200).send(transf.id);
@@ -505,7 +511,6 @@ exports.createPaymentIntent = functions.https.onCall(
                 { apiVersion: '2022-11-15' }
             );
 
-            console.log('ORDER-ID =>', data.orderId, 'TOTAL =>', data.total);
             const paymentIntent = await stripe.paymentIntents.create({
                 amount: Math.round(+data.total.toFixed(2) * 100),
                 currency: 'usd',
@@ -547,7 +552,7 @@ exports.createPaymentIntent = functions.https.onCall(
 );
 exports.createRefund = functions.https.onCall(
     async (
-        data: { payment_intent: string },
+        data: { payment_intent: string; transferId: string },
         context: functions.https.CallableContext
     ) => {
         try {
@@ -559,19 +564,19 @@ exports.createRefund = functions.https.onCall(
 
             const refund = await stripe.refunds.create({
                 payment_intent: data.payment_intent,
-                reverse_transfer: true,
-                refund_application_fee: true
+                reason: 'requested_by_customer'
+                // reverse_transfer: true,
             });
 
-            console.log('REFUND_ID => ', refund.id);
+            await stripe.transfers.createReversal(data.transferId);
 
-            return { refundId: refund.id, status: refund.status };
+            return { success: true, result: refund };
         } catch (error) {
             const err = error as any;
             console.log('Refund Error', err.message);
             throw new functions.https.HttpsError(
                 'aborted',
-                'error occurred in refund',
+                `${err.message}`,
                 err.message
             );
         }

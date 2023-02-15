@@ -60,6 +60,7 @@ export interface Order {
     acceptedOn?: string | null;
     tip?: Tip;
     deliveryPaid: boolean;
+    transferId: string | null;
 }
 
 interface OrdersState {

@@ -1,7 +1,11 @@
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import React from 'react';
 import Text from '../Text';
-import { Order, ORDER_TYPE } from '../../redux/consumer/ordersSlide';
+import {
+    Order,
+    ORDER_STATUS,
+    ORDER_TYPE
+} from '../../redux/consumer/ordersSlide';
 import Stack from '../Stack';
 import { useAppSelector } from '../../redux/store';
 import Row from '../Row';
@@ -27,7 +31,10 @@ const BusinessOrderCard = ({ order, onPress, orders }: Props) => {
                 styles.container,
                 {
                     shadowColor: theme.SHADOW_COLOR,
-                    backgroundColor: theme.BACKGROUND_COLOR,
+                    backgroundColor:
+                        order.status === ORDER_STATUS.cancelled
+                            ? theme.DANGER
+                            : theme.BACKGROUND_COLOR,
                     width: SIZES.isSmallDevice
                         ? '98%'
                         : orders.length === 1

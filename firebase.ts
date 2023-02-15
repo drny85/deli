@@ -59,6 +59,12 @@ export const connectedStore = (name: string) =>
 export const payCourier = (name: string) =>
     httpsCallable<{ orderId: string }, Response>(functions, name);
 
+export const createRefund = (name: string) =>
+    httpsCallable<{ payment_intent: string; transferId: string }, Response>(
+        functions,
+        name
+    );
+
 export const checkForConnectedAccount = (name: string) =>
     httpsCallable<{ accountId: string }, Response>(functions, name);
 

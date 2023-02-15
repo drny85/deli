@@ -96,6 +96,7 @@ export interface Order {
     acceptedOn?: string | null;
     tip?: Tip;
     deliveryPaid: boolean;
+    transferId: string | null;
 }
 export enum ORDER_TYPE {
     pickup = 'pickup',

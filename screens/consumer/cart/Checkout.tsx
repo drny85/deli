@@ -95,7 +95,8 @@ const Checkout = ({ navigation }: CheckOutProps) => {
                           }
                         : { amount: 0, percentage: 0 },
                 orderType: orderType,
-                paymentIntent: paymentId
+                paymentIntent: paymentId,
+                transferId: null
             };
             const { payload } = await dispatch(placePendingOrder({ ...o }));
             const { success, pendingOrder } = payload as {
@@ -475,7 +476,7 @@ const Checkout = ({ navigation }: CheckOutProps) => {
                                     }}
                                     horizontalAlign="space-between"
                                 >
-                                    <Text>Add a tip for your driver</Text>
+                                    <Text pb_4>Add a tip for your driver</Text>
                                     <Text>
                                         {!customTip ? percentage + '% ' : ''}
 
@@ -575,7 +576,7 @@ const Checkout = ({ navigation }: CheckOutProps) => {
                         </Row>
 
                         <Row horizontalAlign="space-between">
-                            <Text>Service Fee</Text>
+                            <Text py_2>Service Fee</Text>
                             <Text>${stripeFee(total)}</Text>
                         </Row>
                         {orderType === ORDER_TYPE.delivery && (
@@ -631,7 +632,13 @@ const Checkout = ({ navigation }: CheckOutProps) => {
                 animationType="slide"
                 presentationStyle="formSheet"
             >
-                <View style={{ marginTop: 20, flex: 1 }}>
+                <View
+                    style={{
+                        paddingTop: 20,
+                        flex: 1,
+                        backgroundColor: theme.BACKGROUND_COLOR
+                    }}
+                >
                     <Header
                         title="Enter a custom tip"
                         onPressBack={() => setShowCustomTip(false)}
@@ -661,6 +668,7 @@ const Checkout = ({ navigation }: CheckOutProps) => {
                                 />
                             }
                             placeholder="Custom Tip"
+                            keyboardType="numeric"
                             contentStyle={{
                                 fontSize: 18,
                                 fontFamily: 'montserrat-bold'

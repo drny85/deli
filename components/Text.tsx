@@ -25,6 +25,7 @@ interface TextProp extends TextProps {
     lowercase?: boolean;
     lobster?: boolean;
     py_4?: boolean;
+    py_2?: boolean;
     py_6?: boolean;
     py_8?: boolean;
     px_4?: boolean;
@@ -111,8 +112,10 @@ const Text = styled(Animatable.Text)<TextProp>`
         }
     }};
 
-    ${({ py_4, py_6, py_8 }: any) => {
+    ${({ py_4, py_6, py_8, py_2 }: any) => {
         switch (true) {
+            case py_2:
+                return `padding: 4px 0px`;
             case py_4:
                 return `padding: 8px 0px`;
 
@@ -128,7 +131,7 @@ const Text = styled(Animatable.Text)<TextProp>`
                 return `padding: 2px 8px`;
 
             case px_6:
-                return `padding: 6px 12px`;
+                return `padding: 4px 12px`;
         }
     }};
     ${({ pb_4, pb_6 }: any) => {

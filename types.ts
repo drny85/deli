@@ -14,6 +14,7 @@ export interface Theme {
     SECONDARY_BUTTON_COLOR: string;
     STATUS_BAR?: 'dark' | 'light';
     WHITE_COLOR: string;
+    DANGER: string;
 }
 
 export interface ConnectedAccountParams {

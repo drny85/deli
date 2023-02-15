@@ -25,6 +25,7 @@ import RadioButton from '../../../components/RadioButton';
 import { updateOrder } from '../../../redux/consumer/ordersActions';
 import { AnimatePresence, MotiView } from 'moti';
 import Communications from 'react-native-communications';
+import { createRefund } from '../../../firebase';
 
 type Props = NativeStackScreenProps<
     BusinessOrdersStackScreens,
@@ -61,7 +62,13 @@ const BusinessOrderDetails = ({
                 `New Status is ${STATUS_NAME(newStatus!)}`,
                 [
                     { text: 'Cancel', style: 'cancel' },
-                    { text: 'Confirm', onPress: handleUpdateOrderStatus }
+                    {
+                        text: 'Confirm',
+                        onPress:
+                            newStatus !== ORDER_STATUS.cancelled
+                                ? handleUpdateOrderStatus
+                                : handleRefund
+                    }
                 ]
             );
         } catch (error) {
@@ -85,6 +92,32 @@ const BusinessOrderDetails = ({
             console.log('Error changing order status', error);
         } finally {
             setUpdating(false);
+        }
+    };
+
+    const handleRefund = async () => {
+        try {
+            console.log(order?.paymentIntent, order?.transferId, order?.id);
+            if (!order?.paymentIntent || !order.transferId) return;
+
+            const func = createRefund('createRefund');
+            const respond = await func({
+                payment_intent: order.paymentIntent,
+                transferId: order.transferId
+            });
+
+            if (respond.data.success) {
+                const newOrder: Order = {
+                    ...order,
+                    status: ORDER_STATUS.cancelled
+                };
+                await dispatch(updateOrder(newOrder));
+
+                setVisible(false);
+            }
+        } catch (error) {
+            const err = error as any;
+            console.log(err.message);
         }
     };
 
@@ -189,7 +222,8 @@ const BusinessOrderDetails = ({
                     disabled={
                         updating ||
                         order.status === ORDER_STATUS.delivered ||
-                        order.status === ORDER_STATUS.picked_up_by_client
+                        order.status === ORDER_STATUS.picked_up_by_client ||
+                        order.status === ORDER_STATUS.cancelled
                     }
                     title="Update Status"
                     onPress={() => {
