@@ -39,6 +39,7 @@ const BusinessOrderDetails = ({
     }
 }: Props) => {
     const theme = useAppSelector((state) => state.theme);
+    const { user } = useAppSelector((state) => state.auth);
     const dispatch = useAppDispatch();
     const [visible, setVisible] = React.useState(false);
     const { loading, order } = useOrder(orderId);
@@ -57,6 +58,18 @@ const BusinessOrderDetails = ({
     const confirmStatusChange = async () => {
         try {
             if (order?.status === newStatus) return;
+
+            if (
+                order?.status === ORDER_STATUS.accepted_by_driver ||
+                order?.status === ORDER_STATUS.marked_ready_for_delivery ||
+                order?.status === ORDER_STATUS.marked_ready_for_pickup ||
+                order?.status === ORDER_STATUS.picked_up_by_driver
+            ) {
+                if (newStatus === ORDER_STATUS.cancelled) {
+                    Alert.alert('Error', 'Order cannot be cancelled');
+                    return;
+                }
+            }
             Alert.alert(
                 'Status Change',
                 `New Status is ${STATUS_NAME(newStatus!)}`,
@@ -81,7 +94,8 @@ const BusinessOrderDetails = ({
             if (!order) return;
             const newOrder: Order = {
                 ...order,
-                status: newStatus ? newStatus : order?.status
+                status: newStatus ? newStatus : order?.status,
+                deliveredBy: newStatus === ORDER_STATUS.delivered ? user : null
             };
             setUpdating(true);
             const { payload } = await dispatch(updateOrder(newOrder));

@@ -33,6 +33,7 @@ import {
     customMapStyleLight
 } from '../../../utils/customMap';
 import { orderTotal } from '../../../utils/orderTotal';
+import CourierCard from '../../../components/courier/CourierCard';
 
 type Props = NativeStackScreenProps<ConsumerOrdersStackScreens, 'OrderDetails'>;
 
@@ -54,7 +55,7 @@ const OrderDetails = ({
     const theme = useAppSelector((state) => state.theme);
     const { loading, order } = useOrder(orderId);
 
-    const snapPoints = useMemo(() => ['13%', '25%', '50%', '90%'], []);
+    const snapPoints = useMemo(() => ['15%', '25%', '50%', '90%'], []);
     const bottomSheetRef = useRef<BottomSheet>(null);
 
     const mapRef = useRef<MapView>(null);
@@ -124,20 +125,12 @@ const OrderDetails = ({
         return (
             <View
                 style={{
-                    height:
-                        order.status === ORDER_STATUS.accepted_by_driver ||
-                        order.status === ORDER_STATUS.picked_up_by_driver
-                            ? SIZES.height * 0.8
-                            : 0.9
+                    height: '85%'
                 }}
             >
                 <MapView
                     ref={mapRef}
-                    customMapStyle={
-                        theme.mode === 'dark'
-                            ? customMapStyleDark
-                            : customMapStyleLight
-                    }
+                    customMapStyle={customMapStyleLight}
                     initialRegion={{
                         latitude: origin?.lat!,
                         longitude: origin?.lng!,
@@ -387,7 +380,11 @@ const OrderDetails = ({
                 <Stack center>
                     <Text bold> It was delivered by</Text>
                     <Text capitalize py_6 lobster medium>
-                        {order.deliveredBy?.name}
+                        {order.deliveredBy?.id === business.id
+                            ? 'By The Store'
+                            : order.deliveredBy?.name
+                            ? order.deliveredBy.name
+                            : 'Store'}
                     </Text>
                 </Stack>
             </View>
@@ -507,7 +504,7 @@ const OrderDetails = ({
                                 {(distance * 0.621371).toFixed(1)} miles
                             </Text>
                         </Row>
-                        <Stack center>
+                        {/* <Stack center>
                             <Image
                                 style={{
                                     width: 60,
@@ -524,7 +521,8 @@ const OrderDetails = ({
                             <Text py_4 capitalize lobster medium center>
                                 {order.courier?.name} just picked up your order
                             </Text>
-                        </Stack>
+                        </Stack> */}
+                        <CourierCard courier={order.courier!} />
                     </Stack>
                 )}
                 <BottomSheetScrollView
@@ -542,6 +540,9 @@ const OrderDetails = ({
                             />
                         </Stack>
                     )}
+                    {order.status === ORDER_STATUS.accepted_by_driver && (
+                        <CourierCard courier={order.courier!} />
+                    )}
                     <Text center lobster medium py_4>
                         {order.status === ORDER_STATUS.new &&
                             `${business.name} just got your order`}
@@ -556,11 +557,6 @@ const OrderDetails = ({
                             `Your order is ready for pickup`}
                         {order.status === ORDER_STATUS.picked_up_by_client &&
                             `Picked Up`}
-
-                        {order.status === ORDER_STATUS.accepted_by_driver &&
-                            `${
-                                order.courier && order.courier.name
-                            } has accepted your order`}
                     </Text>
 
                     <Stack containerStyle={{ marginTop: 30 }}>

@@ -166,7 +166,7 @@ const DeliveryView = ({
                 if (!user) return;
                 if (!isCloseToDestination) {
                     Alert.alert(
-                        'No There Tey',
+                        'No There yet',
                         'Please get more closer to the destination'
                     );
                     return;
