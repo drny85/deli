@@ -378,14 +378,12 @@ const OrderDetails = ({
                     </Text>
                 </Stack>
                 <Stack center>
-                    <Text bold> It was delivered by</Text>
-                    <Text capitalize py_6 lobster medium>
-                        {order.deliveredBy?.id === business.id
-                            ? 'By The Store'
-                            : order.deliveredBy?.name
-                            ? order.deliveredBy.name
-                            : 'Store'}
+                    <Text bold medium py_4>
+                        {' '}
+                        It was delivered by
                     </Text>
+
+                    <CourierCard courier={order.deliveredBy!} />
                 </Stack>
             </View>
         );

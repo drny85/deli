@@ -26,6 +26,7 @@ import { updateOrder } from '../../../redux/consumer/ordersActions';
 import { AnimatePresence, MotiView } from 'moti';
 import Communications from 'react-native-communications';
 import { createRefund } from '../../../firebase';
+import moment from 'moment';
 
 type Props = NativeStackScreenProps<
     BusinessOrdersStackScreens,
@@ -149,6 +150,7 @@ const BusinessOrderDetails = ({
                 }}
             />
             <Stack
+                center
                 containerStyle={{
                     width: '100%',
                     shadowOffset: { width: 3, height: 3 },
@@ -159,6 +161,9 @@ const BusinessOrderDetails = ({
                     borderRadius: SIZES.base
                 }}
             >
+                <Text pb_6 center bold medium>
+                    Order Date {moment(order.orderDate).format('lll')}
+                </Text>
                 <Row
                     containerStyle={{ width: '100%' }}
                     horizontalAlign="space-between"
@@ -175,7 +180,7 @@ const BusinessOrderDetails = ({
                     {order.orderType === ORDER_TYPE.delivery ? (
                         <View>
                             <Text bold>Delivery Address</Text>
-                            <Text>{order?.address?.street}</Text>
+                            <Text>{order?.address?.street.slice(0, -7)}</Text>
                             {order.address?.apt && (
                                 <Text>APT: {order.address.apt}</Text>
                             )}
@@ -231,6 +236,11 @@ const BusinessOrderDetails = ({
                 <Text center bold py_4>
                     STATUS : {STATUS_NAME(order.status)}
                 </Text>
+                {order.status === ORDER_STATUS.delivered && (
+                    <Text center caption py_2>
+                        Delivered on {moment(order.deliveredOn).format('lll')}
+                    </Text>
+                )}
                 <Button
                     isLoading={updating}
                     disabled={

@@ -5,15 +5,28 @@ import Text from '../../components/Text';
 import { Courier } from '../../types';
 import Stack from '../Stack';
 import Row from '../Row';
-import { IMAGE_PLACEHOLDER } from '../../constants';
+import { IMAGE_PLACEHOLDER, SIZES } from '../../constants';
+import { useAppSelector } from '../../redux/store';
 
 type Props = {
     courier: Courier;
 };
 
 const CourierCard = ({ courier }: Props) => {
+    const theme = useAppSelector((state) => state.theme);
     return (
-        <Stack>
+        <Stack
+            containerStyle={{
+                borderRadius: SIZES.radius,
+
+                shadowColor: theme.SHADOW_COLOR,
+                elevation: 6,
+                shadowOffset: { width: 4, height: 4 },
+                shadowOpacity: 0.6,
+                shadowRadius: 6,
+                backgroundColor: theme.ASCENT
+            }}
+        >
             <Row
                 containerStyle={{ width: '100%' }}
                 horizontalAlign="space-evenly"
