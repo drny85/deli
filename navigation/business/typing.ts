@@ -1,5 +1,6 @@
 import { NavigatorScreenParams } from '@react-navigation/native';
 import { Product } from '../../redux/business/productsSlice';
+import { ORDER_STATUS } from '../../redux/consumer/ordersSlide';
 import { ConnectedAccountParams } from '../../types';
 
 export type BusinessnBottomTabScreens = {
@@ -11,16 +12,19 @@ export type BusinessnBottomTabScreens = {
 
 export type BusinessHomeStackScreens = {
     Home: undefined;
+    OrderHistory: undefined;
+    AllCouriers: undefined;
+    BusinessOrders: { status: ORDER_STATUS };
+    BusinessOrderDetails: { orderId: string };
 };
 export type BusinessOrdersStackScreens = {
-    Orders: undefined;
-    BusinessOrderDetails: { orderId: string };
+    Earnings: undefined;
 };
 export type BusinessProductsStackScreens = {
     Products: undefined;
     AddProduct: { product: Product } | undefined;
     AddCategoryScreen: undefined;
-    BusinessProductDetails: { product: Product };
+    BusinessProductDetails: { productId: string };
 };
 export type BusinessSettingsStackScreens = {
     Settings: undefined;

@@ -1,5 +1,5 @@
 import { Alert, TextInput, TouchableOpacity, View } from 'react-native';
-import React, { useRef, useState, version } from 'react';
+import React, { useRef, useState } from 'react';
 import Screen from '../../components/Screen';
 
 import Text from '../../components/Text';
@@ -20,8 +20,6 @@ import { SIZES } from '../../constants';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { autoLogin } from '../../redux/auth/authActions';
 import Loader from '../../components/Loader';
-import { setPreviosRoute } from '../../redux/consumer/settingSlide';
-import { useNavigation } from '@react-navigation/native';
 import useNotifications from '../../hooks/useNotifications';
 
 type Props = NativeStackScreenProps<AuthScreens, 'Login'>;
@@ -29,11 +27,11 @@ type Props = NativeStackScreenProps<AuthScreens, 'Login'>;
 const Login = ({ navigation }: Props) => {
     useNotifications();
     const dispatch = useAppDispatch();
-    const nav = useNavigation();
-    const { user, loading } = useAppSelector((state) => state.auth);
+
+    const { loading } = useAppSelector((state) => state.auth);
     const theme = useAppSelector((state) => state.theme);
     const { previousRoute } = useAppSelector((state) => state.settings);
-    const scrollRef = useRef<KeyboardAwareScrollView>(null);
+
     const emailRef = useRef<TextInput>(null);
     const passwordRef = useRef<TextInput>(null);
     const [email, setEmail] = useState('');
@@ -53,11 +51,6 @@ const Login = ({ navigation }: Props) => {
                 return;
             }
 
-            console.log('DATA from Login => ', user.email);
-
-            // if (previousRoute) {
-            //     nav.navigate('ConsumerCart', { screen: 'OrderReview' });
-            // }
             dispatch(
                 autoLogin({
                     userId: user.uid,

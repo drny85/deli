@@ -13,6 +13,7 @@ const KeyboardScreen = ({ children, containerStyle, extraHeight }: Props) => {
         <KeyboardAwareScrollView
             contentContainerStyle={containerStyle}
             keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
             extraHeight={extraHeight ? extraHeight : 10}
             keyboardDismissMode="on-drag"
         >

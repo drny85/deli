@@ -1,4 +1,10 @@
-import { Alert, ListRenderItem, View, Animated } from 'react-native';
+import {
+    Alert,
+    ListRenderItem,
+    View,
+    Animated,
+    TouchableOpacity
+} from 'react-native';
 import React from 'react';
 import Screen from '../../../components/Screen';
 import Text from '../../../components/Text';
@@ -9,12 +15,14 @@ import AuthNavigationStack from '../../../navigation/auth/AuthNavigationStack';
 import Divider from '../../../components/Divider';
 import Button from '../../../components/Button';
 import { logoutUser } from '../../../redux/auth/authActions';
+import Header from '../../../components/Header';
+import { FontAwesome } from '@expo/vector-icons';
 
 type Props = {};
 
 const Profile = ({}: Props) => {
     const { user, loading } = useAppSelector((state) => state.auth);
-
+    const theme = useAppSelector((state) => state.theme);
     const dispatch = useAppDispatch();
     const handleLogout = () => {
         Alert.alert('Loging Out', 'Do you want to log/sign out?', [
@@ -31,11 +39,21 @@ const Profile = ({}: Props) => {
     if (!user) return <AuthNavigationStack />;
     return (
         <Screen>
-            <Text lobster large animation={'fadeInDown'} duration={1100}>
-                Hi {user.name}
-            </Text>
-            <Divider />
-            <Button title="Sign Out" onPress={handleLogout} />
+            <Header
+                title={`Hi ${user.name}`}
+                rightIcon={
+                    <TouchableOpacity
+                        style={{ marginRight: 8 }}
+                        onPress={handleLogout}
+                    >
+                        <FontAwesome
+                            name="sign-out"
+                            size={30}
+                            color={theme.TEXT_COLOR}
+                        />
+                    </TouchableOpacity>
+                }
+            />
         </Screen>
     );
 };

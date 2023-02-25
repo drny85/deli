@@ -6,9 +6,10 @@ interface Props {
     bgColor?: ViewStyle['backgroundColor'];
     small?: boolean;
     thickness?: 'small' | 'medium' | 'large';
+    py?: number;
 }
 
-const Divider = ({ bgColor, small, thickness }: Props) => {
+const Divider = ({ bgColor, small, thickness, py }: Props) => {
     const theme = useAppSelector((state) => state.theme);
     return (
         <View
@@ -18,6 +19,7 @@ const Divider = ({ bgColor, small, thickness }: Props) => {
                     backgroundColor: bgColor ? bgColor : theme.ASCENT,
                     width: small ? '75%' : '95%',
                     alignSelf: 'center',
+                    marginVertical: py ? py : 10,
                     height:
                         thickness === 'small'
                             ? 0.4
@@ -38,10 +40,8 @@ const styles = StyleSheet.create({
     view: {
         width: '95%',
         height: 0.4,
-
         justifyContent: 'center',
         alignSelf: 'center',
-
         opacity: 0.4,
         elevation: 10,
         margin: 10

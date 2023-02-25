@@ -12,7 +12,14 @@ import Stripe from 'stripe';
 import { assignUserType } from './shared';
 
 import { UserRecord } from 'firebase-functions/v1/auth';
-import { AppUser, Business, CartItem, Order, ORDER_STATUS } from './typing';
+import {
+    AppUser,
+    Business,
+    CartItem,
+    Courier,
+    Order,
+    ORDER_STATUS
+} from './typing';
 
 const stripe = new Stripe(process.env.STRIPE_TEST_KEY!, {
     apiVersion: '2022-11-15'
@@ -68,6 +75,7 @@ exports.createConnectedBusinessAccount = functions.https.onCall(
             address: string;
             name: string;
             lastName: string;
+            type: 'business' | 'courier';
         },
         context
     ): Promise<Response> => {
@@ -75,17 +83,25 @@ exports.createConnectedBusinessAccount = functions.https.onCall(
             console.log(
                 'ENV =>',
                 process.env.NODE_ENV === 'development',
-                process.env.NODE_ENV === 'production'
+                process.env.NODE_ENV === 'production',
+                context.auth
             );
             const email = context.auth?.token.email;
-            const isAuth = await isAuthorizedToGrantAccess(email!);
-            if (!context.auth || !isAuth)
+            if (!email) return { success: false, result: 'no email found' };
+            // const isAuth =
+            //     data.type === 'courier'
+            //         ? await isAuthorizedToGrantAccess(email!)
+            //         : await isAuthorizedCourier(email);
+            if (!context.auth)
                 throw new functions.https.HttpsError(
                     'permission-denied',
                     'you are not authorized'
                 );
 
-            const address = data.address.split(', ');
+            const address =
+                data.type === 'business' && data.address
+                    ? data.address.split(', ')
+                    : undefined;
 
             const account = await stripe.accounts.create({
                 type: 'express',
@@ -104,7 +120,7 @@ exports.createConnectedBusinessAccount = functions.https.onCall(
                 individual: {
                     last_name: data.lastName,
                     first_name: data.name,
-                    address: {
+                    address: address && {
                         line1: address[0],
                         city: address[1],
                         state: address[2].split(' ')[0],
@@ -128,7 +144,7 @@ exports.createConnectedBusinessAccount = functions.https.onCall(
             console.log('Error Creating Account Link', err.message);
             throw new functions.https.HttpsError(
                 'aborted',
-                'error creating connected account',
+                `${err.message}`,
                 error
             );
         }
@@ -188,6 +204,27 @@ exports.webhook = functions.https.onRequest(
                     return res.status(200).send('Success');
                 // ... handle other event types
                 case 'account.updated':
+                    const updated = event.data.object as Stripe.Account;
+                    const { charges_enabled, details_submitted, metadata } =
+                        updated;
+                    console.log(
+                        'DETAILS => ',
+                        details_submitted,
+                        charges_enabled
+                    );
+                    const bId = metadata?.businessId! as string;
+                    if (charges_enabled) {
+                        await admin
+                            .firestore()
+                            .collection('users')
+                            .doc(bId)
+                            .update({
+                                stripeAccount: updated.id,
+                                charges_enabled,
+                                isActive: true
+                            });
+                    }
+
                     return res.status(200).send('Success');
 
                 case 'account.application.deauthorized':
@@ -202,6 +239,8 @@ exports.webhook = functions.https.onRequest(
                         .doc(id)
                         .update({ stripeAccount: null });
 
+                    return res.status(200).send('Success');
+                case 'account.external_account.created':
                     return res.status(200).send('Success');
 
                 default:
@@ -423,6 +462,53 @@ exports.addConnectedAccountToBusiness = functions.https.onCall(
         } catch (error) {
             const err = error as any;
             console.log('Error connecting store', err.message);
+            return { success: false, result: err.message };
+        }
+    }
+);
+
+exports.addConnectedAccountToCourier = functions.https.onCall(
+    async (data: { accountId: string }, context): Promise<Response> => {
+        try {
+            if (!context.auth)
+                return { success: false, result: 'Not authorized' };
+            const userId = context.auth?.uid;
+            const isAuth = await isAuthorizedCourier(
+                context.auth?.token.email!
+            );
+
+            if (!context.auth || !isAuth)
+                return { success: false, result: 'Not authorized' };
+
+            const { accountId } = data;
+            if (!accountId)
+                return { success: false, result: 'no account Id provided' };
+
+            const account = await stripe.accounts.retrieve({
+                stripeAccount: accountId
+            });
+            const { charges_enabled } = account;
+            if (charges_enabled) {
+                await admin.firestore().collection('users').doc(userId).set(
+                    {
+                        stripeAccount: account.id,
+                        isActive: charges_enabled
+                    },
+                    { merge: true }
+                );
+
+                return {
+                    success: charges_enabled,
+                    result: 'account connected'
+                };
+            }
+            return {
+                success: charges_enabled,
+                result: 'account not connected'
+            };
+        } catch (error) {
+            const err = error as any;
+            console.log('Error connecting courier account', err.message);
             return { success: false, result: err.message };
         }
     }
@@ -715,6 +801,13 @@ exports.payCourier = functions.https.onCall(
             const order = orderRef.data() as Order;
             if (!order.tip?.amount || order.deliveryPaid) return;
 
+            const { stripeAccount } = order.deliveredBy as Courier;
+            if (!stripeAccount)
+                throw new functions.https.HttpsError(
+                    'aborted',
+                    'no stripe account found'
+                );
+
             const { transfer_group, status } =
                 await stripe.paymentIntents.retrieve(order.paymentIntent);
             console.log('TIP =>', order.tip.amount);
@@ -722,7 +815,7 @@ exports.payCourier = functions.https.onCall(
             await stripe.transfers.create({
                 amount: Math.round(+order.tip?.amount.toFixed(2) * 100),
                 currency: 'usd',
-                destination: 'acct_1MMGYfCGpz9ntd7c',
+                destination: stripeAccount,
                 transfer_group: transfer_group!,
                 metadata: {
                     orderId: order.id!
@@ -753,4 +846,15 @@ export async function isAuthorizedToGrantAccess(
     const user = await admin.auth().getUserByEmail(email);
     if (user.customClaims && user.customClaims.type === 'business') return true;
     return false;
+}
+
+export async function isAuthorizedCourier(email: string): Promise<boolean> {
+    try {
+        const user = await admin.auth().getUserByEmail(email);
+        if (user.customClaims && user.customClaims.type === 'courier')
+            return true;
+        return false;
+    } catch (error) {
+        return false;
+    }
 }

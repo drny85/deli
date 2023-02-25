@@ -3,7 +3,10 @@ import React, { useEffect } from 'react';
 import Screen from '../../../components/Screen';
 import Text from '../../../components/Text';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { BusinessOrdersStackScreens } from '../../../navigation/business/typing';
+import {
+    BusinessHomeStackScreens,
+    BusinessOrdersStackScreens
+} from '../../../navigation/business/typing';
 import Header from '../../../components/Header';
 import Stack from '../../../components/Stack';
 import Loader from '../../../components/Loader';
@@ -24,12 +27,15 @@ import { FontAwesome } from '@expo/vector-icons';
 import RadioButton from '../../../components/RadioButton';
 import { updateOrder } from '../../../redux/consumer/ordersActions';
 import { AnimatePresence, MotiView } from 'moti';
-import Communications from 'react-native-communications';
+
 import { createRefund } from '../../../firebase';
 import moment from 'moment';
 
+import CourierCard from '../../../components/courier/CourierCard';
+import { Courier } from '../../../types';
+
 type Props = NativeStackScreenProps<
-    BusinessOrdersStackScreens,
+    BusinessHomeStackScreens,
     'BusinessOrderDetails'
 >;
 
@@ -47,14 +53,6 @@ const BusinessOrderDetails = ({
     const [updating, setUpdating] = React.useState(false);
     const [newStatus, setNewStatus] = React.useState<ORDER_STATUS>();
     const qty = order?.items?.reduce((acc, item) => acc + item.quantity, 0);
-
-    const makeCall = async (phone: string) => {
-        try {
-            Communications.phonecall(phone.replace(/-/g, ''), true);
-        } catch (error) {
-            console.log(error);
-        }
-    };
 
     const confirmStatusChange = async () => {
         try {
@@ -96,7 +94,14 @@ const BusinessOrderDetails = ({
             const newOrder: Order = {
                 ...order,
                 status: newStatus ? newStatus : order?.status,
-                deliveredBy: newStatus === ORDER_STATUS.delivered ? user : null
+                pickedUpOn:
+                    newStatus === ORDER_STATUS.picked_up_by_client
+                        ? new Date().toISOString()
+                        : null,
+                deliveredBy:
+                    newStatus === ORDER_STATUS.delivered
+                        ? (user as Courier)
+                        : null
             };
             setUpdating(true);
             const { payload } = await dispatch(updateOrder(newOrder));
@@ -205,26 +210,45 @@ const BusinessOrderDetails = ({
                 </Row>
             </Stack>
             <AnimatePresence>
-                {order.courier && (
+                {order.courier && order.status !== ORDER_STATUS.delivered ? (
                     <MotiView
+                        style={{
+                            width: SIZES.width * 0.5,
+                            alignSelf: 'center'
+                        }}
                         from={{ opacity: 0, translateY: -20 }}
                         animate={{ opacity: 1, translateY: 0 }}
                     >
-                        <Stack>
-                            <Text bold>Courier</Text>
-                            <Text py_4>
-                                {order.courier.name} {order.courier.lastName}
+                        <Stack center>
+                            <Text center raleway_bold>
+                                Courier
                             </Text>
-                            <TouchableOpacity
-                                onPress={() => makeCall(order.courier?.phone!)}
-                            >
-                                <Text style={{ color: 'blue' }}>
-                                    {order.courier.phone}
-                                </Text>
-                            </TouchableOpacity>
+                            <CourierCard
+                                courier={order.courier}
+                                phone={order.courier.phone!}
+                            />
                         </Stack>
                     </MotiView>
-                )}
+                ) : order.deliveredBy ? (
+                    <MotiView
+                        style={{
+                            width: SIZES.width * 0.5,
+                            alignSelf: 'center'
+                        }}
+                        from={{ opacity: 0, translateY: -20 }}
+                        animate={{ opacity: 1, translateY: 0 }}
+                    >
+                        <Stack center>
+                            <Text center raleway_bold>
+                                Courier
+                            </Text>
+                            <CourierCard
+                                courier={order.deliveredBy as Courier}
+                                phone={order.deliveredBy.phone!}
+                            />
+                        </Stack>
+                    </MotiView>
+                ) : null}
             </AnimatePresence>
             <View
                 style={{
@@ -368,7 +392,8 @@ const BusinessOrderDetails = ({
                                         status ===
                                             ORDER_STATUS.picked_up_by_driver ||
                                         status ===
-                                            ORDER_STATUS.picked_up_by_client
+                                            ORDER_STATUS.picked_up_by_client ||
+                                        status === ORDER_STATUS.delivered
                                     )
                                         return;
                                 }
@@ -388,22 +413,13 @@ const BusinessOrderDetails = ({
                                         return;
                                 }
                                 return (
-                                    <Row
-                                        containerStyle={{
-                                            marginVertical: SIZES.base
+                                    <RadioButton
+                                        status={status}
+                                        selected={newStatus === status}
+                                        onPress={() => {
+                                            setNewStatus(status);
                                         }}
-                                        key={status}
-                                    >
-                                        <RadioButton
-                                            selected={newStatus === status}
-                                            onPress={() => {
-                                                setNewStatus(status);
-                                            }}
-                                        />
-                                        <Text bold={status === newStatus} px_4>
-                                            {STATUS_NAME(status)}
-                                        </Text>
-                                    </Row>
+                                    />
                                 );
                             })}
                         </Stack>

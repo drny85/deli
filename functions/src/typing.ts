@@ -130,6 +130,10 @@ export enum ORDER_STATUS {
 
 export interface Courier extends AppUser {
     transportation?: MapViewDirectionsMode;
+    image?: string;
+    stripeAccount: string | null;
+    isOnline: boolean;
+    isActive: boolean;
 }
 
 export type MapViewDirectionsMode =

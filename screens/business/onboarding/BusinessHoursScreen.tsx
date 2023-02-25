@@ -17,7 +17,7 @@ import BusinessHoursReviewModal from '../../../components/business/BusinessHours
 import { connectedStore } from '../../../firebase';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { BusinessOnBoardingStackScreens } from '../../../navigation/business/typing';
-import OnBoardingStripeLottiView from '../../../components/OnBoardingStripeLottiView';
+import OnBoardingStripeLottiView from '../../../components/lottie/OnBoardingStripeLottiView';
 import Divider from '../../../components/Divider';
 
 type Props = NativeStackScreenProps<
@@ -81,7 +81,8 @@ const BusinessHoursScreen = ({ navigation }: Props) => {
                 phone: business.phone!,
                 address: business.address!,
                 lastName: business.owner.lastName,
-                name: business.owner.name
+                name: business.owner.name,
+                type: 'business'
             };
             const { data } = await func({
                 ...params

@@ -28,12 +28,10 @@ import Row from '../../../components/Row';
 import { stripeFee } from '../../../utils/stripeFee';
 import Button from '../../../components/Button';
 import Header from '../../../components/Header';
-import {
-    customMapStyleDark,
-    customMapStyleLight
-} from '../../../utils/customMap';
+import { customMapStyleLight } from '../../../utils/customMap';
 import { orderTotal } from '../../../utils/orderTotal';
 import CourierCard from '../../../components/courier/CourierCard';
+import { Courier } from '../../../types';
 
 type Props = NativeStackScreenProps<ConsumerOrdersStackScreens, 'OrderDetails'>;
 
@@ -362,6 +360,21 @@ const OrderDetails = ({
         );
     };
 
+    const renderCancelledOrder = (): JSX.Element => {
+        return (
+            <View style={{ flex: 1, justifyContent: 'center' }}>
+                <Stack center>
+                    <Text medium animation={'fadeInDown'}>
+                        Sorry for the inconvenience
+                    </Text>
+                    <Text medium py_8 animation={'fadeInUp'} delay={600}>
+                        This order was cancelled
+                    </Text>
+                </Stack>
+            </View>
+        );
+    };
+
     const renderDeliveredOrder = (): JSX.Element => {
         return (
             <View style={{ flex: 1, justifyContent: 'center' }}>
@@ -383,7 +396,7 @@ const OrderDetails = ({
                         It was delivered by
                     </Text>
 
-                    <CourierCard courier={order.deliveredBy!} />
+                    <CourierCard courier={order.deliveredBy! as Courier} />
                 </Stack>
             </View>
         );
@@ -468,6 +481,7 @@ const OrderDetails = ({
                 renderOrderMarkedForDelivery()}
             {order.status === ORDER_STATUS.picked_up_by_client &&
                 renderAlreadyPickedByClient()}
+            {order.status === ORDER_STATUS.cancelled && renderCancelledOrder()}
             <BottomSheet
                 ref={bottomSheetRef}
                 index={0}

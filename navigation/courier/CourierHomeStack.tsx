@@ -1,7 +1,9 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import CourierSettings from '../../redux/consumer/CourierSettings';
+
 import CourierDeliveries from '../../screens/courier/CourerDeliveries';
 import CourierHome from '../../screens/courier/CourierHome';
+import CourierSettings from '../../screens/courier/CourierSettings';
+import DeliveryDetails from '../../screens/courier/DeliveryDetails';
 import DeliveryView from '../../screens/courier/DeliveryView';
 import MyDeliveries from '../../screens/courier/MyDeliveries';
 
@@ -37,6 +39,11 @@ const CourierHomeStack = () => {
                 name="CourierDeliveries"
                 component={CourierDeliveries}
                 options={{ presentation: 'fullScreenModal' }}
+            />
+            <Screen
+                name="DeliveryDetails"
+                component={DeliveryDetails}
+                options={{ presentation: 'modal' }}
             />
         </Navigator>
     );

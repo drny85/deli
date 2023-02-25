@@ -5,7 +5,6 @@ import { Alert } from 'react-native';
 
 export const LOCATION_TASK_NAME = 'background-location-task';
 export const useLocation = () => {
-    const [status, requestPermission] = Location.useBackgroundPermissions();
     const [location, setLocation] = useState<LocationObject | null>(null);
     const [longitude, setLongitude] = useState<number | null>(null);
     const [latitude, setLatitude] = useState<number | null>(null);
@@ -38,6 +37,7 @@ export const useLocation = () => {
                 let location = await Location.getCurrentPositionAsync({
                     accuracy: Location.Accuracy.High
                 });
+                setLocation(location);
 
                 let { coords } = await Location.getCurrentPositionAsync({});
                 const { longitude, latitude } = coords;
@@ -49,8 +49,6 @@ export const useLocation = () => {
                     latitude
                 });
                 setAddress(address[0]);
-
-                setLocation(location);
             } catch (error) {
                 console.log('ERROR', error);
             }

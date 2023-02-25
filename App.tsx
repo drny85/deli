@@ -13,12 +13,15 @@ import BusinessBottomTabs from './navigation/business/BusinessBottomTabs';
 import BusinessOnBoardingNavigation from './navigation/business/BusinessOnBoardingNavigation';
 import ConsumerBottomTabs from './navigation/consumer/ConsumerBottomTabs';
 import CourierHomeStack from './navigation/courier/CourierHomeStack';
+import { Courier } from './types';
+import CourierOnBoarding from './navigation/courier/CourierOnBoardingNavigation';
 
 const App = () => {
     const { isLoadingComplete, onLayoutRootView } = useCachedResources();
     const theme = useAppSelector((state) => state.theme);
     const [processing, setProcessing] = useState(true);
     const { user, loading } = useAppSelector((state) => state.auth);
+
     const { business, loading: businessLoading } = useAppSelector(
         (state) => state.business
     );
@@ -32,7 +35,7 @@ const App = () => {
         }
     }, [isLoadingComplete, loading, businessLoading]);
 
-    // console.log('PROS', processing);
+    console.log('PROS', processing);
     if (processing) return <Loader />;
     return (
         <ThemeProvider theme={theme}>
@@ -59,8 +62,15 @@ const App = () => {
                       business &&
                       business.stripeAccount === null ? (
                         <BusinessOnBoardingNavigation />
-                    ) : user && user.type === 'courier' ? (
+                    ) : (user as Courier) &&
+                      (user as Courier).stripeAccount &&
+                      (user as Courier).isActive &&
+                      (user as Courier).type === 'courier' ? (
                         <CourierHomeStack />
+                    ) : (user as Courier) &&
+                      !(user as Courier).stripeAccount &&
+                      (user as Courier).type === 'courier' ? (
+                        <CourierOnBoarding />
                     ) : (
                         <ConsumerBottomTabs />
                     )}

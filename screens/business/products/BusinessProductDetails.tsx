@@ -29,6 +29,7 @@ import Divider from '../../../components/Divider';
 import { useBusinessOrders } from '../../../hooks/useBusinessOrders';
 import moment from 'moment';
 import { deleteProduct } from '../../../redux/business/productsActions';
+import { useProduct } from '../../../hooks/useProduct';
 
 type Props = NativeStackScreenProps<
     BusinessProductsStackScreens,
@@ -38,12 +39,13 @@ type Props = NativeStackScreenProps<
 const BusinessProductDetails = ({
     navigation,
     route: {
-        params: { product }
+        params: { productId }
     }
 }: Props) => {
     const theme = useAppSelector((state) => state.theme);
     const { loading, orders } = useBusinessOrders();
     const [lastOrdered, setLastOrdered] = useState('');
+    const { product } = useProduct(productId);
 
     const dispatch = useAppDispatch();
 
@@ -52,14 +54,14 @@ const BusinessProductDetails = ({
     useEffect(() => {
         if (loading || !orders.length) return;
         const found = orders
-            .filter((order) => order.items.some((o) => o.id === product.id))
+            .filter((order) => order.items.some((o) => o.id === productId))
             .sort((a, b) => (a.orderDate > b.orderDate ? -1 : 1));
         if (found.length) {
             setLastOrdered(found[0].orderDate);
         }
     }, [loading, orders.length]);
 
-    if (!product) return <Loader />;
+    if (!product || loading) return <Loader />;
 
     return (
         <KeyboardScreen containerStyle={{ flex: 1 }} extraHeight={30}>

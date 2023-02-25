@@ -15,7 +15,7 @@ import { SIZES } from '../../../constants';
 import { stripeFee } from '../../../utils/stripeFee';
 import Divider from '../../../components/Divider';
 import Button from '../../../components/Button';
-import PaymentLoading from '../../../components/PaymentLoading';
+import PaymentLoading from '../../../components/lottie/PaymentLoading';
 
 import { usePayment } from '../../../hooks/usePayment';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -335,7 +335,10 @@ const Checkout = ({ navigation }: CheckOutProps) => {
                         flexGrow: 1
                     }}
                 >
-                    <ScrollView>
+                    <ScrollView
+                        showsVerticalScrollIndicator={false}
+                        contentContainerStyle={{ maxHeight: '50%' }}
+                    >
                         <View>
                             <Section>
                                 <Row horizontalAlign="space-between">

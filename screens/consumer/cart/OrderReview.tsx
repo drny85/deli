@@ -60,6 +60,8 @@ const OrderReview = () => {
                 businessId: business?.id!,
                 orderDate: new Date().toISOString(),
                 items: items,
+                deliveryPaid: false,
+                transferId: null,
                 contactPerson: {
                     name: user?.name!,
                     lastName: user?.lastName!,
@@ -215,8 +217,9 @@ const OrderReview = () => {
                                             </View>
 
                                             <InputField
+                                                nogap
                                                 mainStyle={{
-                                                    width: '50%'
+                                                    width: '40%'
                                                 }}
                                                 containerStyle={{
                                                     borderRadius: SIZES.radius
@@ -240,6 +243,43 @@ const OrderReview = () => {
                                                 placeholder="Apt #, Suite, Floor, etc"
                                             />
                                         </Row>
+
+                                        <View>
+                                            <Text raleway_bold px_4>
+                                                Delivery Instructions
+                                            </Text>
+                                            <InputField
+                                                nogap
+                                                containerStyle={{
+                                                    borderRadius: SIZES.radius
+                                                }}
+                                                multiline
+                                                placeholder="Note for the driver"
+                                                value={deliveryInstructions}
+                                                maxLenght={100}
+                                                onChangeText={(text) => {
+                                                    setDeliveryInstructions(
+                                                        text
+                                                    );
+                                                    dispatch(
+                                                        setOrder({
+                                                            ...order!,
+                                                            deliveryInstructions:
+                                                                text
+                                                        })
+                                                    );
+                                                }}
+                                            />
+                                            {deliveryInstructions.length >
+                                                0 && (
+                                                <Text px_4 small>
+                                                    {
+                                                        deliveryInstructions.length
+                                                    }{' '}
+                                                    / 100
+                                                </Text>
+                                            )}
+                                        </View>
                                     </MotiView>
                                 )}
                             </AnimatePresence>
@@ -262,7 +302,7 @@ const OrderReview = () => {
                         maxHeight: SIZES.height * 0.5
                     }}
                 >
-                    <Text raleway_bold medium>
+                    <Text raleway_bold medium center>
                         {quantity} Items
                     </Text>
                     {items.map((item, index) => (
@@ -283,39 +323,8 @@ const OrderReview = () => {
                             <Text px_4>service fee</Text>
                             <Text>${stripeFee(total)}</Text>
                         </Row>
-                        <Text right bold medium>
-                            Total ${(total + stripeFee(total)).toFixed(2)}
-                        </Text>
                     </View>
                 </ScrollView>
-
-                <Stack>
-                    <Text raleway_bold py_4>
-                        Delivery Instructions
-                    </Text>
-                    <InputField
-                        nogap
-                        containerStyle={{ borderRadius: SIZES.radius }}
-                        multiline
-                        placeholder="Note for the driver"
-                        value={deliveryInstructions}
-                        maxLenght={100}
-                        onChangeText={(text) => {
-                            setDeliveryInstructions(text);
-                            dispatch(
-                                setOrder({
-                                    ...order!,
-                                    deliveryInstructions: text
-                                })
-                            );
-                        }}
-                    />
-                    {deliveryInstructions.length > 0 && (
-                        <Text px_4 small>
-                            {deliveryInstructions.length} / 100
-                        </Text>
-                    )}
-                </Stack>
             </View>
 
             <View
@@ -337,8 +346,8 @@ const OrderReview = () => {
                             }
                         ]}
                     >
-                        <Text bold large>
-                            ${(total + stripeFee(total)).toFixed(2)}
+                        <Text bold medium>
+                            Total ${(total + stripeFee(total)).toFixed(2)}
                         </Text>
                     </View>
                     <Button

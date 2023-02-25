@@ -20,9 +20,10 @@ export interface Theme {
 export interface ConnectedAccountParams {
     businessName: string;
     phone: string;
-    address: string;
+    address?: string;
     name: string;
     lastName: string;
+    type: 'business' | 'courier';
 }
 
 interface Day {
@@ -35,7 +36,10 @@ export interface BusinessDay {
 
 export interface Courier extends AppUser {
     transportation?: MapViewDirectionsMode;
-    image?: string;
+    image: string | null;
+    stripeAccount: string | null;
+    isOnline: boolean;
+    isActive: boolean;
 }
 
 export const DAYS = [
@@ -52,5 +56,6 @@ export enum NOTIFICATION_TYPE {
     new_message = 'new message',
     closed = 'closed',
     new_referral = 'new_referral',
-    reminder = 'reminder'
+    reminder = 'reminder',
+    ready_for_delivery = 'ready_for_delivery'
 }

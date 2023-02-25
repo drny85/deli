@@ -41,9 +41,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { CourierStackScreens } from '../../navigation/courier/typing';
 import { useReadyForDeliveryOrders } from '../../hooks/useReadyForDeliveryOrders';
 import { customMapStyleDark, customMapStyleLight } from '../../utils/customMap';
+import { Courier } from '../../types';
 
 let a: NodeJS.Timeout;
-
+let locationSub: Location.LocationSubscription;
 const ACCEPTED_TIME = 'ACCEPTED_TIME';
 const EGDE_PADDING = 100;
 
@@ -57,7 +58,6 @@ const DeliveryView = ({
 }: Props) => {
     const { user } = useAppSelector((state) => state.auth);
     const { location } = useLocation();
-    const [isReady, setIsReady] = useState(false);
     const [isCloseToDestination, setIsCloseToDestination] = useState(false);
     const [accepted, setAccepted] = useState(false);
     const theme = useAppSelector((state) => state.theme);
@@ -69,7 +69,7 @@ const DeliveryView = ({
     const [destination, setDestination] = useState<Coors>();
     const mapViewRef = useRef<MapView>(null);
     const sheetRef = useRef<BottomSheet>(null);
-    const snapPoints = useMemo(() => ['10%', '80%'], []);
+    const snapPoints = useMemo(() => ['12%', '80%'], []);
     const [business, setBusiness] = React.useState<Business>();
     const dispatch = useAppDispatch();
 
@@ -175,18 +175,14 @@ const DeliveryView = ({
                     updateOrder({
                         ...order,
                         status: ORDER_STATUS.picked_up_by_driver,
-                        pickedUpOn: new Date().toISOString(),
+                        pickedByCourierOn: new Date().toISOString(),
                         courier: {
-                            ...user,
+                            ...(user as Courier),
                             coors: { lat: origin?.lat!, lng: origin?.lng! }
                         }
                     })
                 );
                 if (payload) {
-                    const funcP = payCourier('payCourier');
-                    await funcP({
-                        orderId: order.id!
-                    });
                     sheetRef.current?.snapToIndex(0);
                     mapViewRef.current?.animateToRegion({
                         latitude: origin?.lat!,
@@ -210,11 +206,16 @@ const DeliveryView = ({
                         ...order,
                         status: ORDER_STATUS.delivered,
                         courier: null,
-                        deliveredBy: user,
+                        deliveredBy: user as Courier,
                         deliveredOn: new Date().toISOString()
                     })
                 );
                 if (payload) {
+                    const funcP = payCourier('payCourier');
+                    await funcP({
+                        orderId: order.id!
+                    });
+                    locationSub.remove();
                     sheetRef.current?.snapToIndex(0);
                     setAccepted(false);
                     navigation.navigate('MyDeliveries');
@@ -224,7 +225,7 @@ const DeliveryView = ({
                     //     longitude: origin?.lng!,
                     //     latitudeDelta: 0.2,
                     //     longitudeDelta: 0.2
-                    // });
+                    // });mele
                 }
             }
         } catch (error) {
@@ -360,7 +361,6 @@ const DeliveryView = ({
     }, [order?.status, location]);
 
     useEffect(() => {
-        let sub: Location.LocationSubscription;
         (async () => {
             if (!order) return;
 
@@ -371,13 +371,16 @@ const DeliveryView = ({
                 return;
 
             console.log('UPDATING 1');
-            sub = await Location.watchPositionAsync(
+            locationSub = await Location.watchPositionAsync(
                 {
-                    accuracy: Location.Accuracy.High,
+                    accuracy: Location.Accuracy.BestForNavigation,
                     distanceInterval: 100
                 },
                 (result) => {
-                    if (result && result.coords.latitude !== origin?.lat) {
+                    if (
+                        result.coords &&
+                        result.coords.latitude !== origin?.lat
+                    ) {
                         console.log('UPDATING 2');
                         dispatch(
                             updateOrder({
@@ -397,11 +400,11 @@ const DeliveryView = ({
         })();
 
         return () => {
-            if (sub) {
-                sub.remove();
+            if (locationSub) {
+                locationSub.remove();
             }
         };
-    }, [location, order, accepted]);
+    }, [location, order?.courier?.coors, accepted]);
 
     useEffect(() => {
         if (
@@ -454,6 +457,7 @@ const DeliveryView = ({
             lng: order.courier.coors?.lng!
         });
     }, [order?.courier, order?.status]);
+
     if (!location) {
         return (
             <View style={{ flex: 1, backgroundColor: theme.BACKGROUND_COLOR }}>
@@ -505,11 +509,7 @@ const DeliveryView = ({
                 followsUserLocation
                 showsPointsOfInterest={false}
                 showsBuildings={false}
-                customMapStyle={
-                    theme.mode === 'dark'
-                        ? customMapStyleDark
-                        : customMapStyleLight
-                }
+                customMapStyle={customMapStyleLight}
                 zoomEnabled
                 provider={PROVIDER_GOOGLE}
                 zoomControlEnabled
@@ -538,7 +538,7 @@ const DeliveryView = ({
                             style={{
                                 width: 40,
                                 height: 40,
-                                tintColor: '#212121'
+                                tintColor: theme.ASCENT
                             }}
                             resizeMode="contain"
                             source={require('../../restaurant.png')}
@@ -578,7 +578,7 @@ const DeliveryView = ({
                     >
                         <FontAwesome
                             name="user"
-                            color={theme.TEXT_COLOR}
+                            color={theme.ASCENT}
                             size={26}
                         />
                     </Marker>
@@ -613,7 +613,7 @@ const DeliveryView = ({
                     onReady={(result) => {
                         const { distance, duration } = result;
                         console.log('DIS', distance);
-                        setIsCloseToDestination(distance < 0.2);
+                        setIsCloseToDestination(distance < 0.3);
                         setDuration(duration);
                         setDistance(distance);
                     }}

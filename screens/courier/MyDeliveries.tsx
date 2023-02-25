@@ -30,7 +30,7 @@ const MyDeliveries = ({ navigation }: Props) => {
     const { businessAvailable } = useBusinessAvailable();
 
     const handleOnPress = (order: Order) => {
-        console.log('Go To Order Details with ID', order.id);
+        navigation.navigate('DeliveryDetails', { order });
     };
 
     const renderOrders: ListRenderItem<Order> = ({ item }) => {

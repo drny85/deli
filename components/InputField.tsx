@@ -23,6 +23,7 @@ interface Props extends TextInputProps {
     placeholder: string;
     centerLabel?: boolean;
     value: string;
+    onBlur?: (e: NativeSyntheticEvent<TextInputFocusEventData>) => void;
     smallLabel?: boolean;
     onChangeText: (value: string) => void;
     leftIcon?: React.ReactNode | undefined;
@@ -69,6 +70,7 @@ const InputField: FC<Props> = React.forwardRef(
             onKeyPress,
             returnKeyType,
             maxLenght,
+            onBlur,
             smallLabel,
             secureTextEntry,
             nogap,
@@ -117,7 +119,6 @@ const InputField: FC<Props> = React.forwardRef(
                             shadowColor: theme.SHADOW_COLOR,
                             borderBottomWidth: 0.3,
                             borderBottomColor: theme.SHADOW_COLOR,
-
                             shadowOpacity: 0.4,
                             shadowRadius: 3,
                             elevation: 5,
@@ -155,6 +156,7 @@ const InputField: FC<Props> = React.forwardRef(
                         autoCorrect={false}
                         onFocus={onFocus}
                         maxLength={maxLenght}
+                        onBlur={onBlur}
                         onKeyPress={onKeyPress}
                         //autoCompleteType='off'
                         returnKeyLabel={returnKeyLabel}
@@ -183,10 +185,9 @@ const InputField: FC<Props> = React.forwardRef(
                         <Text
                             style={[
                                 {
-                                    color: '#d16f6f',
-                                    textAlign: 'right',
-                                    marginRight: SIZES.padding,
-                                    paddingTop: 5
+                                    color: theme.DANGER,
+                                    textAlign: 'left',
+                                    marginBottom: SIZES.base
                                 },
                                 errorStyle
                             ]}

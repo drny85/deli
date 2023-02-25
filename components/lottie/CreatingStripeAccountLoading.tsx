@@ -1,14 +1,13 @@
 import { View } from 'react-native';
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
 
 import LottieView from 'lottie-react-native';
-import { useAppSelector } from '../redux/store';
-import Text from './Text';
-import { SIZES } from '../constants';
+import { useAppSelector } from '../../redux/store';
+import Text from '../Text';
 
 type Props = {};
 
-const OnBoardingStripeLottiView = ({}: Props): JSX.Element => {
+const CreatingStripeAccountLoading = ({}: Props): JSX.Element => {
     const theme = useAppSelector((state) => state.theme);
 
     return (
@@ -19,20 +18,10 @@ const OnBoardingStripeLottiView = ({}: Props): JSX.Element => {
                 style={{ flex: 1 }}
                 source={
                     theme.mode === 'dark'
-                        ? require('../assets/animations/stripe_loading_dark.json')
-                        : require('../assets/animations/stripe_loading_light.json')
+                        ? require('../../assets/animations/creating_dark.json')
+                        : require('../../assets/animations/creating_light.json')
                 }
             />
-            <View
-                style={{
-                    alignSelf: 'center',
-                    marginTop: SIZES.statusBarHeight
-                }}
-            >
-                <Text py_6 center animation={'fadeInDown'} lobster large>
-                    One more step to go
-                </Text>
-            </View>
             <View
                 style={{
                     position: 'absolute',
@@ -46,12 +35,17 @@ const OnBoardingStripeLottiView = ({}: Props): JSX.Element => {
                     animation={'fadeInUp'}
                     delay={800}
                     center
+                    capitalize
                 >
-                    Taking you to setup your payment profile
+                    Getting payment ready
+                </Text>
+
+                <Text py_8 animation={'fadeInLeft'} delay={3000}>
+                    Please be patient, this might take some time
                 </Text>
             </View>
         </View>
     );
 };
 
-export default OnBoardingStripeLottiView;
+export default CreatingStripeAccountLoading;

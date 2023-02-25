@@ -8,17 +8,18 @@ export const useProduct = (id: string) => {
     const { business } = useAppSelector((state) => state.business);
     const [product, setProduct] = useState<Product>();
     const [loading, setLoading] = useState(true);
+
     useEffect(() => {
-        if (!business?.id || id!) return;
+        if (!business?.id || !id) return;
 
         const productRef = doc(productsCollection(business.id), id);
         const sub = onSnapshot(productRef, (snap) => {
             if (!snap.exists()) return;
             setProduct({ id: snap.id, ...snap.data() });
         });
+        setLoading(false);
         return sub;
-    }, [business]);
-    setLoading(false);
+    }, [id, business?.id]);
 
     return { product, loading };
 };

@@ -1,11 +1,11 @@
-import { FlatList, ListRenderItem, TouchableOpacity, View } from 'react-native';
-import React, {
-    useCallback,
-    useEffect,
-    useMemo,
-    useRef,
-    useState
-} from 'react';
+import {
+    Alert,
+    FlatList,
+    ListRenderItem,
+    TouchableOpacity,
+    View
+} from 'react-native';
+import React, { useEffect } from 'react';
 import Screen from '../../components/Screen';
 import Text from '../../components/Text';
 import { onSnapshot, query, where } from 'firebase/firestore';
@@ -23,25 +23,23 @@ import DeliveryCard from '../../components/courier/DeliveryCard';
 import { useBusinessAvailable } from '../../hooks/useBusinessAvailable';
 import { CourierStackScreens } from '../../navigation/courier/typing';
 
-import { Theme } from '../../types';
-import BottomSheet, { BottomSheetScrollView } from '@gorhom/bottom-sheet';
+import { Courier, Theme } from '../../types';
+import { updateUser } from '../../redux/auth/authActions';
 import Header from '../../components/Header';
 import { SIZES } from '../../constants';
 
-import Button from '../../components/Button';
-import Row from '../../components/Row';
-import { logoutUser } from '../../redux/auth/authActions';
 import MenuButtons from '../../components/courier/MenuButtons';
+import Row from '../../components/Row';
 
 type Props = NativeStackScreenProps<CourierStackScreens, 'CourierHome'>;
 
 const CourierHome = ({ navigation }: Props) => {
     useNotifications();
     const dispatch = useAppDispatch();
+    const { user } = useAppSelector((state) => state.auth);
     const theme = useAppSelector((state) => state.theme);
     const [orders, setOrders] = React.useState<Order[]>([]);
     const { businessAvailable, isLoading } = useBusinessAvailable();
-    const [isOpen, setIsOpen] = useState(false);
 
     const [loading, setLoading] = React.useState(true);
 
@@ -67,6 +65,37 @@ const CourierHome = ({ navigation }: Props) => {
         }
     };
 
+    const confirmStatusChange = () => {
+        Alert.alert(
+            'Change status',
+            `Are you sure you want to go ${
+                (user as Courier).isOnline ? 'Offilie' : 'Online'
+            }?`,
+            [
+                { text: 'Cancel', style: 'cancel' },
+                { text: 'Yes', onPress: toogleStatus }
+            ]
+        );
+    };
+
+    const toogleStatus = async () => {
+        try {
+            dispatch(
+                updateUser({
+                    ...(user! as Courier),
+                    isOnline: !(user as Courier).isOnline
+                })
+            );
+        } catch (error) {
+            console.log(error);
+        }
+    };
+    useEffect(() => {
+        if (!(user as Courier).isOnline) {
+            setOrders([]);
+        }
+    }, [(user as Courier).isOnline]);
+
     useEffect(() => {
         setLoading(true);
         const q = query(
@@ -79,7 +108,7 @@ const CourierHome = ({ navigation }: Props) => {
         setLoading(false);
 
         return sub;
-    }, []);
+    }, [(user as Courier).isOnline]);
 
     if (loading || isLoading) return <Loader />;
     return (
@@ -87,6 +116,27 @@ const CourierHome = ({ navigation }: Props) => {
             <Header
                 containerStyle={{ marginTop: SIZES.base }}
                 title={`Orders For Delivery (${orders.length})`}
+                rightIcon={
+                    <TouchableOpacity onPress={confirmStatusChange}>
+                        <Row>
+                            <View
+                                style={{
+                                    height: 26,
+                                    width: 26,
+                                    borderRadius: 13,
+                                    backgroundColor: (user as Courier).isOnline
+                                        ? 'green'
+                                        : theme.DANGER
+                                }}
+                            />
+                            <Text px_4>
+                                {(user as Courier).isOnline
+                                    ? 'Online'
+                                    : 'Offline'}
+                            </Text>
+                        </Row>
+                    </TouchableOpacity>
+                }
             />
             <View style={{ flex: 1 }}>
                 {/* <Text center lobster large py_4>

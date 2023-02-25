@@ -24,6 +24,7 @@ const Products = ({}: Props) => {
     const theme = useAppSelector((state) => state.theme);
     const navigation = useNavigation();
     const dispatch = useAppDispatch();
+    const { user } = useAppSelector((state) => state.auth);
     const { categories, products, loading } = useCategoriesAndProducts();
 
     if (loading) return <Loader />;
@@ -115,7 +116,7 @@ const Products = ({}: Props) => {
                 onPressProduct={(product) => {
                     navigation.navigate('BusinessProducts', {
                         screen: 'BusinessProductDetails',
-                        params: { product }
+                        params: { productId: product.id! }
                     });
                 }}
             />

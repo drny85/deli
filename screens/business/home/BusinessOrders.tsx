@@ -23,10 +23,17 @@ import { MotiView } from 'moti';
 import { useAppSelector } from '../../../redux/store';
 import Stack from '../../../components/Stack';
 import { FontAwesome } from '@expo/vector-icons';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { BusinessHomeStackScreens } from '../../../navigation/business/typing';
+import Header from '../../../components/Header';
 
-type Props = {};
+type Props = NativeStackScreenProps<BusinessHomeStackScreens, 'BusinessOrders'>;
 
-const Orders = ({}: Props) => {
+const BusinessOrders = ({
+    route: {
+        params: { status: st }
+    }
+}: Props) => {
     const navigation = useNavigation();
     const { loading, orders } = useBusinessOrders();
     const theme = useAppSelector((state) => state.theme);
@@ -40,7 +47,7 @@ const Orders = ({}: Props) => {
                 orders={filteredOrders}
                 order={item}
                 onPress={() => {
-                    navigation.navigate('BusinessOrders', {
+                    navigation.navigate('BusinessHome', {
                         screen: 'BusinessOrderDetails',
                         params: { orderId: item.id! }
                     });
@@ -72,9 +79,17 @@ const Orders = ({}: Props) => {
         );
     }, [orders, from, status]);
 
+    useEffect(() => {
+        setStatus(st);
+    }, [st]);
+
     if (loading) return <Loader />;
     return (
         <Screen>
+            <Header
+                title={`${STATUS_NAME(st)} Orders `}
+                onPressBack={() => navigation.goBack()}
+            />
             <View style={{ padding: 10 }}>
                 <Row horizontalAlign="space-evenly">
                     {Object.values(ORDER_STATUS).map((s) => {
@@ -211,4 +226,4 @@ const Orders = ({}: Props) => {
     );
 };
 
-export default Orders;
+export default BusinessOrders;

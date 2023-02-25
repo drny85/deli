@@ -1,14 +1,14 @@
 import { View } from 'react-native';
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 
 import LottieView from 'lottie-react-native';
-import { useAppSelector } from '../redux/store';
-import Text from './Text';
-import { SIZES } from '../constants';
+import { useAppSelector } from '../../redux/store';
+import Text from '../Text';
+import { SIZES } from '../../constants';
 
 type Props = {};
 
-const PaymentLoading = ({}: Props): JSX.Element => {
+const OnBoardingStripeLottiView = ({}: Props): JSX.Element => {
     const theme = useAppSelector((state) => state.theme);
 
     return (
@@ -19,10 +19,20 @@ const PaymentLoading = ({}: Props): JSX.Element => {
                 style={{ flex: 1 }}
                 source={
                     theme.mode === 'dark'
-                        ? require('../assets/animations/payment_dark.json')
-                        : require('../assets/animations/payment_light.json')
+                        ? require('../../assets/animations/stripe_loading_dark.json')
+                        : require('../../assets/animations/stripe_loading_light.json')
                 }
             />
+            <View
+                style={{
+                    alignSelf: 'center',
+                    marginTop: SIZES.statusBarHeight
+                }}
+            >
+                <Text py_6 center animation={'fadeInDown'} lobster large>
+                    One more step to go
+                </Text>
+            </View>
             <View
                 style={{
                     position: 'absolute',
@@ -36,13 +46,12 @@ const PaymentLoading = ({}: Props): JSX.Element => {
                     animation={'fadeInUp'}
                     delay={800}
                     center
-                    capitalize
                 >
-                    Getting payment ready
+                    Taking you to setup your payment profile
                 </Text>
             </View>
         </View>
     );
 };
 
-export default PaymentLoading;
+export default OnBoardingStripeLottiView;

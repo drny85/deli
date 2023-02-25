@@ -3,6 +3,7 @@ import { Coors } from '../business/businessSlide';
 import { logoutUser, autoLogin } from './authActions';
 import { MapViewDirectionsMode } from 'react-native-maps-directions';
 import { Order } from '../consumer/ordersSlide';
+import { Courier } from '../../types';
 
 export interface UserPreferences {
     favoritesBusiness: string[];
@@ -23,12 +24,14 @@ export interface AppUser {
     deliveryAddresses: Order['address'][];
 }
 interface IState {
-    user: AppUser | null;
+    user: AppUser | Courier | null;
     loading: boolean;
+    screen: 'login' | 'signup' | 'business' | 'courier';
 }
 const initialState: IState = {
     user: null,
-    loading: false
+    loading: false,
+    screen: 'login'
 };
 const authSlide = createSlice({
     name: 'auth',
@@ -36,6 +39,9 @@ const authSlide = createSlice({
     reducers: {
         setUserData: (state, { payload }: PayloadAction<IState['user']>) => {
             state.user = payload;
+        },
+        switchScreen: (state, { payload }: PayloadAction<IState['screen']>) => {
+            state.screen = payload;
         }
     },
     extraReducers: (builder) => {
@@ -64,6 +70,6 @@ const authSlide = createSlice({
             });
     }
 });
-export const { setUserData } = authSlide.actions;
+export const { setUserData, switchScreen } = authSlide.actions;
 
 export default authSlide.reducer;

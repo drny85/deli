@@ -1,10 +1,4 @@
-import {
-    Alert,
-    Keyboard,
-    TextInput,
-    TouchableOpacity,
-    View
-} from 'react-native';
+import { Alert, TextInput, TouchableOpacity, View } from 'react-native';
 import React, { useEffect, useRef, useState } from 'react';
 import Screen from '../../components/Screen';
 
@@ -32,6 +26,7 @@ import { useNavigation } from '@react-navigation/native';
 import useNotifications from '../../hooks/useNotifications';
 import { formatPhone } from '../../utils/formatPhone';
 import { isTherePreviousRoute } from '../../utils/checkForPreviousRoute';
+import Header from '../../components/Header';
 
 type Props = NativeStackScreenProps<AuthScreens, 'Signup'>;
 
@@ -130,15 +125,17 @@ const Signup = ({ navigation }: Props) => {
                 <View
                     style={{
                         flex: 1,
-                        alignItems: 'center',
+                        // alignItems: 'center',
                         justifyContent: 'center',
                         maxWidth: 610,
                         alignSelf: 'center'
                     }}
                 >
-                    <Text py_8 animation={'fadeInDown'} lobster large py_4>
-                        Sign Up{' '}
-                    </Text>
+                    <Header
+                        containerStyle={{ marginBottom: 15 }}
+                        title="Sign Up"
+                        onPressBack={() => navigation.goBack()}
+                    />
 
                     <Row>
                         <InputField
@@ -242,19 +239,6 @@ const Signup = ({ navigation }: Props) => {
                             transition={{ type: 'timing' }}
                             exit={{ scale: 0, opacity: 0 }}
                         >
-                            <Row
-                                containerStyle={{ marginBottom: 20 }}
-                                horizontalAlign="center"
-                            >
-                                <Text px_6>Back to login</Text>
-
-                                <TouchableOpacity
-                                    style={{ padding: SIZES.base }}
-                                    onPress={() => navigation.goBack()}
-                                >
-                                    <Text bold>Login</Text>
-                                </TouchableOpacity>
-                            </Row>
                             <Row
                                 containerStyle={{ marginBottom: 20 }}
                                 horizontalAlign="center"

@@ -2,7 +2,6 @@ import {
     ImageBackground,
     StyleSheet,
     TouchableOpacity,
-    View,
     ViewStyle
 } from 'react-native';
 import React from 'react';
@@ -12,7 +11,6 @@ import { SIZES } from '../constants';
 import { AnimatePresence, MotiView } from 'moti';
 import { useAppSelector } from '../redux/store';
 
-import { useNavigation } from '@react-navigation/native';
 import Row from './Row';
 import Stack from './Stack';
 
@@ -25,9 +23,9 @@ type Props = {
 
 const ProductCard = ({ product, disabled, onPress, containerStyle }: Props) => {
     const theme = useAppSelector((state) => state.theme);
+
     const { productImage } = useAppSelector((state) => state.products);
 
-    const navigation = useNavigation();
     return (
         <TouchableOpacity
             style={[
@@ -98,7 +96,7 @@ const ProductCard = ({ product, disabled, onPress, containerStyle }: Props) => {
 export default ProductCard;
 const styles = StyleSheet.create({
     container: {
-        width: SIZES.isSmallDevice ? 240 : 320,
+        //width: SIZES.isSmallDevice ? 240 : 320,
         height: SIZES.height * 0.19,
         maxWidth: 400,
         overflow: 'hidden',

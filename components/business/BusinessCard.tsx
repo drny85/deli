@@ -65,6 +65,7 @@ const BusinessCard = ({ business, onPress, containerStyle }: Props) => {
             </ImageBackground>
             <AnimatePresence>
                 {user &&
+                    user.favoritesStores &&
                     user?.favoritesStores.findIndex(
                         (i) => i === business.id
                     ) !== -1 && (

@@ -12,16 +12,17 @@ export interface ContactPerson {
 }
 
 export enum ORDER_STATUS {
+    new = 'new',
     delivered = 'delivered',
     in_progress = 'in_progress',
-    new = 'new',
     marked_ready_for_delivery = 'marked_ready_for_delivery',
     marked_ready_for_pickup = 'marked_ready_for_pickup',
     cancelled = 'cancelled',
     accepted_by_driver = 'accepted_by_driver',
-    all = 'all orders',
+
     picked_up_by_driver = 'picked_up_by_driver',
-    picked_up_by_client = 'picked_up_by_client'
+    picked_up_by_client = 'picked_up_by_client',
+    all = 'all orders'
 }
 
 export enum ORDER_TYPE {
@@ -55,9 +56,10 @@ export interface Order {
     status: ORDER_STATUS;
     courier?: Courier | null;
     deliveredOn?: string | null;
-    deliveredBy?: AppUser | null;
+    deliveredBy: Courier | null;
     pickedUpOn?: string | null;
     acceptedOn?: string | null;
+    pickedByCourierOn?: string;
     tip?: Tip;
     deliveryPaid: boolean;
     transferId: string | null;
@@ -117,6 +119,9 @@ const ordersSlice = createSlice({
         },
         setGrandTotal: (state, { payload }: PayloadAction<number>) => {
             state.grandTotal = payload;
+        },
+        setAllOrders: (state, { payload }: PayloadAction<Order[]>) => {
+            state.orders = payload;
         }
     },
     extraReducers: (builder) => {
@@ -141,7 +146,8 @@ export const {
     setPaymentSuccess,
     tooglePickupMap,
     setTipAmount,
-    setGrandTotal
+    setGrandTotal,
+    setAllOrders
 } = ordersSlice.actions;
 
 export default ordersSlice.reducer;

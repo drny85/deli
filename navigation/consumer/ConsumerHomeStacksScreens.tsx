@@ -22,11 +22,7 @@ const ConsumerHomeStackNavigation = () => {
                 component={DeliveryAddressSelection}
                 options={{ presentation: 'modal' }}
             />
-            <Screen
-                name="BusinessPage"
-                component={BusinessPage}
-                //options={{ presentation: 'modal' }}
-            />
+            <Screen name="BusinessPage" component={BusinessPage} />
             <Screen
                 name="ProductDetails"
                 component={ProductDetails}

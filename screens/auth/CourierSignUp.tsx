@@ -28,6 +28,23 @@ import { Courier } from '../../types';
 import { AnimatePresence, MotiView } from 'moti';
 import Header from '../../components/Header';
 import Stack from '../../components/Stack';
+import * as Yup from 'yup';
+import { Formik } from 'formik';
+
+const validationScheme = Yup.object().shape({
+    name: Yup.string().min(3, 'name is too short').required('name is required'),
+    lastName: Yup.string()
+        .min(3, 'last name is too short')
+        .required('last name is required'),
+    email: Yup.string().email('invalid email').required('email is required'),
+    phone: Yup.string().min(14, 'invalid phone').required('phone is required'),
+    password: Yup.string()
+        .min(6, 'must be at least 6 characters')
+        .required('password is required'),
+    confirm: Yup.string()
+        .min(6, 'must be at least 6 characters')
+        .equals([Yup.ref('password'), null], 'password does not match')
+});
 
 type Props = NativeStackScreenProps<AuthScreens, 'CourierSignup'>;
 
@@ -41,29 +58,32 @@ const CourierSignUp = ({ navigation }: Props) => {
     const passwordRef = useRef<TextInput>(null);
     const [transportation, setTransportation] =
         useState<Courier['transportation']>();
-    const [name, setName] = useState('');
-    const [lastName, setlastName] = useState('');
-    const [email, setEmail] = useState('');
-    const [phone, setPhone] = useState('');
-    const [password, setPassword] = useState('');
-    const [comfirm, setComfirm] = useState('');
+
     const [showPassword, setShowPassword] = useState(false);
     const [showTransportation, setShowTransportation] = useState(false);
-    const handleSignUp = async () => {
+    const initialValues = {
+        name: '',
+        lastName: '',
+        email: '',
+        password: '',
+        phone: '',
+        confirm: ''
+    };
+    const handleSignUp = async (
+        values: typeof initialValues
+    ): Promise<boolean> => {
         try {
-            const isValid = validateInputs();
-            if (!isValid) {
-                Alert.alert('Error', 'Please fill in all required fields');
-                return;
-            }
+            console.log(values);
+
             setLoading(true);
+            const { name, lastName, password, email, phone } = values;
             const { user } = await createUserWithEmailAndPassword(
                 auth,
-                email,
-                password
+                values.email,
+                values.password
             );
             if (!user) {
-                return;
+                return false;
             }
             await sendEmailVerification(user);
 
@@ -75,58 +95,26 @@ const CourierSignUp = ({ navigation }: Props) => {
                 phone,
                 emailVerified: user.emailVerified,
                 type: 'courier',
-                transportation: transportation
+                transportation: transportation,
+                isActive: false,
+                isOnline: false,
+                image: null,
+                stripeAccount: null,
+                deliveryAddresses: [],
+                favoritesStores: []
             };
 
             await dispatch(createUser(userData));
+            return true;
         } catch (error) {
             const err = error as any;
 
-            console.log('Error @signup fro business =>', err.message);
+            console.log('Error @signup from courier =>', err.message);
             Alert.alert('Error', FIREBASE_ERRORS[err.message] || err.message);
+            return false;
         } finally {
             setLoading(false);
         }
-    };
-
-    const validateInputs = (): boolean => {
-        if (!name || !lastName || !email || !password) return false;
-        if (!email && !password) {
-            Alert.alert('Error', 'both fields are required');
-            emailRef.current?.focus();
-            return false;
-        }
-
-        if (phone.length !== 14) {
-            Alert.alert('Error', 'Invalid phone');
-
-            return false;
-        }
-
-        if (!isEmailValid(email)) {
-            Alert.alert('Error', 'Invalid email');
-            emailRef.current?.focus();
-            return false;
-        }
-
-        if (!password) {
-            Alert.alert('Error', 'please type your password');
-            passwordRef.current?.focus();
-            return false;
-        }
-        if (!comfirm) {
-            Alert.alert('Error', 'please type your password');
-
-            return false;
-        }
-
-        if (password !== comfirm) {
-            Alert.alert('Error', 'please type your password');
-
-            return false;
-        }
-
-        return true;
     };
 
     return (
@@ -134,169 +122,293 @@ const CourierSignUp = ({ navigation }: Props) => {
             <KeyboardScreen>
                 <View
                     style={{
-                        alignItems: 'center',
+                        //alignItems: 'center',
                         justifyContent: 'center',
                         maxWidth: 610,
                         alignSelf: 'center'
                     }}
                 >
-                    <Text py_8 animation={'fadeInDown'} lobster large py_4>
-                        Sign Up to Drive{' '}
-                    </Text>
+                    <Header
+                        title="Signup To Drive"
+                        onPressBack={() => navigation.goBack()}
+                    />
                     <View style={{ height: 10 }} />
-                    <Row>
-                        <InputField
-                            label="First Name"
-                            mainStyle={{ width: '49%', marginRight: 3 }}
-                            placeholder="Ex. John"
-                            value={name}
-                            onChangeText={setName}
-                            autoCapitalize="words"
-                        />
-                        <InputField
-                            label="Last Name"
-                            mainStyle={{ width: '49%', marginLeft: 3 }}
-                            placeholder="Ex. Smith"
-                            value={lastName}
-                            onChangeText={setlastName}
-                            autoCapitalize="words"
-                        />
-                    </Row>
-                    <InputField
-                        label="Phone"
-                        value={phone}
-                        onChangeText={(text) => setPhone(formatPhone(text))}
-                        keyboardType="number-pad"
-                        placeholder="Ex.(123)-456-7890"
-                    />
-
-                    <InputField
-                        label="Email Address"
-                        ref={emailRef}
-                        placeholder="Email Address"
-                        onChangeText={setEmail}
-                        keyboardType="email-address"
-                        value={email}
-                        rightIcon={
-                            isEmailValid(email) && (
-                                <FontAwesome
-                                    name="check-circle"
-                                    size={20}
-                                    color={theme.ASCENT}
-                                />
-                            )
-                        }
-                    />
-                    <Button
-                        title={
-                            transportation
-                                ? `${transportation}`
-                                : 'Pick your Transportation'
-                        }
-                        onPress={() => {
-                            setShowTransportation(true);
-                        }}
-                    />
-                    <AnimatePresence>
-                        {transportation && (
-                            <MotiView
-                                style={{ width: '100%' }}
-                                from={{ opacity: 0, translateY: -20 }}
-                                animate={{
-                                    opacity: 1,
-                                    translateY: 0,
-                                    width: '100%'
-                                }}
-                            >
-                                <InputField
-                                    label="Password"
-                                    mainStyle={{
-                                        width: SIZES.width * 0.95,
-                                        maxWidth: 600
-                                    }}
-                                    ref={passwordRef}
-                                    placeholder="Password"
-                                    onChangeText={setPassword}
-                                    value={password}
-                                    secureTextEntry={!showPassword}
-                                    rightIcon={
-                                        <FontAwesome
-                                            onPress={() =>
-                                                setShowPassword((prev) => !prev)
-                                            }
-                                            name={
-                                                showPassword
-                                                    ? 'eye'
-                                                    : 'eye-slash'
-                                            }
-                                            size={20}
-                                            color={theme.TEXT_COLOR}
-                                        />
-                                    }
-                                />
-                                <InputField
-                                    mainStyle={{
-                                        width: SIZES.width * 0.95,
-                                        maxWidth: 600
-                                    }}
-                                    label="Confirm Password"
-                                    ref={passwordRef}
-                                    placeholder="ConfirmPassword"
-                                    onChangeText={setComfirm}
-                                    value={comfirm}
-                                    secureTextEntry={!showPassword}
-                                    rightIcon={
-                                        <FontAwesome
-                                            onPress={() =>
-                                                setShowPassword((prev) => !prev)
-                                            }
-                                            name={
-                                                showPassword
-                                                    ? 'eye'
-                                                    : 'eye-slash'
-                                            }
-                                            size={20}
-                                            color={theme.TEXT_COLOR}
-                                        />
-                                    }
-                                />
-                            </MotiView>
-                        )}
-                    </AnimatePresence>
-
-                    <View
-                        style={{
-                            width: '80%',
-                            alignSelf: 'center',
-                            marginVertical: 20
+                    <Formik
+                        initialValues={initialValues}
+                        validationSchema={validationScheme}
+                        onSubmit={async (values, { resetForm }) => {
+                            const submitted = await handleSignUp(values);
+                            if (submitted) {
+                                resetForm();
+                                setTransportation(undefined);
+                            }
                         }}
                     >
-                        <Button
-                            containerStyle={{
-                                width: '100%'
-                            }}
-                            textStyle={{ width: '100%' }}
-                            isLoading={loading}
-                            disabled={loading}
-                            title="Sign Up"
-                            onPress={handleSignUp}
-                        />
-                    </View>
+                        {({
+                            handleChange,
+                            handleSubmit,
+                            handleBlur,
+                            values,
+                            setFieldValue,
+                            touched,
+                            errors,
+                            isSubmitting
+                        }) => {
+                            const {
+                                name,
+                                lastName,
+                                password,
+                                phone,
+                                email,
+                                confirm
+                            } = values;
+
+                            return (
+                                <>
+                                    <Row>
+                                        <InputField
+                                            label="First Name"
+                                            mainStyle={{
+                                                width: '49%',
+                                                marginRight: 3
+                                            }}
+                                            placeholder="Ex. John"
+                                            value={name}
+                                            errorMessage={
+                                                touched.name && errors.name
+                                                    ? errors.name
+                                                    : undefined
+                                            }
+                                            onBlur={handleBlur('name')}
+                                            onChangeText={handleChange('name')}
+                                            autoCapitalize="words"
+                                        />
+                                        <InputField
+                                            label="Last Name"
+                                            mainStyle={{
+                                                width: '49%',
+                                                marginLeft: 3
+                                            }}
+                                            placeholder="Ex. Smith"
+                                            value={lastName}
+                                            errorMessage={
+                                                touched.lastName &&
+                                                errors.lastName
+                                                    ? errors.lastName
+                                                    : undefined
+                                            }
+                                            onBlur={handleBlur('lastName')}
+                                            onChangeText={handleChange(
+                                                'lastName'
+                                            )}
+                                            autoCapitalize="words"
+                                        />
+                                    </Row>
+                                    <InputField
+                                        label="Phone"
+                                        value={phone}
+                                        errorMessage={
+                                            touched.phone && errors.phone
+                                                ? errors.phone
+                                                : undefined
+                                        }
+                                        onBlur={handleBlur('phone')}
+                                        onChangeText={(text) =>
+                                            setFieldValue(
+                                                'phone',
+                                                formatPhone(text)
+                                            )
+                                        }
+                                        rightIcon={
+                                            phone.length === 14 && (
+                                                <FontAwesome
+                                                    name="check-circle"
+                                                    size={20}
+                                                    color={theme.ASCENT}
+                                                />
+                                            )
+                                        }
+                                        keyboardType="number-pad"
+                                        placeholder="Ex.(123)-456-7890"
+                                    />
+
+                                    <InputField
+                                        label="Email Address"
+                                        ref={emailRef}
+                                        placeholder="Email Address"
+                                        onChangeText={handleChange('email')}
+                                        keyboardType="email-address"
+                                        onBlur={handleBlur('email')}
+                                        errorMessage={
+                                            touched.email && errors.email
+                                                ? errors.email
+                                                : undefined
+                                        }
+                                        value={email}
+                                        rightIcon={
+                                            isEmailValid(email) && (
+                                                <FontAwesome
+                                                    name="check-circle"
+                                                    size={20}
+                                                    color={theme.ASCENT}
+                                                />
+                                            )
+                                        }
+                                    />
+                                    <Button
+                                        containerStyle={{ alignSelf: 'center' }}
+                                        title={
+                                            transportation
+                                                ? `${transportation}`
+                                                : 'Pick your Transportation'
+                                        }
+                                        onPress={() => {
+                                            setShowTransportation(true);
+                                        }}
+                                    />
+                                    <AnimatePresence>
+                                        {transportation && (
+                                            <MotiView
+                                                style={{ width: '100%' }}
+                                                from={{
+                                                    opacity: 0,
+                                                    translateY: -20
+                                                }}
+                                                animate={{
+                                                    opacity: 1,
+                                                    translateY: 0,
+                                                    width: '100%'
+                                                }}
+                                            >
+                                                <InputField
+                                                    label="Password"
+                                                    mainStyle={{
+                                                        width:
+                                                            SIZES.width * 0.95,
+                                                        maxWidth: 600
+                                                    }}
+                                                    ref={passwordRef}
+                                                    placeholder="Password"
+                                                    errorMessage={
+                                                        touched.password &&
+                                                        errors.password
+                                                            ? errors.password
+                                                            : undefined
+                                                    }
+                                                    onBlur={handleBlur(
+                                                        'password'
+                                                    )}
+                                                    onChangeText={handleChange(
+                                                        'password'
+                                                    )}
+                                                    value={password}
+                                                    secureTextEntry={
+                                                        !showPassword
+                                                    }
+                                                    rightIcon={
+                                                        <FontAwesome
+                                                            onPress={() =>
+                                                                setShowPassword(
+                                                                    (prev) =>
+                                                                        !prev
+                                                                )
+                                                            }
+                                                            name={
+                                                                showPassword
+                                                                    ? 'eye'
+                                                                    : 'eye-slash'
+                                                            }
+                                                            size={20}
+                                                            color={
+                                                                theme.TEXT_COLOR
+                                                            }
+                                                        />
+                                                    }
+                                                />
+                                                <InputField
+                                                    mainStyle={{
+                                                        width:
+                                                            SIZES.width * 0.95,
+                                                        maxWidth: 600
+                                                    }}
+                                                    label="Confirm Password"
+                                                    ref={passwordRef}
+                                                    onBlur={handleBlur(
+                                                        'confirm'
+                                                    )}
+                                                    placeholder="ConfirmPassword"
+                                                    errorMessage={
+                                                        touched.confirm &&
+                                                        errors.confirm
+                                                            ? errors.confirm
+                                                            : undefined
+                                                    }
+                                                    onChangeText={handleChange(
+                                                        'confirm'
+                                                    )}
+                                                    value={confirm}
+                                                    secureTextEntry={
+                                                        !showPassword
+                                                    }
+                                                    rightIcon={
+                                                        <FontAwesome
+                                                            onPress={() =>
+                                                                setShowPassword(
+                                                                    (prev) =>
+                                                                        !prev
+                                                                )
+                                                            }
+                                                            name={
+                                                                showPassword
+                                                                    ? 'eye'
+                                                                    : 'eye-slash'
+                                                            }
+                                                            size={20}
+                                                            color={
+                                                                theme.TEXT_COLOR
+                                                            }
+                                                        />
+                                                    }
+                                                />
+                                            </MotiView>
+                                        )}
+                                    </AnimatePresence>
+
+                                    <View
+                                        style={{
+                                            width: '80%',
+                                            alignSelf: 'center',
+                                            marginVertical: 20
+                                        }}
+                                    >
+                                        <Button
+                                            containerStyle={{
+                                                width: '100%'
+                                            }}
+                                            textStyle={{ width: '100%' }}
+                                            isLoading={loading || isSubmitting}
+                                            disabled={loading}
+                                            title="Sign Up"
+                                            onPress={() => {
+                                                if (!transportation) {
+                                                    Alert.alert(
+                                                        'Error',
+                                                        'Please select a transportation type'
+                                                    );
+                                                    setShowTransportation(true);
+                                                    return;
+                                                }
+                                                handleSubmit();
+                                            }}
+                                        />
+                                    </View>
+                                </>
+                            );
+                        }}
+                    </Formik>
                 </View>
-                <View>
-                    <Row
-                        containerStyle={{ marginBottom: 20 }}
-                        horizontalAlign="center"
-                    >
-                        <Text px_6>Back to login</Text>
 
-                        <TouchableOpacity
-                            style={{ padding: SIZES.base }}
-                            onPress={() => navigation.navigate('Login')}
-                        >
-                            <Text bold>Login</Text>
-                        </TouchableOpacity>
-                    </Row>
+                <View>
                     <Row
                         containerStyle={{ marginBottom: 20 }}
                         horizontalAlign="center"
@@ -324,10 +436,7 @@ const CourierSignUp = ({ navigation }: Props) => {
                         paddingTop: 20
                     }}
                 >
-                    <Header
-                        title="Pick One"
-                        onPressBack={() => setShowTransportation(false)}
-                    />
+                    <Header title="Pick One" />
                     <View
                         style={{
                             justifyContent: 'center',
@@ -364,9 +473,10 @@ const CourierSignUp = ({ navigation }: Props) => {
                                 >
                                     <TouchableOpacity
                                         style={{ flexGrow: 1 }}
-                                        onPress={() =>
-                                            setTransportation('DRIVING')
-                                        }
+                                        onPress={() => {
+                                            setTransportation('DRIVING');
+                                            setShowTransportation(false);
+                                        }}
                                     >
                                         <FontAwesome
                                             name="car"
@@ -405,9 +515,10 @@ const CourierSignUp = ({ navigation }: Props) => {
                                 >
                                     <TouchableOpacity
                                         style={{ flexGrow: 1 }}
-                                        onPress={() =>
-                                            setTransportation('BICYCLING')
-                                        }
+                                        onPress={() => {
+                                            setTransportation('BICYCLING');
+                                            setShowTransportation(false);
+                                        }}
                                     >
                                         <FontAwesome
                                             name="bicycle"

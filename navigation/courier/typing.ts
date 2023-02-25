@@ -1,5 +1,8 @@
 // import { NavigatorScreenParams } from '@react-navigation/native';
 
+import { Order } from '../../redux/consumer/ordersSlide';
+import { ConnectedAccountParams } from '../../types';
+
 // export type CourierBottomTabScreens = {
 //     CourierHomeStack: NavigatorScreenParams<CourierHomeStackScreens>;
 //     CourierDeliveries: NavigatorScreenParams<CourierDeliveriesStackScreens>;
@@ -12,6 +15,14 @@ export type CourierStackScreens = {
     MyDeliveries: undefined;
     CourierSettings: undefined;
     CourierDeliveries: undefined;
+    DeliveryDetails: { order: Order };
+};
+
+export type CourierOnBoardingScreens = {
+    CourierEmailVerification: undefined;
+    CourierStripeAccountCreation: { url: string; data: ConnectedAccountParams };
+    CourierOnBoardingSuccess: undefined;
+    CourierPictureScreen: undefined;
 };
 // export type CourierDeliveriesStackScreens = {
 //     Deliveries: undefined;
