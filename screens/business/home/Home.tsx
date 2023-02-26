@@ -120,6 +120,7 @@ const Home = ({}: Props) => {
                                     screen: 'OrderHistory'
                                 })
                             }
+                            disabled={orders.length === 0}
                             style={{
                                 shadowOffset: { width: 4, height: 4 },
                                 elevation: 6,

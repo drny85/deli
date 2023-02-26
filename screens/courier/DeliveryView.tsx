@@ -42,11 +42,12 @@ import { CourierStackScreens } from '../../navigation/courier/typing';
 import { useReadyForDeliveryOrders } from '../../hooks/useReadyForDeliveryOrders';
 import { customMapStyleDark, customMapStyleLight } from '../../utils/customMap';
 import { Courier } from '../../types';
+import { original } from '@reduxjs/toolkit';
 
 let a: NodeJS.Timeout;
 let locationSub: Location.LocationSubscription;
 const ACCEPTED_TIME = 'ACCEPTED_TIME';
-const EGDE_PADDING = 100;
+const EGDE_PADDING = 140;
 
 type Props = NativeStackScreenProps<CourierStackScreens, 'DeliveryView'>;
 
@@ -72,6 +73,7 @@ const DeliveryView = ({
     const snapPoints = useMemo(() => ['12%', '80%'], []);
     const [business, setBusiness] = React.useState<Business>();
     const dispatch = useAppDispatch();
+    console.log(order?.status);
 
     const makeCall = async (phone: string) => {
         try {
@@ -160,9 +162,7 @@ const DeliveryView = ({
                     latitudeDelta: 0.2,
                     longitudeDelta: 0.2
                 });
-            }
-
-            if (order?.status === ORDER_STATUS.accepted_by_driver) {
+            } else if (order?.status === ORDER_STATUS.accepted_by_driver) {
                 if (!user) return;
                 if (!isCloseToDestination) {
                     Alert.alert(
@@ -171,6 +171,7 @@ const DeliveryView = ({
                     );
                     return;
                 }
+
                 const { payload } = await dispatch(
                     updateOrder({
                         ...order,
@@ -191,8 +192,7 @@ const DeliveryView = ({
                         longitudeDelta: 0.2
                     });
                 }
-            }
-            if (order?.status === ORDER_STATUS.picked_up_by_driver) {
+            } else if (order?.status === ORDER_STATUS.picked_up_by_driver) {
                 if (!user) return;
                 if (!isCloseToDestination) {
                     Alert.alert(
@@ -201,6 +201,7 @@ const DeliveryView = ({
                     );
                     return;
                 }
+
                 const { payload } = await dispatch(
                     updateOrder({
                         ...order,
@@ -256,7 +257,7 @@ const DeliveryView = ({
                             left: EGDE_PADDING,
                             right: EGDE_PADDING,
                             top: EGDE_PADDING,
-                            bottom: EGDE_PADDING * 1.5
+                            bottom: EGDE_PADDING
                         }
                     }
                 );
@@ -270,11 +271,11 @@ const DeliveryView = ({
                             left: EGDE_PADDING,
                             right: EGDE_PADDING,
                             top: EGDE_PADDING,
-                            bottom: EGDE_PADDING * 1.5
+                            bottom: EGDE_PADDING
                         }
                     }
                 );
-            }, 4000);
+            }, 3000);
             a = setTimeout(() => {
                 mapViewRef.current?.fitToSuppliedMarkers(
                     ['origin', 'business', 'destination'],
@@ -283,11 +284,11 @@ const DeliveryView = ({
                             left: EGDE_PADDING,
                             right: EGDE_PADDING,
                             top: EGDE_PADDING,
-                            bottom: EGDE_PADDING * 1.5
+                            bottom: EGDE_PADDING
                         }
                     }
                 );
-            }, 5000);
+            }, 7000);
 
             a = setTimeout(() => {
                 mapViewRef.current?.fitToSuppliedMarkers(
@@ -301,9 +302,8 @@ const DeliveryView = ({
                         }
                     }
                 );
-            }, 7000);
-        }
-        if (order.status === ORDER_STATUS.accepted_by_driver) {
+            }, 9000);
+        } else if (order.status === ORDER_STATUS.accepted_by_driver) {
             setDestination({
                 lat: business?.coors?.lat!,
                 lng: business?.coors?.lng!
@@ -329,30 +329,32 @@ const DeliveryView = ({
                     }
                 );
             }, 2000);
-        }
-        if (order.status === ORDER_STATUS.picked_up_by_driver) {
+        } else if (order.status === ORDER_STATUS.picked_up_by_driver) {
+            console.log('Status', order.status, 'Origin', origin);
             setDestination({
                 lat: order.address?.coors?.lat!,
                 lng: order.address?.coors?.lng!
             });
-            mapViewRef.current?.animateToRegion({
-                latitude: business?.coors?.lat!,
-                longitude: business?.coors?.lng!,
-                latitudeDelta: 0.02,
-                longitudeDelta: 0.02
-            });
-
-            mapViewRef.current?.fitToSuppliedMarkers(
-                ['business', 'destination'],
-                {
-                    edgePadding: {
-                        left: EGDE_PADDING,
-                        right: EGDE_PADDING,
-                        top: EGDE_PADDING,
-                        bottom: EGDE_PADDING
+            // mapViewRef.current?.animateToRegion({
+            //     latitude: business?.coors?.lat!,
+            //     longitude: business?.coors?.lng!,
+            //     latitudeDelta: 0.02,
+            //     longitudeDelta: 0.02
+            // });
+            a = setTimeout(() => {
+                console.log('Business to destination');
+                mapViewRef.current?.fitToSuppliedMarkers(
+                    ['business', 'destination'],
+                    {
+                        edgePadding: {
+                            left: EGDE_PADDING,
+                            right: EGDE_PADDING,
+                            top: EGDE_PADDING,
+                            bottom: EGDE_PADDING
+                        }
                     }
-                }
-            );
+                );
+            }, 1000);
         }
 
         return () => {
@@ -373,7 +375,7 @@ const DeliveryView = ({
             console.log('UPDATING 1');
             locationSub = await Location.watchPositionAsync(
                 {
-                    accuracy: Location.Accuracy.BestForNavigation,
+                    accuracy: Location.Accuracy.High,
                     distanceInterval: 100
                 },
                 (result) => {
@@ -385,6 +387,7 @@ const DeliveryView = ({
                         dispatch(
                             updateOrder({
                                 ...order!,
+
                                 courier: {
                                     ...order?.courier!,
                                     coors: {
@@ -393,6 +396,13 @@ const DeliveryView = ({
                                     }
                                 }
                             })
+                        );
+                    } else {
+                        console.log(
+                            'HHH',
+                            result.coords.latitude,
+                            origin?.lat,
+                            order.courier?.coors?.lat
                         );
                     }
                 }

@@ -1,4 +1,4 @@
-import { TouchableOpacity, View } from 'react-native';
+import { TouchableOpacity } from 'react-native';
 import React from 'react';
 
 import Text from './Text';
@@ -55,7 +55,7 @@ const RadioButton = ({ selected, onPress, status }: Props) => {
                         }}
                         transition={{ type: 'timing' }}
                         exit={{ backgroundColor: theme.BACKGROUND_COLOR }}
-                    ></MotiView>
+                    />
                 </MotiView>
                 <Text bold={selected} px_4>
                     {STATUS_NAME(status)}

@@ -26,6 +26,7 @@ const BusinessHomeStackNavigation = () => {
             <Screen
                 name="BusinessOrderDetails"
                 component={BusinessOrderDetails}
+                options={{ presentation: 'fullScreenModal' }}
             />
         </Navigator>
     );

@@ -15,7 +15,7 @@ const Settings = ({}: Props) => {
     const theme = useAppSelector((state) => state.theme);
     const dispatch = useAppDispatch();
     return (
-        <Screen center>
+        <Screen>
             <Button
                 title="Switch Theme"
                 onPress={() => {

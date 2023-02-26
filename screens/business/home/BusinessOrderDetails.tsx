@@ -3,10 +3,7 @@ import React, { useEffect } from 'react';
 import Screen from '../../../components/Screen';
 import Text from '../../../components/Text';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import {
-    BusinessHomeStackScreens,
-    BusinessOrdersStackScreens
-} from '../../../navigation/business/typing';
+import { BusinessHomeStackScreens } from '../../../navigation/business/typing';
 import Header from '../../../components/Header';
 import Stack from '../../../components/Stack';
 import Loader from '../../../components/Loader';
@@ -380,48 +377,53 @@ const BusinessOrderDetails = ({
                             Status : {STATUS_NAME(order.status)}
                         </Text>
                         <Stack>
-                            {Object.values(ORDER_STATUS).map((status) => {
-                                if (order.orderType === ORDER_TYPE.delivery) {
+                            {Object.values(ORDER_STATUS).map(
+                                (status, index) => {
                                     if (
-                                        status === ORDER_STATUS.new ||
-                                        status === ORDER_STATUS.all ||
-                                        status ===
-                                            ORDER_STATUS.marked_ready_for_pickup ||
-                                        status ===
-                                            ORDER_STATUS.accepted_by_driver ||
-                                        status ===
-                                            ORDER_STATUS.picked_up_by_driver ||
-                                        status ===
-                                            ORDER_STATUS.picked_up_by_client ||
-                                        status === ORDER_STATUS.delivered
-                                    )
-                                        return;
-                                }
+                                        order.orderType === ORDER_TYPE.delivery
+                                    ) {
+                                        if (
+                                            status === ORDER_STATUS.new ||
+                                            status === ORDER_STATUS.all ||
+                                            status ===
+                                                ORDER_STATUS.marked_ready_for_pickup ||
+                                            status ===
+                                                ORDER_STATUS.accepted_by_driver ||
+                                            status ===
+                                                ORDER_STATUS.picked_up_by_driver ||
+                                            status ===
+                                                ORDER_STATUS.picked_up_by_client ||
+                                            status === ORDER_STATUS.delivered
+                                        )
+                                            return;
+                                    }
 
-                                if (order.orderType === ORDER_TYPE.pickup) {
-                                    if (
-                                        status === ORDER_STATUS.delivered ||
-                                        status === ORDER_STATUS.new ||
-                                        status === ORDER_STATUS.all ||
-                                        status ===
-                                            ORDER_STATUS.picked_up_by_driver ||
-                                        status ===
-                                            ORDER_STATUS.accepted_by_driver ||
-                                        status ===
-                                            ORDER_STATUS.marked_ready_for_delivery
-                                    )
-                                        return;
+                                    if (order.orderType === ORDER_TYPE.pickup) {
+                                        if (
+                                            status === ORDER_STATUS.delivered ||
+                                            status === ORDER_STATUS.new ||
+                                            status === ORDER_STATUS.all ||
+                                            status ===
+                                                ORDER_STATUS.picked_up_by_driver ||
+                                            status ===
+                                                ORDER_STATUS.accepted_by_driver ||
+                                            status ===
+                                                ORDER_STATUS.marked_ready_for_delivery
+                                        )
+                                            return;
+                                    }
+                                    return (
+                                        <RadioButton
+                                            key={index}
+                                            status={status}
+                                            selected={newStatus === status}
+                                            onPress={() => {
+                                                setNewStatus(status);
+                                            }}
+                                        />
+                                    );
                                 }
-                                return (
-                                    <RadioButton
-                                        status={status}
-                                        selected={newStatus === status}
-                                        onPress={() => {
-                                            setNewStatus(status);
-                                        }}
-                                    />
-                                );
-                            })}
+                            )}
                         </Stack>
                     </View>
                 </View>
