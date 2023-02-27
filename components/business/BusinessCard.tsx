@@ -13,6 +13,7 @@ import { Business } from '../../redux/business/businessSlide';
 import { AnimatePresence, MotiView } from 'moti';
 import { FontAwesome } from '@expo/vector-icons';
 import { useAppSelector } from '../../redux/store';
+import Row from '../Row';
 
 type Props = {
     business: Business;
@@ -24,6 +25,7 @@ const BusinessCard = ({ business, onPress, containerStyle }: Props) => {
     const { user } = useAppSelector((state) => state.auth);
     return (
         <TouchableOpacity
+            disabled={!business.isOpen}
             onPress={onPress}
             style={[styles.container, containerStyle]}
         >
@@ -52,12 +54,21 @@ const BusinessCard = ({ business, onPress, containerStyle }: Props) => {
                     <Text bold lightText>
                         {business.address?.split(',')[0]}
                     </Text>
-                    <Text lightText raleway_italic>
-                        {business.minimumDelivery &&
-                            `$${business.minimumDelivery} minimum delivery`}
-                    </Text>
-                    {!business.isOpen && (
+                    <Row horizontalAlign="space-between">
                         <Text lightText raleway_italic>
+                            {business.minimumDelivery &&
+                                `$${business.minimumDelivery} minimum delivery`}
+                        </Text>
+                        <Text lightText raleway_italic>
+                            {business.eta
+                                ? `ETA ${business.eta} - ${
+                                      business.eta + 5
+                                  } mins`
+                                : ''}
+                        </Text>
+                    </Row>
+                    {!business.isOpen && (
+                        <Text lightText bold raleway_italic>
                             Closed
                         </Text>
                     )}

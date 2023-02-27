@@ -223,10 +223,18 @@ const BusinessHeader = ({ business }: Props) => {
                 <Text bold lightText>
                     {business.address?.split(',')[0]}
                 </Text>
-                <Text lightText raleway_italic>
-                    {business.minimumDelivery &&
-                        `$${business.minimumDelivery} minimum delivery`}
-                </Text>
+                <Row horizontalAlign="space-between">
+                    <Text lightText raleway_italic>
+                        {business.minimumDelivery &&
+                            `$${business.minimumDelivery} minimum delivery`}
+                    </Text>
+                    <Text lightText raleway_italic>
+                        {business.eta
+                            ? `ETA ${business.eta} - ${business.eta + 5} mins`
+                            : ''}
+                    </Text>
+                </Row>
+
                 {!business.isOpen && (
                     <Text lightText raleway_italic>
                         Closed

@@ -139,10 +139,9 @@ const Cart = ({}: Props) => {
                 }
             />
             <View style={{ flex: 1, justifyContent: 'space-between' }}>
-                <View style={{ flex: 0.8 }}>
+                <View style={{ flex: 0.9 }}>
                     <FlatList
                         data={items}
-                        contentContainerStyle={{ flex: 1 }}
                         keyExtractor={(item, index) => item.id! + index}
                         renderItem={renderCartItems}
                     />

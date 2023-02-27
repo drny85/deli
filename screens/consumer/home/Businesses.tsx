@@ -103,9 +103,9 @@ const Businesses = () => {
     };
 
     useEffect(() => {
-        //if (!businessAvailable.length) return;
+        if (!businessAvailable.length) return;
         setBusinesses(businessAvailable);
-    }, [businessAvailable.length]);
+    }, [businessAvailable]);
 
     useEffect(() => {
         if (deliveryAdd) return;
@@ -296,7 +296,7 @@ const Businesses = () => {
                         showsVerticalScrollIndicator={false}
                         ListFooterComponent={<View style={{ height: 40 }} />}
                         data={[...businesses]}
-                        keyExtractor={(item, index) => index.toString()}
+                        keyExtractor={(_, index) => index.toString()}
                         renderItem={renderBusinesses}
                     />
                 </>

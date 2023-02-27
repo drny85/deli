@@ -24,7 +24,7 @@ import { FontAwesome } from '@expo/vector-icons';
 import RadioButton from '../../../components/RadioButton';
 import { updateOrder } from '../../../redux/consumer/ordersActions';
 import { AnimatePresence, MotiView } from 'moti';
-
+import Communications from 'react-native-communications';
 import { createRefund } from '../../../firebase';
 import moment from 'moment';
 
@@ -50,6 +50,14 @@ const BusinessOrderDetails = ({
     const [updating, setUpdating] = React.useState(false);
     const [newStatus, setNewStatus] = React.useState<ORDER_STATUS>();
     const qty = order?.items?.reduce((acc, item) => acc + item.quantity, 0);
+
+    const makeCall = async (phone: string) => {
+        try {
+            Communications.phonecall(phone.replace(/-/g, ''), true);
+        } catch (error) {
+            console.log(error);
+        }
+    };
 
     const confirmStatusChange = async () => {
         try {
@@ -177,7 +185,13 @@ const BusinessOrderDetails = ({
                             {order?.contactPerson.name}{' '}
                             {order?.contactPerson.lastName}
                         </Text>
-                        <Text>Phone: {order?.contactPerson.phone}</Text>
+                        <TouchableOpacity
+                            onPress={() => makeCall(order.contactPerson.phone)}
+                        >
+                            <Text textColor={theme.ASCENT} bold>
+                                Phone: {order?.contactPerson.phone}
+                            </Text>
+                        </TouchableOpacity>
                     </View>
                     {order.orderType === ORDER_TYPE.delivery ? (
                         <View>

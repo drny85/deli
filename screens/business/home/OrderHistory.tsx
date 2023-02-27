@@ -23,7 +23,6 @@ import moment from 'moment';
 import Divider from '../../../components/Divider';
 import RadioButton from '../../../components/RadioButton';
 import InputField from '../../../components/InputField';
-import Button from '../../../components/Button';
 
 type Props = {};
 
@@ -49,7 +48,8 @@ const BusinessOrderListItem = ({
                 padding: SIZES.padding
             }}
         >
-            <Row horizontalAlign="space-evenly">
+            <Row horizontalAlign="space-between">
+                <Text bold># {order.orderNumber}</Text>
                 <Text bold>Status : {STATUS_NAME(order.status)}</Text>
                 <Text bold>Date: {moment(order.orderDate).format('lll')}</Text>
             </Row>
@@ -98,6 +98,7 @@ const OrderHistory = (props: Props) => {
                         order.contactPerson.lastName
                             .toLowerCase()
                             .match(regex) ||
+                        order.orderNumber?.toString().match(regex) ||
                         order.address?.street.toLowerCase().match(regex) ||
                         order.contactPerson.phone
                             .replace(/\D/g, '')
@@ -227,7 +228,8 @@ const OrderHistory = (props: Props) => {
                         flex: 1,
                         padding: SIZES.padding,
                         justifyContent: 'center',
-                        alignItems: 'center'
+                        alignItems: 'center',
+                        backgroundColor: theme.BACKGROUND_COLOR
                     }}
                 >
                     <Header
