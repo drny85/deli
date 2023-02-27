@@ -34,6 +34,7 @@ export interface Business {
     isOpen: boolean;
     readyIn?: number;
     distance?: number | null;
+    eta?: number;
 }
 interface IState {
     business: Business | null;

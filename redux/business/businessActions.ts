@@ -1,6 +1,7 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import { businessCollection, usersCollection } from '../../firebase';
+import { RootState } from '../store';
 import { Business, setBusiness } from './businessSlide';
 
 export interface ReturnResponse {
@@ -58,17 +59,22 @@ export const getCurrentBusiness = createAsyncThunk(
 
 export const updateBusiness = createAsyncThunk(
     'business/update',
-    async (businessData: Business, _): Promise<boolean> => {
+    async (businessData: Business, { getState }): Promise<boolean> => {
         try {
             if (!businessData.id) return false;
+            const {
+                auth: { user }
+            } = getState() as RootState;
             const businessRef = doc(businessCollection, businessData.id);
             const data = await getDoc(businessRef);
             if (!data.exists()) return false;
 
             await updateDoc(businessRef, { ...businessData });
             if (businessData.phone) {
-                const userRef = doc(usersCollection, businessData.id);
-                await updateDoc(userRef, { phone: businessData.phone });
+                if (!user?.phone) {
+                    const userRef = doc(usersCollection, businessData.id);
+                    await updateDoc(userRef, { phone: businessData.phone });
+                }
             }
 
             getBusiness(businessData.id);
