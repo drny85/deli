@@ -60,7 +60,7 @@ const config: ExpoConfig = {
             '@stripe/stripe-react-native',
             {
                 merchantIdentifier: [
-                    'net.robertdev.deli.app',
+                   
                     'merchant.net.robertdev.deli.app'
                 ],
                 enableGooglePay: true

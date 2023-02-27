@@ -72,7 +72,8 @@ const OrderReview = () => {
                 status: ORDER_STATUS.new,
                 orderType: orderType,
                 deliveryInstructions: deliveryInstructions,
-                address: deliveryAddress || null
+                address: deliveryAddress || null,
+                deliveredBy: null
             };
 
             if (!newOrder.address) {
