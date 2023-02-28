@@ -32,10 +32,11 @@ interface Message {
 const Messages: Message = {
     stripeAccount: 'Payment Information',
     address: 'Business Address',
-    images: 'Business Photo',
+    image: 'Business Photo (Business Profile)',
     phone: 'Business Phone Number',
     minimumDelivery: 'Minimum Delivery Amount',
-    hours: 'Business Hours'
+    hours: 'Business Hours',
+    zips: 'Delivery Zip Codes'
 };
 
 const EmailVerification = ({ navigation }: Props) => {
@@ -69,7 +70,7 @@ const EmailVerification = ({ navigation }: Props) => {
     useEffect(() => {
         if (!business) return;
         Object.entries(business).forEach(([key, value]) => {
-            if (value === null || !value) {
+            if (value === null || !value || value.length === 0) {
                 if (Messages[key]) {
                     setSteps((prev) => [...prev, Messages[key]]);
                 }
@@ -127,17 +128,21 @@ const EmailVerification = ({ navigation }: Props) => {
                             marginLeft: 30
                         }}
                     >
-                        {steps.map((step, index) => (
-                            <Text
-                                py_6
-                                left
-                                animation={'fadeInLeft'}
-                                delay={index * 300}
-                                key={index.toString()}
-                            >
-                                {index + 1} - {step}
-                            </Text>
-                        ))}
+                        {steps
+                            .sort((a, b) =>
+                                a.toLowerCase() > b.toLowerCase() ? 1 : -1
+                            )
+                            .map((step, index) => (
+                                <Text
+                                    py_6
+                                    left
+                                    animation={'fadeInLeft'}
+                                    delay={index * 300}
+                                    key={index.toString()}
+                                >
+                                    {index + 1} - {step}
+                                </Text>
+                            ))}
                     </ScrollView>
                     <View
                         style={{
@@ -149,7 +154,7 @@ const EmailVerification = ({ navigation }: Props) => {
                         <Button
                             title="Next Step"
                             onPress={() =>
-                                navigation.navigate('PrepareInfoScreen')
+                                navigation.navigate('BusinessInformation')
                             }
                         />
                     </View>

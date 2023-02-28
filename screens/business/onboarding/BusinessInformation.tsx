@@ -3,7 +3,8 @@ import {
     StyleSheet,
     FlatList,
     Alert,
-    TouchableOpacity
+    TouchableOpacity,
+    Image
 } from 'react-native';
 import React, { useRef, useState } from 'react';
 import Screen from '../../../components/Screen';
@@ -11,25 +12,25 @@ import Text from '../../../components/Text';
 import Header from '../../../components/Header';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { BusinessOnBoardingStackScreens } from '../../../navigation/business/typing';
-import { SIZES } from '../../../constants';
+import { IMAGE_PLACEHOLDER, SIZES } from '../../../constants';
 import { useAppDispatch, useAppSelector } from '../../../redux/store';
 import KeyboardScreen from '../../../components/KeyboardScreen';
 import GoogleAutoComplete from '../../../components/GoogleAutoCompleteField';
 import InputField from '../../../components/InputField';
-import { GoogleAuthProvider } from 'firebase/auth';
 import {
     GooglePlaceDetail,
     GooglePlacesAutocompleteRef
 } from 'react-native-google-places-autocomplete';
 import { formatPhone } from '../../../utils/formatPhone';
 import { FontAwesome } from '@expo/vector-icons';
-import { connectedStore } from '../../../firebase';
 import Loader from '../../../components/Loader';
-import { ConnectedAccountParams } from '../../../types';
 
 import { Business, Coors } from '../../../redux/business/businessSlide';
 import Row from '../../../components/Row';
 import { updateBusiness } from '../../../redux/business/businessActions';
+import ZipCodes from '../../../components/ZipCodes';
+import { useBusiness } from '../../../hooks/useBusiness';
+import { useBusinessImage } from '../../../hooks/useBusinessImage';
 
 type Props = NativeStackScreenProps<
     BusinessOnBoardingStackScreens,
@@ -37,13 +38,16 @@ type Props = NativeStackScreenProps<
 >;
 
 const BusinessInformation = ({ navigation }: Props) => {
-    const { business } = useAppSelector((state) => state.business);
+    const { user } = useAppSelector((state) => state.auth);
+    const { business } = useBusiness(user?.id!);
+    const { business: buss } = useAppSelector((state) => state.business);
+    const { pickImage } = useBusinessImage();
     const dispatch = useAppDispatch();
     const [loading, setLoading] = useState(false);
     const theme = useAppSelector((state) => state.theme);
     const [coors, setCoors] = useState<Coors>({ lat: 0, lng: 0 });
     const [phone, setPhone] = useState('');
-    const [milesRadius, setMilesRadius] = useState('');
+
     const [minimunDeliveryAmount, setMinimunDeliveryAmount] = useState('');
     const [address, setAddress] = useState('');
     const addressRef = useRef<GooglePlacesAutocompleteRef>(null);
@@ -61,7 +65,6 @@ const BusinessInformation = ({ navigation }: Props) => {
                 address: address,
                 coors,
                 phone,
-                milesRadius: +milesRadius,
                 minimumDelivery: +minimunDeliveryAmount
             };
             setLoading(true);
@@ -69,7 +72,7 @@ const BusinessInformation = ({ navigation }: Props) => {
             const { payload } = await dispatch(updateBusiness(businessData));
             if (!payload) return;
             setAddress('');
-            setMilesRadius('');
+
             setMinimunDeliveryAmount('');
 
             navigation.navigate('BusinessHoursScreen');
@@ -81,6 +84,18 @@ const BusinessInformation = ({ navigation }: Props) => {
     };
 
     const validateInputs = (): boolean => {
+        if (!buss?.image!) {
+            Alert.alert(
+                'Please provide an image for your business, soemthing nice because will be since as the face of your business'
+            );
+            return false;
+        }
+        if (business?.zips.length === 0) {
+            Alert.alert(
+                'Please provide zip codes where you are going to deliver'
+            );
+            return false;
+        }
         if (address.length < 10) {
             Alert.alert('No Address Provided', 'Please type an address');
             addressRef.current?.focus();
@@ -91,11 +106,7 @@ const BusinessInformation = ({ navigation }: Props) => {
             return false;
             // await getConnectedStoreUrl();
         }
-        if (!milesRadius || !minimunDeliveryAmount) {
-            Alert.alert('Minimun Delivery and Miles Radius are required');
-            return false;
-            // await getConnectedStoreUrl();
-        }
+
         return true;
     };
 
@@ -122,6 +133,53 @@ const BusinessInformation = ({ navigation }: Props) => {
 
                         <KeyboardScreen>
                             <View style={styles.container}>
+                                <TouchableOpacity
+                                    onPress={pickImage}
+                                    style={{
+                                        alignSelf: 'center',
+                                        width: SIZES.width * 0.5,
+                                        height: SIZES.height * 0.15,
+                                        borderRadius: SIZES.radius,
+                                        marginBottom: 10
+                                    }}
+                                >
+                                    <Image
+                                        source={{
+                                            uri:
+                                                business?.image ||
+                                                buss?.image ||
+                                                IMAGE_PLACEHOLDER
+                                        }}
+                                        resizeMode="cover"
+                                        style={{
+                                            width: '100%',
+                                            height: '100%',
+                                            borderRadius: SIZES.radius
+                                        }}
+                                    />
+                                    <View
+                                        style={{
+                                            position: 'absolute',
+                                            left: 10,
+                                            bottom: 10
+                                        }}
+                                    >
+                                        <Text lobster lightText large>
+                                            {business?.name}
+                                        </Text>
+                                        {address && (
+                                            <Text lightText>
+                                                {address.slice(0, -15)}
+                                            </Text>
+                                        )}
+                                        {minimunDeliveryAmount && (
+                                            <Text lightText>
+                                                minimum delivery $ $
+                                                {minimunDeliveryAmount}
+                                            </Text>
+                                        )}
+                                    </View>
+                                </TouchableOpacity>
                                 <GoogleAutoComplete
                                     label="Business' Address"
                                     placeholder="Start typing the address"
@@ -135,6 +193,9 @@ const BusinessInformation = ({ navigation }: Props) => {
                                 />
 
                                 <InputField
+                                    nogap
+                                    p_y={8}
+                                    contentStyle={{ marginLeft: 4 }}
                                     label="Business' Phone Number"
                                     placeholder="Ex. (212)-555-4444"
                                     onChangeText={(text) =>
@@ -152,6 +213,17 @@ const BusinessInformation = ({ navigation }: Props) => {
                                         )
                                     }
                                 />
+                                <View style={{ marginTop: 6 }}>
+                                    <ZipCodes
+                                        zips={
+                                            business?.zips &&
+                                            business.zips.length
+                                                ? business.zips
+                                                : []
+                                        }
+                                    />
+                                </View>
+
                                 <View style={{ width: '100%' }}>
                                     <Row
                                         horizontalAlign="space-between"
@@ -173,28 +245,6 @@ const BusinessInformation = ({ navigation }: Props) => {
                                                 setMinimunDeliveryAmount
                                             }
                                             value={minimunDeliveryAmount}
-                                        />
-                                    </Row>
-                                    <Row
-                                        horizontalAlign="space-between"
-                                        containerStyle={{ width: '100%' }}
-                                    >
-                                        <Text bold px_4>
-                                            Miles Radius Delivery:
-                                        </Text>
-                                        <InputField
-                                            mainStyle={{
-                                                width: '30%'
-                                            }}
-                                            contentStyle={{
-                                                textAlign: 'center'
-                                            }}
-                                            placeholder="Ex . 5"
-                                            label="Miles"
-                                            keyboardType="number-pad"
-                                            maxLenght={2}
-                                            onChangeText={setMilesRadius}
-                                            value={milesRadius}
                                         />
                                     </Row>
                                 </View>

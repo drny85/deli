@@ -62,7 +62,6 @@ const Checkout = ({ navigation }: CheckOutProps) => {
     } = useAppSelector((state) => state.orders);
     const { business } = useAppSelector((state) => state.business);
     const canBeDelivery = useCanBeDelivery();
-    console.log('D', canBeDelivery);
 
     const [pOrder, setPendingOrder] = useState<Order>();
 

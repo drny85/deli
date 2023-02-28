@@ -300,61 +300,7 @@ const Settings = ({}: Props) => {
                         )}
                     </AnimatePresence>
                 </ListItem>
-                <ListItem style={{ elevation: 6 }}>
-                    <Row horizontalAlign="space-between">
-                        <Text bold>Delivery Miles Radius</Text>
-                        <Row>
-                            <Text bold>
-                                {business?.milesRadius
-                                    ? business.milesRadius
-                                    : 6}{' '}
-                                Miles
-                            </Text>
-                        </Row>
-                        <View>
-                            <Button
-                                outlined
-                                containerStyle={{ borderRadius: 10 }}
-                                title={etaTitle}
-                                onPress={handleETAPress}
-                            />
-                        </View>
-                    </Row>
-                    <AnimatePresence>
-                        {changingETA && (
-                            <MotiView
-                                from={{ opacity: 0, translateY: -10 }}
-                                animate={{
-                                    opacity: 1,
-                                    translateY: 0,
-                                    height: 80
-                                }}
-                                transition={{ type: 'timing' }}
-                                exit={{
-                                    opacity: 0,
-                                    translateY: -10,
-                                    height: 0
-                                }}
-                            >
-                                <View
-                                    style={{
-                                        alignSelf: 'center',
-                                        width: '25%'
-                                    }}
-                                >
-                                    <InputField
-                                        p_y={8}
-                                        placeholder="How many minutes"
-                                        value={newETA}
-                                        contentStyle={{ textAlign: 'center' }}
-                                        onChangeText={setNewETA}
-                                        keyboardType="numeric"
-                                    />
-                                </View>
-                            </MotiView>
-                        )}
-                    </AnimatePresence>
-                </ListItem>
+
                 <ListItem>
                     <ZipCodes zips={business?.zips || []} />
                 </ListItem>

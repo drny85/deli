@@ -28,7 +28,6 @@ export interface Business {
     image: string | null;
     hours: BusinessDay | null;
     charges_enabled: boolean;
-    milesRadius: number | null;
     minimumDelivery: number | null;
     orderType?: BUSINESS_ORDER_TYPE;
     isOpen: boolean;

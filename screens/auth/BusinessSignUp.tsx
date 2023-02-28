@@ -46,12 +46,14 @@ const validationScheme = Yup.object().shape({
         .min(6, 'must be at least 6 characters')
         .required('password is required'),
     confirm: Yup.string()
-        .min(6, 'must be at least 6 characters')
+        .min(6)
+        .required('passsword confirmation is required')
         .equals([Yup.ref('password'), null], 'password does not match')
 });
 
 const BusinessSignUp = ({ navigation }: Props) => {
     useNotifications();
+
     const [loading, setLoading] = useState(false);
     const dispatch = useAppDispatch();
     const theme = useAppSelector((state) => state.theme);
@@ -67,22 +69,20 @@ const BusinessSignUp = ({ navigation }: Props) => {
         password: '',
         confirm: ''
     };
-    // const [name, setName] = useState('');
-    // const [lastName, setlastName] = useState('');
-    // const [email, setEmail] = useState('');
-    // const [password, setPassword] = useState('');
-    // const [comfirm, setComfirm] = useState('');
+
     const [showPassword, setShowPassword] = useState(false);
     const handleSignUp = async (values: typeof initialValues) => {
         try {
             // //const isValid = validateInputs();
             // if (!isValid) return;
             // setLoading(true);
+
             const { user } = await createUserWithEmailAndPassword(
                 auth,
-                initialValues.email,
-                initialValues.password
+                values.email,
+                values.password
             );
+
             if (!user) {
                 return;
             }
@@ -107,7 +107,6 @@ const BusinessSignUp = ({ navigation }: Props) => {
                 hours: null,
                 image: null,
                 charges_enabled: false,
-                milesRadius: null,
                 isOpen: true,
                 zips: []
             };
@@ -128,51 +127,12 @@ const BusinessSignUp = ({ navigation }: Props) => {
         } catch (error) {
             const err = error as any;
 
-            console.log('Error @signup fro business =>', err.message);
+            console.log('Error @signup from business =>', err.message);
             Alert.alert('Error', FIREBASE_ERRORS[err.message] || err.message);
         } finally {
             setLoading(false);
         }
     };
-
-    // const validateInputs = (): boolean => {
-    //     if (!businessName) {
-    //         Alert.alert('Please enter a name for your business');
-    //         businessNameRef.current?.focus();
-    //         return false;
-    //     }
-    //     if (!name || !lastName || !email || !password) return false;
-    //     if (!email && !password) {
-    //         Alert.alert('Error', 'both fields are required');
-    //         emailRef.current?.focus();
-    //         return false;
-    //     }
-
-    //     if (!isEmailValid(email)) {
-    //         Alert.alert('Error', 'Invalid email');
-    //         emailRef.current?.focus();
-    //         return false;
-    //     }
-
-    //     if (!password) {
-    //         Alert.alert('Error', 'please type your password');
-    //         passwordRef.current?.focus();
-    //         return false;
-    //     }
-    //     if (!comfirm) {
-    //         Alert.alert('Error', 'please type your password');
-
-    //         return false;
-    //     }
-
-    //     if (password !== comfirm) {
-    //         Alert.alert('Error', 'please type your password');
-
-    //         return false;
-    //     }
-
-    //     return true;
-    // };
 
     return (
         <Screen>
@@ -206,7 +166,7 @@ const BusinessSignUp = ({ navigation }: Props) => {
                             touched
                         }) => {
                             //console.log(errors);
-                            console.log(isSubmitting, isValid);
+
                             const {
                                 name,
                                 businessName,
@@ -370,7 +330,7 @@ const BusinessSignUp = ({ navigation }: Props) => {
                                                 width: '100%'
                                             }}
                                             textStyle={{ width: '100%' }}
-                                            isLoading={loading || isSubmitting}
+                                            isLoading={loading}
                                             disabled={loading}
                                             title="Sign Up"
                                             onPress={handleSubmit}

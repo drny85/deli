@@ -24,7 +24,8 @@ import { AnimatePresence, MotiView } from 'moti';
 import Row from '../../../components/Row';
 import {
     Order,
-    saveDeliveryAddress
+    saveDeliveryAddress,
+    setDeliveryZip
 } from '../../../redux/consumer/ordersSlide';
 
 import InputField from '../../../components/InputField';
@@ -40,6 +41,7 @@ import HomeBusinessOrderDetails from '../../../components/modals/HomeBusinessOrd
 
 const Businesses = () => {
     useNotifications();
+    const { user, loading } = useAppSelector((state) => state.auth);
     const dispatch = useAppDispatch();
     const [visible, setVisible] = useState(false);
     const [order, setOrder] = useState<Order>();
@@ -77,7 +79,8 @@ const Businesses = () => {
         }
         currentOffset.current = y;
     };
-    const { user, loading } = useAppSelector((state) => state.auth);
+
+    console.log(deliveryZip);
 
     const handleSearch = (text: string) => {
         setSearchValue(text.replace(/[^a-z]/gi, ''));
@@ -139,6 +142,7 @@ const Businesses = () => {
                 addedOn: new Date().toISOString()
             })
         );
+        dispatch(setDeliveryZip(+postalCode!));
     }, [address, latitude, latitude]);
 
     useEffect(() => {
@@ -305,7 +309,10 @@ const Businesses = () => {
                 </View>
             ) : (
                 <>
-                    <Row horizontalAlign="space-between">
+                    <Row
+                        horizontalAlign="space-between"
+                        containerStyle={{ marginVertical: 10 }}
+                    >
                         <Text lobster medium px_4>
                             {SIZES.isSmallDevice
                                 ? 'Stores'
