@@ -16,8 +16,6 @@ import { stripeFee } from '../../../utils/stripeFee';
 import Divider from '../../../components/Divider';
 import Button from '../../../components/Button';
 import PaymentLoading from '../../../components/lottie/PaymentLoading';
-
-import { usePayment } from '../../../hooks/usePayment';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { ConsumerCartStackScreens } from '../../../navigation/consumer/typing';
 import {
@@ -32,9 +30,10 @@ import {
     placeOrder,
     placePendingOrder
 } from '../../../redux/consumer/ordersActions';
-import { db, fetchPaymentParams } from '../../../firebase';
-import { collection, deleteDoc, doc } from 'firebase/firestore';
+import { fetchPaymentParams } from '../../../firebase';
+
 import InputField from '../../../components/InputField';
+import { useCanBeDelivery } from '../../../hooks/useCanBeDelivery';
 
 export type CheckOutProps = NativeStackScreenProps<
     ConsumerCartStackScreens,
@@ -50,6 +49,7 @@ const Checkout = ({ navigation }: CheckOutProps) => {
     const { initPaymentSheet, presentPaymentSheet } = useStripe();
     const { total, items, quantity } = useAppSelector((state) => state.cart);
     const dispatch = useAppDispatch();
+    const [canDelivery, setCanDelivery] = useState(true);
 
     //const navigation = useNavigation();
     const {
@@ -61,6 +61,8 @@ const Checkout = ({ navigation }: CheckOutProps) => {
         tip: { amount, percentage }
     } = useAppSelector((state) => state.orders);
     const { business } = useAppSelector((state) => state.business);
+    const canBeDelivery = useCanBeDelivery();
+    console.log('D', canBeDelivery);
 
     const [pOrder, setPendingOrder] = useState<Order>();
 
@@ -77,9 +79,21 @@ const Checkout = ({ navigation }: CheckOutProps) => {
         return true;
     };
 
+    const refuseToContinue = () => {
+        Alert.alert(
+            'Change Address',
+            `${business?.name} is not current offering delivery to this address`
+        );
+        return;
+    };
+
     const handlePlacePendingOrder = async () => {
         try {
             if (!order) return;
+            if (orderType === ORDER_TYPE.delivery && !canBeDelivery) {
+                refuseToContinue();
+                return;
+            }
             const valid = validateOrder();
             if (!valid) return;
             const o: Order = {
@@ -313,6 +327,12 @@ const Checkout = ({ navigation }: CheckOutProps) => {
             dispatch(setPaymentSuccess(false));
         };
     }, [paymentSuccess, pOrder]);
+
+    useEffect(() => {
+        if (canBeDelivery || orderType === ORDER_TYPE.pickup) return;
+
+        refuseToContinue();
+    }, [canBeDelivery]);
 
     if (loading || loadingOrder) return <PaymentLoading />;
     return (

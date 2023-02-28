@@ -108,7 +108,8 @@ const BusinessSignUp = ({ navigation }: Props) => {
                 image: null,
                 charges_enabled: false,
                 milesRadius: null,
-                isOpen: true
+                isOpen: true,
+                zips: []
             };
             const userData: AppUser = {
                 id: user.uid,

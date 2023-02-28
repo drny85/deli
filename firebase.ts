@@ -5,7 +5,7 @@ import {
     DocumentData,
     collection
 } from 'firebase/firestore';
-import { getAuth, User, UserCredential } from 'firebase/auth';
+import { getAuth, User } from 'firebase/auth';
 import { getStorage } from 'firebase/storage';
 import { getFunctions, httpsCallable } from 'firebase/functions';
 import { AppUser } from './redux/auth/authSlide';

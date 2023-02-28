@@ -7,9 +7,13 @@ import { useNavigation } from '@react-navigation/native';
 import GoogleAutoComplete from '../../../components/GoogleAutoCompleteField';
 import {
     Order,
-    saveDeliveryAddress
+    saveDeliveryAddress,
+    setDeliveryZip
 } from '../../../redux/consumer/ordersSlide';
-import { GooglePlaceDetail } from 'react-native-google-places-autocomplete';
+import {
+    GooglePlaceData,
+    GooglePlaceDetail
+} from 'react-native-google-places-autocomplete';
 import { AnimatePresence, MotiView } from 'moti';
 import InputField from '../../../components/InputField';
 import { SIZES } from '../../../constants';
@@ -18,9 +22,7 @@ import { useAppDispatch, useAppSelector } from '../../../redux/store';
 import { updateUser } from '../../../redux/auth/authActions';
 import Stack from '../../../components/Stack';
 
-type Props = {};
-
-const DeliveryAddressSelection = ({}: Props) => {
+const DeliveryAddressSelection = () => {
     const { user } = useAppSelector((state) => state.auth);
     const theme = useAppSelector((state) => state.theme);
     const navigation = useNavigation();
@@ -30,6 +32,7 @@ const DeliveryAddressSelection = ({}: Props) => {
         if (!address) return;
         try {
             dispatch(saveDeliveryAddress({ ...address! }));
+            dispatch(setDeliveryZip(+address.street.slice(-10, -5)));
             if (user) {
                 if (user.deliveryAddresses) {
                     const deliveryAddress = [...user.deliveryAddresses];
@@ -52,17 +55,20 @@ const DeliveryAddressSelection = ({}: Props) => {
 
                     navigation.goBack();
                 }
+            } else {
+                navigation.goBack();
             }
         } catch (error) {
             console.log(error);
         }
     };
-    const handlePress = (_: any, details: GooglePlaceDetail) => {
+    const handlePress = (data: GooglePlaceData, details: GooglePlaceDetail) => {
         setAddress({
             coors: { ...details.geometry.location! },
             street: details.formatted_address,
             addedOn: new Date().toISOString()
         });
+        // dispatch(setDeliveryZip(+details.formatted_address.slice(-10, -5)));
     };
     return (
         <Screen>
@@ -124,7 +130,14 @@ const DeliveryAddressSelection = ({}: Props) => {
                                 <TouchableOpacity
                                     onPress={() => {
                                         dispatch(
-                                            saveDeliveryAddress({ ...a! })
+                                            saveDeliveryAddress({
+                                                ...a!
+                                            })
+                                        );
+                                        dispatch(
+                                            setDeliveryZip(
+                                                +a!.street.slice(-10, -5)
+                                            )
                                         );
                                         navigation.goBack();
                                     }}

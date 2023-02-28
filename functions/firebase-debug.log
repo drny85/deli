@@ -1,0 +1,115 @@
+[debug] [2023-02-28T01:01:33.937Z] ----------------------------------------------------------------------
+[debug] [2023-02-28T01:01:33.938Z] Command:       /usr/local/bin/node /usr/local/bin/firebase functions:shell
+[debug] [2023-02-28T01:01:33.938Z] CLI Version:   11.22.0
+[debug] [2023-02-28T01:01:33.938Z] Platform:      darwin
+[debug] [2023-02-28T01:01:33.938Z] Node Version:  v18.12.1
+[debug] [2023-02-28T01:01:33.939Z] Time:          Mon Feb 27 2023 20:01:33 GMT-0500 (Eastern Standard Time)
+[debug] [2023-02-28T01:01:33.939Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2023-02-28T01:01:33.970Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2023-02-28T01:01:33.970Z] > authorizing via signed-in user (robertm3lendez@gmail.com)
+[debug] [2023-02-28T01:01:33.970Z] [iam] checking project deli-8cd19 for permissions ["firebase.projects.get"]
+[debug] [2023-02-28T01:01:33.971Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/deli-8cd19:testIamPermissions [none]
+[debug] [2023-02-28T01:01:33.971Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/deli-8cd19:testIamPermissions x-goog-quota-user=projects/deli-8cd19
+[debug] [2023-02-28T01:01:33.971Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/deli-8cd19:testIamPermissions {"permissions":["firebase.projects.get"]}
+[debug] [2023-02-28T01:01:34.099Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/deli-8cd19:testIamPermissions 200
+[debug] [2023-02-28T01:01:34.100Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/deli-8cd19:testIamPermissions {"permissions":["firebase.projects.get"]}
+[debug] [2023-02-28T01:01:34.192Z] [functions] Functions Emulator only supports listening on one address (127.0.0.1). Not listening on ::1
+[debug] [2023-02-28T01:01:34.193Z] defaultcredentials: writing to file /Users/melendez/.config/firebase/robertm3lendez_gmail_com_application_default_credentials.json
+[debug] [2023-02-28T01:01:34.194Z] DEBUG: Setting GAC to /Users/melendez/.config/firebase/robertm3lendez_gmail_com_application_default_credentials.json
+[debug] [2023-02-28T01:01:34.194Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/deli-8cd19/adminSdkConfig [none]
+[debug] [2023-02-28T01:01:34.476Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/deli-8cd19/adminSdkConfig 200
+[debug] [2023-02-28T01:01:34.476Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/deli-8cd19/adminSdkConfig {"projectId":"deli-8cd19","storageBucket":"deli-8cd19.appspot.com","locationId":"us-central"}
+[debug] [2023-02-28T01:01:34.490Z] [functions] Watching "/Users/melendez/Desktop/mydeli/functions" for Cloud Functions...
+[debug] [2023-02-28T01:01:34.494Z] Validating nodejs source
+[debug] [2023-02-28T01:01:34.925Z] > [functions] package.json contents: {
+  "name": "functions",
+  "type": "commonjs",
+  "scripts": {
+    "build": "tsc",
+    "build:watch": "tsc --watch",
+    "serve": "npm run build && firebase emulators:start --only functions",
+    "shell": "npm run build && firebase functions:shell",
+    "start": "npm run shell",
+    "deploy": "firebase deploy --only functions",
+    "logs": "firebase functions:log"
+  },
+  "engines": {
+    "node": "16"
+  },
+  "main": "lib/index.js",
+  "dependencies": {
+    "dotenv": "^16.0.3",
+    "firebase-admin": "^10.2.0",
+    "firebase-functions": "^4.2.1",
+    "node-fetch": "^2.6.6",
+    "stripe": "^11.4.0",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "@types/express-serve-static-core": "^4.17.31",
+    "@types/node-fetch": "^2.6.2",
+    "@types/uuid": "^9.0.0",
+    "typescript": "^4.9.4"
+  },
+  "private": true
+}
+[debug] [2023-02-28T01:01:34.925Z] Building nodejs source
+[debug] [2023-02-28T01:01:34.925Z] Failed to find version of module node: reached end of search path /Users/melendez/Desktop/mydeli/functions/node_modules
+[warn] ⚠  functions: Your requested "node" version "16" doesn't match your global version "18". Using node@18 from host. 
+[info] i  functions: Loaded environment variables from .env. 
+[debug] [2023-02-28T01:01:34.928Z] Could not find functions.yaml. Must use http discovery
+[debug] [2023-02-28T01:01:34.936Z] Found firebase-functions binary at '/Users/melendez/Desktop/mydeli/functions/node_modules/.bin/firebase-functions'
+[debug] [2023-02-28T01:01:35.059Z] Serving at port 8935
+
+[debug] [2023-02-28T01:01:35.191Z] Got response from /__/functions.yaml {"endpoints":{"createStripeCustomer":{"platform":"gcfv1","availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"serviceAccountEmail":null,"vpc":null,"eventTrigger":{"eventType":"providers/cloud.firestore/eventTypes/document.write","eventFilters":{"resource":"projects/deli-8cd19/databases/(default)/documents/users/{userId}"},"retry":false},"labels":{},"entryPoint":"createStripeCustomer"},"createConnectedBusinessAccount":{"platform":"gcfv1","labels":{},"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"serviceAccountEmail":null,"vpc":null,"callableTrigger":{},"entryPoint":"createConnectedBusinessAccount"},"webhook":{"platform":"gcfv1","availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"serviceAccountEmail":null,"vpc":null,"httpsTrigger":{},"entryPoint":"webhook"},"deli":{"platform":"gcfv1","availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"serviceAccountEmail":null,"vpc":null,"httpsTrigger":{},"entryPoint":"deli"},"checkIfEmailIsVerified":{"platform":"gcfv1","labels":{},"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"serviceAccountEmail":null,"vpc":null,"callableTrigger":{},"entryPoint":"checkIfEmailIsVerified"},"addConnectedAccountToBusiness":{"platform":"gcfv1","labels":{},"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"serviceAccountEmail":null,"vpc":null,"callableTrigger":{},"entryPoint":"addConnectedAccountToBusiness"},"addConnectedAccountToCourier":{"platform":"gcfv1","labels":{},"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"serviceAccountEmail":null,"vpc":null,"callableTrigger":{},"entryPoint":"addConnectedAccountToCourier"},"checkForStoreReady":{"platform":"gcfv1","availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"serviceAccountEmail":null,"vpc":null,"eventTrigger":{"eventType":"providers/cloud.firestore/eventTypes/document.write","eventFilters":{"resource":"projects/deli-8cd19/databases/(default)/documents/business/{businessId}"},"retry":false},"labels":{},"entryPoint":"checkForStoreReady"},"createPaymentIntent":{"platform":"gcfv1","labels":{},"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"serviceAccountEmail":null,"vpc":null,"callableTrigger":{},"entryPoint":"createPaymentIntent"},"createRefund":{"platform":"gcfv1","labels":{},"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"serviceAccountEmail":null,"vpc":null,"callableTrigger":{},"entryPoint":"createRefund"},"generateOrderNumber":{"platform":"gcfv1","availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"serviceAccountEmail":null,"vpc":null,"eventTrigger":{"eventType":"providers/cloud.firestore/eventTypes/document.create","eventFilters":{"resource":"projects/deli-8cd19/databases/(default)/documents/orders/{orderId}"},"retry":false},"labels":{},"entryPoint":"generateOrderNumber"},"updateUnitSold":{"platform":"gcfv1","availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"serviceAccountEmail":null,"vpc":null,"eventTrigger":{"eventType":"providers/cloud.firestore/eventTypes/document.create","eventFilters":{"resource":"projects/deli-8cd19/databases/(default)/documents/orders/{orderId}"},"retry":false},"labels":{},"entryPoint":"updateUnitSold"},"sendOrderStatusUpdates":{"platform":"gcfv1","availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"serviceAccountEmail":null,"vpc":null,"eventTrigger":{"eventType":"providers/cloud.firestore/eventTypes/document.update","eventFilters":{"resource":"projects/deli-8cd19/databases/(default)/documents/orders/{orderId}"},"retry":false},"labels":{},"entryPoint":"sendOrderStatusUpdates"},"payCourier":{"platform":"gcfv1","labels":{},"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"serviceAccountEmail":null,"vpc":null,"callableTrigger":{},"entryPoint":"payCourier"},"getSripeKey":{"platform":"gcfv1","labels":{},"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"serviceAccountEmail":null,"vpc":null,"callableTrigger":{},"entryPoint":"getSripeKey"}},"specVersion":"v1alpha1","requiredAPIs":[]}
+[debug] [2023-02-28T01:01:35.196Z] shutdown requested via /__/quitquitquit
+
+[debug] [2023-02-28T01:01:35.201Z] [functions] Loaded functions definitions from source: createStripeCustomer, createConnectedBusinessAccount, webhook, deli, checkIfEmailIsVerified, addConnectedAccountToBusiness, addConnectedAccountToCourier, checkForStoreReady, createPaymentIntent, createRefund, generateOrderNumber, updateUnitSold, sendOrderStatusUpdates, payCourier, getSripeKey.
+[debug] [2023-02-28T01:01:35.201Z] [functions[us-central1-createStripeCustomer]] function ignored because the firestore emulator does not exist or is not running.
+[debug] [2023-02-28T01:01:35.201Z] [functions[us-central1-createConnectedBusinessAccount]] http function initialized (http://127.0.0.1:5001/deli-8cd19/us-central1/createConnectedBusinessAccount).
+[debug] [2023-02-28T01:01:35.201Z] [functions[us-central1-webhook]] http function initialized (http://127.0.0.1:5001/deli-8cd19/us-central1/webhook).
+[debug] [2023-02-28T01:01:35.201Z] [functions[us-central1-deli]] http function initialized (http://127.0.0.1:5001/deli-8cd19/us-central1/deli).
+[debug] [2023-02-28T01:01:35.201Z] [functions[us-central1-checkIfEmailIsVerified]] http function initialized (http://127.0.0.1:5001/deli-8cd19/us-central1/checkIfEmailIsVerified).
+[debug] [2023-02-28T01:01:35.201Z] [functions[us-central1-addConnectedAccountToBusiness]] http function initialized (http://127.0.0.1:5001/deli-8cd19/us-central1/addConnectedAccountToBusiness).
+[debug] [2023-02-28T01:01:35.201Z] [functions[us-central1-addConnectedAccountToCourier]] http function initialized (http://127.0.0.1:5001/deli-8cd19/us-central1/addConnectedAccountToCourier).
+[debug] [2023-02-28T01:01:35.201Z] [functions[us-central1-checkForStoreReady]] function ignored because the firestore emulator does not exist or is not running.
+[debug] [2023-02-28T01:01:35.201Z] [functions[us-central1-createPaymentIntent]] http function initialized (http://127.0.0.1:5001/deli-8cd19/us-central1/createPaymentIntent).
+[debug] [2023-02-28T01:01:35.201Z] [functions[us-central1-createRefund]] http function initialized (http://127.0.0.1:5001/deli-8cd19/us-central1/createRefund).
+[debug] [2023-02-28T01:01:35.201Z] [functions[us-central1-generateOrderNumber]] function ignored because the firestore emulator does not exist or is not running.
+[debug] [2023-02-28T01:01:35.201Z] [functions[us-central1-updateUnitSold]] function ignored because the firestore emulator does not exist or is not running.
+[debug] [2023-02-28T01:01:35.201Z] [functions[us-central1-sendOrderStatusUpdates]] function ignored because the firestore emulator does not exist or is not running.
+[debug] [2023-02-28T01:01:35.201Z] [functions[us-central1-payCourier]] http function initialized (http://127.0.0.1:5001/deli-8cd19/us-central1/payCourier).
+[debug] [2023-02-28T01:01:35.201Z] [functions[us-central1-getSripeKey]] http function initialized (http://127.0.0.1:5001/deli-8cd19/us-central1/getSripeKey).
+[info] i  functions: Loaded functions: createStripeCustomer, createConnectedBusinessAccount, webhook, deli, checkIfEmailIsVerified, addConnectedAccountToBusiness, addConnectedAccountToCourier, checkForStoreReady, createPaymentIntent, createRefund, generateOrderNumber, updateUnitSold, sendOrderStatusUpdates, payCourier, getSripeKey 
+[warn] ⚠  functions: The following emulators are not running, calls to these services will affect production: firestore, database, pubsub, storage, eventarc 
+[debug] [2023-02-28T01:01:41.811Z] [work-queue] {"queuedWork":["/deli-8cd19/us-central1/getSripeKey-2023-02-28T01:01:41.811Z"],"queueLength":1,"runningWork":[],"workRunningCount":0}
+[debug] [2023-02-28T01:01:41.812Z] [work-queue] {"queuedWork":[],"queueLength":0,"runningWork":["/deli-8cd19/us-central1/getSripeKey-2023-02-28T01:01:41.811Z"],"workRunningCount":1}
+[debug] [2023-02-28T01:01:41.812Z] Accepted request POST /deli-8cd19/us-central1/getSripeKey --> us-central1-getSripeKey
+[debug] [2023-02-28T01:01:41.818Z] DEBUG: [functions] Runtime ready! Sending request!
+[debug] [2023-02-28T01:01:41.818Z] DEBUG: [functions] Got req.url=/deli-8cd19/us-central1/getSripeKey, mapping to path=/
+[info] i  functions: Loaded environment variables from .env. 
+[debug] [2023-02-28T01:01:41.827Z] DEBUG: [worker-pool] addWorker(us-central1-getSripeKey)
+[debug] [2023-02-28T01:01:41.828Z] DEBUG: [worker-pool] Adding worker with key us-central1-getSripeKey, total=1
+[debug] [2023-02-28T01:01:42.363Z] DEBUG: [runtime-status] [76691] Resolved module firebase-admin {"declared":true,"installed":true,"version":"10.3.0","resolution":"/Users/melendez/Desktop/mydeli/functions/node_modules/firebase-admin/lib/index.js"}
+[debug] [2023-02-28T01:01:42.363Z] DEBUG: [runtime-status] [76691] Resolved module firebase-functions {"declared":true,"installed":true,"version":"4.2.1","resolution":"/Users/melendez/Desktop/mydeli/functions/node_modules/firebase-functions/lib/v1/index.js"}
+[debug] [2023-02-28T01:01:42.363Z] DEBUG: [runtime-status] [76691] Outgoing network have been stubbed. [{"name":"http","status":"mocked"},{"name":"http","status":"mocked"},{"name":"https","status":"mocked"},{"name":"https","status":"mocked"},{"name":"net","status":"mocked"}]
+[debug] [2023-02-28T01:01:42.364Z] DEBUG: [runtime-status] [76691] Resolved module firebase-functions {"declared":true,"installed":true,"version":"4.2.1","resolution":"/Users/melendez/Desktop/mydeli/functions/node_modules/firebase-functions/lib/v1/index.js"}
+[debug] [2023-02-28T01:01:42.455Z] DEBUG: [runtime-status] [76691] Checked functions.config() {"config":{}}
+[debug] [2023-02-28T01:01:42.455Z] DEBUG: [runtime-status] [76691] firebase-functions has been stubbed. {"functionsResolution":{"declared":true,"installed":true,"version":"4.2.1","resolution":"/Users/melendez/Desktop/mydeli/functions/node_modules/firebase-functions/lib/v1/index.js"}}
+[debug] [2023-02-28T01:01:42.455Z] DEBUG: [runtime-status] [76691] Resolved module firebase-functions {"declared":true,"installed":true,"version":"4.2.1","resolution":"/Users/melendez/Desktop/mydeli/functions/node_modules/firebase-functions/lib/v1/index.js"}
+[debug] [2023-02-28T01:01:42.456Z] DEBUG: [runtime-status] [76691] Resolved module firebase-admin {"declared":true,"installed":true,"version":"10.3.0","resolution":"/Users/melendez/Desktop/mydeli/functions/node_modules/firebase-admin/lib/index.js"}
+[debug] [2023-02-28T01:01:42.457Z] DEBUG: [runtime-status] [76691] Resolved module firebase-functions {"declared":true,"installed":true,"version":"4.2.1","resolution":"/Users/melendez/Desktop/mydeli/functions/node_modules/firebase-functions/lib/v1/index.js"}
+[debug] [2023-02-28T01:01:42.457Z] DEBUG: [runtime-status] [76691] firebase-admin has been stubbed. {"adminResolution":{"declared":true,"installed":true,"version":"10.3.0","resolution":"/Users/melendez/Desktop/mydeli/functions/node_modules/firebase-admin/lib/index.js"}}
+[debug] [2023-02-28T01:01:42.464Z] DEBUG: [runtime-status] [76691] initializeApp(DEFAULT) {"storageBucket":"deli-8cd19.appspot.com","projectId":"deli-8cd19"}
+[debug] [2023-02-28T01:01:42.490Z] DEBUG: [runtime-status] [76691] Functions runtime initialized. {"cwd":"/Users/melendez/Desktop/mydeli/functions","node_version":"18.12.1"}
+[debug] [2023-02-28T01:01:42.490Z] DEBUG: [runtime-status] [76691] Listening to port: /var/folders/_s/474gfyk16gq0xd0w0mnbv0gh0000gn/T/fire_emu_222e4722c4b63360.sock
+[debug] [2023-02-28T01:01:42.542Z] DEBUG: [worker-us-central1-getSripeKey-c5eae335-2ef7-4634-9e9b-6449d0c3b0ab]: IDLE
+[debug] [2023-02-28T01:01:42.543Z] DEBUG: [worker-pool] submitRequest(triggerId=us-central1-getSripeKey)
+[debug] [2023-02-28T01:01:42.543Z] DEBUG: [worker-us-central1-getSripeKey-c5eae335-2ef7-4634-9e9b-6449d0c3b0ab]: BUSY
+[debug] [2023-02-28T01:01:42.550Z] [functions] Beginning execution of "getSripeKey"
+[info] >  {"verifications":{"app":"MISSING","auth":"MISSING"},"logging.googleapis.com/labels":{"firebase-log-type":"callable-request-verification"},"severity":"DEBUG","message":"Callable request verification passed"} {"user":{"verifications":{"app":"MISSING","auth":"MISSING"},"logging.googleapis.com/labels":{"firebase-log-type":"callable-request-verification"},"severity":"DEBUG","message":"Callable request verification passed"},"metadata":{"emulator":{"name":"functions"},"function":{"name":"us-central1-getSripeKey"},"extension":{},"message":"\u001b[90m> \u001b[39m {\"verifications\":{\"app\":\"MISSING\",\"auth\":\"MISSING\"},\"logging.googleapis.com/labels\":{\"firebase-log-type\":\"callable-request-verification\"},\"severity\":\"DEBUG\",\"message\":\"Callable request verification passed\"}"}}
+[debug] [2023-02-28T01:01:42.551Z] DEBUG: [runtime-status] [76691] No callable functions auth found
+[debug] [2023-02-28T01:01:42.552Z] DEBUG: [worker-us-central1-getSripeKey-c5eae335-2ef7-4634-9e9b-6449d0c3b0ab]: IDLE
+[debug] [2023-02-28T01:01:42.552Z] [work-queue] {"queuedWork":[],"queueLength":0,"runningWork":[],"workRunningCount":0}
+[debug] [2023-02-28T01:01:42.553Z] [functions] Finished "getSripeKey" in 2.194708ms

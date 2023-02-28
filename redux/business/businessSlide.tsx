@@ -32,9 +32,9 @@ export interface Business {
     minimumDelivery: number | null;
     orderType?: BUSINESS_ORDER_TYPE;
     isOpen: boolean;
-    readyIn?: number;
     distance?: number | null;
     eta?: number;
+    zips: number[];
 }
 interface IState {
     business: Business | null;

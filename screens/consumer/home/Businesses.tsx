@@ -5,7 +5,8 @@ import {
     NativeScrollEvent,
     NativeSyntheticEvent,
     TouchableOpacity,
-    View
+    View,
+    Switch
 } from 'react-native';
 import React, { useEffect, useRef, useState } from 'react';
 import Screen from '../../../components/Screen';
@@ -43,18 +44,24 @@ const Businesses = () => {
     const [visible, setVisible] = useState(false);
     const [order, setOrder] = useState<Order>();
     // variables
+    const [showOnlyWithinDeliveryZone, setShowOnlyWithinDeliveryZone] =
+        useState(true);
 
     const { address, latitude, longitude } = useLocation();
+
     const navigation = useNavigation();
     const currentOffset = useRef(0);
     const currentDirection = useRef<'up' | 'down'>('up');
     const inputRef = useRef<TextInput>(null);
     const [nothingFound, setNothingFound] = useState(false);
-    const { deliveryAdd } = useAppSelector((state) => state.orders);
+    const { deliveryAdd, deliveryZip } = useAppSelector(
+        (state) => state.orders
+    );
     const theme = useAppSelector((state) => state.theme);
     const [show, setShow] = useState(true);
     const [searchValue, setSearchValue] = useState('');
     const listRef = useRef<FlatList>(null);
+
     const {
         businessAvailable,
         allProducts,
@@ -104,8 +111,21 @@ const Businesses = () => {
 
     useEffect(() => {
         if (!businessAvailable.length) return;
-        setBusinesses(businessAvailable);
-    }, [businessAvailable]);
+        if (deliveryAdd && showOnlyWithinDeliveryZone && deliveryZip) {
+            setBusinesses(
+                businessAvailable.filter(
+                    (b) => b.zips && b.zips.includes(deliveryZip)
+                )
+            );
+        } else {
+            setBusinesses(businessAvailable);
+        }
+    }, [
+        businessAvailable,
+        showOnlyWithinDeliveryZone,
+        deliveryAdd,
+        deliveryZip
+    ]);
 
     useEffect(() => {
         if (deliveryAdd) return;
@@ -126,6 +146,7 @@ const Businesses = () => {
             const { success, route } = await isTherePreviousRoute();
 
             if (user && success) {
+                console.log('Redirecting to previous route');
                 if (route === 'OrderReview') {
                     navigation.navigate('ConsumerCart', {
                         screen: 'OrderReview'
@@ -284,21 +305,58 @@ const Businesses = () => {
                 </View>
             ) : (
                 <>
-                    <Text lobster medium px_4>
-                        Stores / Groceries
-                    </Text>
-                    <FlatList
-                        ref={listRef}
-                        onScroll={onScroll}
-                        bounces={false}
-                        alwaysBounceVertical={false}
-                        scrollEventThrottle={16}
-                        showsVerticalScrollIndicator={false}
-                        ListFooterComponent={<View style={{ height: 40 }} />}
-                        data={[...businesses]}
-                        keyExtractor={(_, index) => index.toString()}
-                        renderItem={renderBusinesses}
-                    />
+                    <Row horizontalAlign="space-between">
+                        <Text lobster medium px_4>
+                            {SIZES.isSmallDevice
+                                ? 'Stores'
+                                : 'Stores / Groceries'}
+                        </Text>
+                        <Row>
+                            <Text bold px_4>
+                                {showOnlyWithinDeliveryZone && deliveryZip
+                                    ? `Stores delivering to ${deliveryZip}`
+                                    : 'Showing all stores'}
+                            </Text>
+                            <Switch
+                                value={showOnlyWithinDeliveryZone}
+                                onValueChange={setShowOnlyWithinDeliveryZone}
+                                thumbColor={theme.TEXT_COLOR}
+                                trackColor={{
+                                    true: theme.ASCENT,
+                                    false: theme.TEXT_COLOR
+                                }}
+                            />
+                        </Row>
+                    </Row>
+                    {businesses.length > 0 ? (
+                        <FlatList
+                            ref={listRef}
+                            onScroll={onScroll}
+                            bounces={false}
+                            alwaysBounceVertical={false}
+                            scrollEventThrottle={16}
+                            showsVerticalScrollIndicator={false}
+                            ListFooterComponent={
+                                <View style={{ height: 40 }} />
+                            }
+                            data={[...businesses]}
+                            keyExtractor={(_, index) => index.toString()}
+                            renderItem={renderBusinesses}
+                        />
+                    ) : (
+                        <View
+                            style={{
+                                flex: 1,
+                                justifyContent: 'center',
+                                alignItems: 'center'
+                            }}
+                        >
+                            <Text bold>No Stores found</Text>
+                            <Text py_8 caption>
+                                Considering changing your delivery address
+                            </Text>
+                        </View>
+                    )}
                 </>
             )}
 

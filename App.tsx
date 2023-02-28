@@ -30,8 +30,6 @@ const App = () => {
         if (isLoadingComplete && !loading && !businessLoading) {
             onLayoutRootView();
             setProcessing(false);
-        } else {
-            setProcessing(true);
         }
     }, [isLoadingComplete, loading, businessLoading]);
 

@@ -858,3 +858,8 @@ export async function isAuthorizedCourier(email: string): Promise<boolean> {
         return false;
     }
 }
+
+exports.getSripeKey = functions.https.onCall((data, context) => {
+    if (!context.auth) return { message: 'no authorized' };
+    return { key: process.env.STRIPE_TEST_KEY!, env: process.env.NODE_ENV };
+});

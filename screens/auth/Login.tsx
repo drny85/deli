@@ -21,16 +21,18 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view
 import { autoLogin } from '../../redux/auth/authActions';
 import Loader from '../../components/Loader';
 import useNotifications from '../../hooks/useNotifications';
+import { useNavigation } from '@react-navigation/native';
+import { isTherePreviousRoute } from '../../utils/checkForPreviousRoute';
 
 type Props = NativeStackScreenProps<AuthScreens, 'Login'>;
 
 const Login = ({ navigation }: Props) => {
     useNotifications();
     const dispatch = useAppDispatch();
+    const nav = useNavigation();
 
     const { loading } = useAppSelector((state) => state.auth);
     const theme = useAppSelector((state) => state.theme);
-    const { previousRoute } = useAppSelector((state) => state.settings);
 
     const emailRef = useRef<TextInput>(null);
     const passwordRef = useRef<TextInput>(null);
@@ -47,6 +49,7 @@ const Login = ({ navigation }: Props) => {
                 email,
                 password
             );
+
             if (!user) {
                 return;
             }
@@ -57,13 +60,15 @@ const Login = ({ navigation }: Props) => {
                     emailVerified: user.emailVerified
                 })
             );
+            const { success, route } = await isTherePreviousRoute();
+            if (success && route && route === 'OrderReview') {
+                nav.navigate('ConsumerCart', { screen: 'OrderReview' });
+            }
         } catch (error) {
             const err = error as any;
 
             console.log('Error =>', err.message);
             Alert.alert('Error', FIREBASE_ERRORS[err.message] || err.message);
-        } finally {
-            console.log('PR +DOWUN', previousRoute);
         }
     };
 

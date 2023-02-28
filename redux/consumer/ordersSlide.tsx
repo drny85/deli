@@ -19,7 +19,6 @@ export enum ORDER_STATUS {
     marked_ready_for_pickup = 'marked_ready_for_pickup',
     cancelled = 'cancelled',
     accepted_by_driver = 'accepted_by_driver',
-
     picked_up_by_driver = 'picked_up_by_driver',
     picked_up_by_client = 'picked_up_by_client',
     all = 'all orders'
@@ -75,6 +74,7 @@ interface OrdersState {
     paymentSuccess: boolean;
     tip: Tip;
     grandTotal: number;
+    deliveryZip: number | null;
 }
 const initialState: OrdersState = {
     orders: [],
@@ -85,7 +85,8 @@ const initialState: OrdersState = {
     loading: false,
     paymentSuccess: false,
     tip: { amount: 0, percentage: 0 },
-    grandTotal: 0
+    grandTotal: 0,
+    deliveryZip: null
 };
 
 const ordersSlice = createSlice({
@@ -122,6 +123,9 @@ const ordersSlice = createSlice({
         },
         setAllOrders: (state, { payload }: PayloadAction<Order[]>) => {
             state.orders = payload;
+        },
+        setDeliveryZip: (state, { payload }: PayloadAction<number | null>) => {
+            state.deliveryZip = payload;
         }
     },
     extraReducers: (builder) => {
@@ -147,7 +151,8 @@ export const {
     tooglePickupMap,
     setTipAmount,
     setGrandTotal,
-    setAllOrders
+    setAllOrders,
+    setDeliveryZip
 } = ordersSlice.actions;
 
 export default ordersSlice.reducer;

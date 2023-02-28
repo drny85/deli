@@ -66,15 +66,33 @@ export interface Business {
     profileCompleted: boolean;
     hasItems: boolean;
     image: string | null;
-    hours: hour[] | null;
+    hours: BusinessDay | null;
     charges_enabled: boolean;
-    minimumDelivery: number | null;
     milesRadius: number | null;
+    minimumDelivery: number | null;
+    orderType?: BUSINESS_ORDER_TYPE;
+    isOpen: boolean;
+    distance?: number | null;
+    eta?: number;
+    zips: number[];
 }
 export interface Tip {
     amount: number;
     percentage: number;
 }
+export enum BUSINESS_ORDER_TYPE {
+    deliveryOnly = 'deliveryOnly',
+    both = 'both'
+}
+export interface BusinessDay {
+    [key: string]: Day;
+}
+
+interface Day {
+    openAt: string;
+    closeAt: string;
+}
+
 export interface Order {
     id?: string;
     orderNumber?: number;

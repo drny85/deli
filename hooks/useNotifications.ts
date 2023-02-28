@@ -104,8 +104,11 @@ const useNotifications = () => {
                     // );
                     return;
                 }
-                const token = (await Notifications.getExpoPushTokenAsync())
-                    .data;
+                const token = (
+                    await Notifications.getExpoPushTokenAsync({
+                        experienceId: 'deli'
+                    })
+                ).data;
 
                 if (user?.pushToken) return;
 
