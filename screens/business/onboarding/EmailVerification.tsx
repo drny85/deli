@@ -12,6 +12,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { BusinessOnBoardingStackScreens } from '../../../navigation/business/typing';
 import { Business } from '../../../redux/business/businessSlide';
 import Divider from '../../../components/Divider';
+import { useBusiness } from '../../../hooks/useBusiness';
 
 type Props = NativeStackScreenProps<
     BusinessOnBoardingStackScreens,
@@ -36,12 +37,13 @@ const Messages: Message = {
     phone: 'Business Phone Number',
     minimumDelivery: 'Minimum Delivery Amount',
     hours: 'Business Hours',
-    zips: 'Delivery Zip Codes'
+    zips: 'Delivery Zip Codes',
+    eta: 'Estimated Delivery Arrival'
 };
 
 const EmailVerification = ({ navigation }: Props) => {
     const { user, loading } = useAppSelector((state) => state.auth);
-    const { business } = useAppSelector((state) => state.business);
+    const { business } = useBusiness(user?.id!);
     const [isVerified, setIsVerify] = useState(user?.emailVerified);
     const [steps, setSteps] = useState<string[]>([]);
 
@@ -70,7 +72,12 @@ const EmailVerification = ({ navigation }: Props) => {
     useEffect(() => {
         if (!business) return;
         Object.entries(business).forEach(([key, value]) => {
-            if (value === null || !value || value.length === 0) {
+            if (
+                value === null ||
+                !value ||
+                value.length === 0 ||
+                value === undefined
+            ) {
                 if (Messages[key]) {
                     setSteps((prev) => [...prev, Messages[key]]);
                 }

@@ -8,6 +8,7 @@ export const useBusiness = (businessId: string) => {
     const [loading, setLoading] = useState(true);
     useEffect(() => {
         if (!businessId) return;
+       
         const businessRef = doc(businessCollection, businessId);
         const sub = onSnapshot(businessRef, (snap) => {
             if (!snap.exists()) return;

@@ -19,6 +19,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { BusinessOnBoardingStackScreens } from '../../../navigation/business/typing';
 import OnBoardingStripeLottiView from '../../../components/lottie/OnBoardingStripeLottiView';
 import Divider from '../../../components/Divider';
+import Header from '../../../components/Header';
 
 type Props = NativeStackScreenProps<
     BusinessOnBoardingStackScreens,
@@ -78,7 +79,7 @@ const BusinessHoursScreen = ({ navigation }: Props) => {
             setLoading(true);
             const params: ConnectedAccountParams = {
                 businessName: business?.name,
-                phone: business.phone!,
+                phone: business.phone?.replace(/[^\d\+]/g, '')!,
                 address: business.address!,
                 lastName: business.owner.lastName,
                 name: business.owner.name,
@@ -106,6 +107,13 @@ const BusinessHoursScreen = ({ navigation }: Props) => {
 
     return (
         <Screen>
+            <View style={{ alignSelf: 'center', width: '100%', maxWidth: 800 }}>
+                <Header
+                    title="Business Hours"
+                    onPressBack={() => navigation.goBack()}
+                />
+            </View>
+
             <Text center large py_4 lobster>
                 {business?.name} Hours
             </Text>

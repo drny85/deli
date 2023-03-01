@@ -95,7 +95,7 @@ const BusinessSignUp = ({ navigation }: Props) => {
                     lastName: values.lastName
                 },
                 stripeAccount: null,
-                email: initialValues.email,
+                email: values.email,
                 isActive: true,
                 userId: user.uid,
                 profileCompleted: false,

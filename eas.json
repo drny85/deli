@@ -16,9 +16,15 @@
             "distribution": "internal"
         },
         "preview": {
+            "extends": "production",
             "distribution": "internal"
         },
-        "production": {}
+        "production": {
+           
+            "ios": {
+                "resourceClass": "m1-medium"
+              }
+        }
     },
     "submit": {
         "production": {}

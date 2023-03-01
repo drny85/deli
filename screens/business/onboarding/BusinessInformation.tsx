@@ -6,7 +6,7 @@ import {
     TouchableOpacity,
     Image
 } from 'react-native';
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Screen from '../../../components/Screen';
 import Text from '../../../components/Text';
 import Header from '../../../components/Header';
@@ -25,12 +25,20 @@ import { formatPhone } from '../../../utils/formatPhone';
 import { FontAwesome } from '@expo/vector-icons';
 import Loader from '../../../components/Loader';
 
-import { Business, Coors } from '../../../redux/business/businessSlide';
+import {
+    Business,
+    Coors,
+    setBusiness
+} from '../../../redux/business/businessSlide';
 import Row from '../../../components/Row';
 import { updateBusiness } from '../../../redux/business/businessActions';
 import ZipCodes from '../../../components/ZipCodes';
 import { useBusiness } from '../../../hooks/useBusiness';
 import { useBusinessImage } from '../../../hooks/useBusinessImage';
+import { LinearGradient } from 'expo-linear-gradient';
+import { getDownloadURL, ref, uploadBytesResumable } from 'firebase/storage';
+import { storage } from '../../../firebase';
+import { useNavigation } from '@react-navigation/native';
 
 type Props = NativeStackScreenProps<
     BusinessOnBoardingStackScreens,
@@ -39,32 +47,83 @@ type Props = NativeStackScreenProps<
 
 const BusinessInformation = ({ navigation }: Props) => {
     const { user } = useAppSelector((state) => state.auth);
-    const { business } = useBusiness(user?.id!);
+    const { business, loading: l } = useBusiness(user?.id!);
+
+    const nav = useNavigation();
     const { business: buss } = useAppSelector((state) => state.business);
     const { pickImage } = useBusinessImage();
     const dispatch = useAppDispatch();
+    const googleRef = useRef<GooglePlacesAutocompleteRef>(null);
     const [loading, setLoading] = useState(false);
     const theme = useAppSelector((state) => state.theme);
     const [coors, setCoors] = useState<Coors>({ lat: 0, lng: 0 });
     const [phone, setPhone] = useState('');
+    const [eta, setEta] = useState('');
 
     const [minimunDeliveryAmount, setMinimunDeliveryAmount] = useState('');
     const [address, setAddress] = useState('');
     const addressRef = useRef<GooglePlacesAutocompleteRef>(null);
 
+    const savePictureAndContinue = async () => {
+        const isValid = validateInputs();
+        // console.log(isValid, buss?.image?.startsWith('file://'), buss?.image);
+        console.log(isValid);
+        if (!isValid) return;
+        if (buss?.image && !buss?.image?.startsWith('file://')) {
+            console.log('___');
+            handleNext();
+            return;
+        }
+
+        if (!buss?.image?.startsWith('file://')) return;
+        try {
+            const image = buss.image;
+            const id = image.split('ImagePicker')[1].split('.')[0];
+            const ext = image.split('.').pop();
+            const filename = id + '.' + ext;
+            const response = await fetch(image);
+            const blob = await response.blob();
+
+            const uploadRef = ref(
+                storage,
+                `${business?.id!}-${business?.name}/${filename}`
+            );
+            const uploadTask = uploadBytesResumable(uploadRef, blob);
+            uploadTask.on(
+                'state_changed',
+                (snapshot) => {},
+                (error) => {
+                    console.log('@Error: ', error);
+                },
+                async () => {
+                    const imageUrl = await getDownloadURL(
+                        uploadTask.snapshot.ref
+                    );
+                    console.log(imageUrl);
+                    dispatch(setBusiness({ ...business!, image: imageUrl }));
+                    await handleNext();
+                }
+            );
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
     const handleNext = async () => {
         try {
             const isValid = validateInputs();
-            console.log(isValid);
+            console.log('V', isValid);
             if (!isValid) {
                 return;
             }
-            console.log(address);
+
             const businessData: Business = {
                 ...business!,
                 address: address,
                 coors,
                 phone,
+                eta: +eta,
+                image: buss?.image!,
                 minimumDelivery: +minimunDeliveryAmount
             };
             setLoading(true);
@@ -86,14 +145,9 @@ const BusinessInformation = ({ navigation }: Props) => {
     const validateInputs = (): boolean => {
         if (!buss?.image!) {
             Alert.alert(
-                'Please provide an image for your business, soemthing nice because will be since as the face of your business'
+                'Please provide an image for your business, something nice because it will be seen as the face of your business'
             );
-            return false;
-        }
-        if (business?.zips.length === 0) {
-            Alert.alert(
-                'Please provide zip codes where you are going to deliver'
-            );
+            pickImage();
             return false;
         }
         if (address.length < 10) {
@@ -101,16 +155,58 @@ const BusinessInformation = ({ navigation }: Props) => {
             addressRef.current?.focus();
             return false;
         }
-        if (!address.length && phone.length !== 14) {
+        if (phone.length !== 14) {
             Alert.alert('Phone Number Provided', 'Please type a phone number');
+            return false;
+            // await getConnectedStoreUrl();
+        }
+        if (business?.zips.length === 0) {
+            Alert.alert(
+                'Please provide zip codes where you are going to deliver'
+            );
+            return false;
+        }
+
+        if (!minimunDeliveryAmount) {
+            Alert.alert('Provide a minimum delivery amount');
+            return false;
+            // await getConnectedStoreUrl();
+        }
+        if (!eta) {
+            Alert.alert('Provide an eatimared delivery arrival');
             return false;
             // await getConnectedStoreUrl();
         }
 
         return true;
     };
+    useEffect(() => {
+        if (!business) return;
+        const sub = nav.addListener('focus', () => {
+            console.log('FOCUS', business);
 
-    if (loading) return <Loader />;
+            if (business.address) {
+                googleRef.current?.setAddressText(business.address);
+                setAddress(business.address);
+            }
+            if (business.phone) {
+                setPhone(business.phone);
+            }
+            if (business.minimumDelivery && !minimunDeliveryAmount) {
+                setMinimunDeliveryAmount(business.minimumDelivery.toString());
+            }
+            if (business.eta && !eta) {
+                setEta(business.eta.toString());
+            }
+            if (business.image) {
+                setBusiness({ ...business, image: business.image });
+            }
+        });
+
+        return sub;
+    }, [nav, business]);
+
+    if (loading || l) return <Loader />;
     return (
         <Screen>
             <FlatList
@@ -121,7 +217,7 @@ const BusinessInformation = ({ navigation }: Props) => {
                 ListHeaderComponent={
                     <View
                         style={{
-                            maxWidth: 600,
+                            maxWidth: 640,
                             alignSelf: 'center',
                             marginTop: 20
                         }}
@@ -157,11 +253,21 @@ const BusinessInformation = ({ navigation }: Props) => {
                                             borderRadius: SIZES.radius
                                         }}
                                     />
-                                    <View
+                                    <LinearGradient
+                                        colors={[
+                                            'rgba(0,0,0,0.2)',
+                                            'rgba(0,0,0,0.6)',
+                                            'rgba(0,0,0,0.8)'
+                                        ]}
                                         style={{
                                             position: 'absolute',
-                                            left: 10,
-                                            bottom: 10
+                                            left: 0,
+                                            bottom: 0,
+                                            right: 0,
+                                            overflow: 'hidden',
+                                            borderRadius: 10,
+                                            width: '100%',
+                                            padding: 10
                                         }}
                                     >
                                         <Text lobster lightText large>
@@ -172,15 +278,19 @@ const BusinessInformation = ({ navigation }: Props) => {
                                                 {address.slice(0, -15)}
                                             </Text>
                                         )}
+                                        {phone && (
+                                            <Text lightText>{phone}</Text>
+                                        )}
                                         {minimunDeliveryAmount && (
                                             <Text lightText>
                                                 minimum delivery $ $
                                                 {minimunDeliveryAmount}
                                             </Text>
                                         )}
-                                    </View>
+                                    </LinearGradient>
                                 </TouchableOpacity>
                                 <GoogleAutoComplete
+                                    ref={googleRef}
                                     label="Business' Address"
                                     placeholder="Start typing the address"
                                     onPress={(
@@ -213,7 +323,7 @@ const BusinessInformation = ({ navigation }: Props) => {
                                         )
                                     }
                                 />
-                                <View style={{ marginTop: 6 }}>
+                                <View style={{ marginVertical: SIZES.base }}>
                                     <ZipCodes
                                         zips={
                                             business?.zips &&
@@ -248,6 +358,28 @@ const BusinessInformation = ({ navigation }: Props) => {
                                         />
                                     </Row>
                                 </View>
+                                <View style={{ width: '100%' }}>
+                                    <Row
+                                        horizontalAlign="space-between"
+                                        containerStyle={{ width: '100%' }}
+                                    >
+                                        <Text bold px_4>
+                                            Estimated Delivery Arrival (ETA):
+                                        </Text>
+                                        <InputField
+                                            mainStyle={{ width: '30%' }}
+                                            placeholder="Ex . 10"
+                                            label="Minutes"
+                                            contentStyle={{
+                                                textAlign: 'center'
+                                            }}
+                                            keyboardType="number-pad"
+                                            maxLenght={2}
+                                            onChangeText={setEta}
+                                            value={eta}
+                                        />
+                                    </Row>
+                                </View>
                             </View>
                         </KeyboardScreen>
                     </View>
@@ -256,7 +388,7 @@ const BusinessInformation = ({ navigation }: Props) => {
 
             <TouchableOpacity
                 //disabled={!validateInputs()}
-                onPress={handleNext}
+                onPress={savePictureAndContinue}
                 style={{
                     position: 'absolute',
                     flexDirection: 'row',
