@@ -34,6 +34,14 @@ export interface BusinessDay {
     [key: string]: Day;
 }
 
+export interface GraphicData {
+    labels: string[];
+    datasets: [{ data: number[]; strokeWidth?: number }];
+}
+
+
+export interface GraphicDataValue  { [key: string]: number;}
+
 export interface Courier extends AppUser {
     transportation?: MapViewDirectionsMode;
     image: string | null;

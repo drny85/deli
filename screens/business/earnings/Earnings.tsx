@@ -17,6 +17,8 @@ import { businessProperty } from '../../../utils/businessProperty';
 import { useBusinessOrders } from '../../../hooks/useBusinessOrders';
 import moment from 'moment';
 import { Order } from '../../../redux/consumer/ordersSlide';
+import { GraphicDataValue } from '../../../types';
+import { useGraphicData } from '../../../hooks/useGraphicData';
 const line = {
     labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
     datasets: [
@@ -38,11 +40,6 @@ const barData = {
 
 type Props = {};
 
-interface Data {
-    labels: string[];
-    datasets: [{ data: number[]; strokeWidth?: number }];
-}
-
 const Earnings = (props: Props) => {
     const theme = useAppSelector((state) => state.theme);
     const { orders, loading } = useBusinessOrders();
@@ -54,38 +51,11 @@ const Earnings = (props: Props) => {
         orders,
         property: 'picked_up_by_client'
     }) as Order[];
-    const data = [...data2, ...data1];
+    const week1 = [...data2, ...data1];
+    console.log('W', week1);
+    const { data } = useGraphicData({ orders: week1, range: 'week' });
 
-    const ld: Data = {
-        labels: [
-            ...new Set([
-                ...data.map((d) => {
-                    return moment(d.orderDate).format('MMMM');
-                })
-            ])
-        ],
-
-        datasets: [{ data: [90] }]
-    };
-    const thisWeekData: Data = {
-        labels: [
-            ...new Set([
-                ...data.map((d) => {
-                    return moment(d.orderDate).format('dddd');
-                })
-            ])
-        ],
-        datasets: [{ data: [98, 325, 500, 200] }]
-    };
-    console.log(thisWeekData);
-
-    // const lineData = data.map((d) => {
-    //     return {
-    //         labels: [...new Set([moment(d.orderDate).format('MMM')])],
-    //         datasets: [{ data: [96] }]
-    //     };
-    // });
-    // console.log(lineData);
+    //console.log(thisWeekData);
 
     return (
         <Screen>
@@ -120,7 +90,7 @@ const Earnings = (props: Props) => {
                         borderRadius: SIZES.radius,
                         alignSelf: 'center'
                     }}
-                    data={thisWeekData}
+                    data={line}
                     width={SIZES.width * 0.9}
                     height={SIZES.height * 0.2}
                     yAxisLabel={'$'}
