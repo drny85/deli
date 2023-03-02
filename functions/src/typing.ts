@@ -154,6 +154,11 @@ export interface Courier extends AppUser {
     isActive: boolean;
 }
 
+export enum NOTIFICATION_TYPE {
+    new_order = 'new order',
+    ready_for_delivery = 'ready_for_delivery'
+}
+
 export type MapViewDirectionsMode =
     | 'DRIVING'
     | 'BICYCLING'

@@ -53,9 +53,6 @@ export const DAYS = [
 ];
 
 export enum NOTIFICATION_TYPE {
-    new_message = 'new message',
-    closed = 'closed',
-    new_referral = 'new_referral',
-    reminder = 'reminder',
+    new_order = 'new order',
     ready_for_delivery = 'ready_for_delivery'
 }

@@ -22,17 +22,16 @@ import Row from '../../../components/Row';
 import { SIZES } from '../../../constants';
 import ProductCard from '../../../components/ProductCard';
 import { AnimatePresence, MotiView } from 'moti';
-import Slider from '@react-native-community/slider';
+
 import CategoryTile from '../../../components/CategoryTile';
 
 import Button from '../../../components/Button';
 import { useSaveImage } from '../../../utils/saveImage';
 import {
     addProduct,
-    deleteProduct,
     updateProduct
 } from '../../../redux/business/productsActions';
-import { PRODUCT_SIZES, P_Size } from '../../../utils/sizes';
+import { P_Size } from '../../../utils/sizes';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import Loader from '../../../components/Loader';
 import { FontAwesome } from '@expo/vector-icons';
@@ -288,7 +287,7 @@ const AddProduct = ({ route: { params } }: Props) => {
                             />
                         }
                         keyboardType="numeric"
-                        value={product.price.toString()}
+                        value={product.price as string}
                         maxLenght={5}
                         placeholder="Ex. 2.99"
                         label="Product's Price"

@@ -486,9 +486,15 @@ const OrderDetails = ({
                 ref={bottomSheetRef}
                 index={0}
                 snapPoints={snapPoints}
-                handleIndicatorStyle={{ backgroundColor: theme.TEXT_COLOR }}
+                handleIndicatorStyle={{ backgroundColor: theme.WHITE_COLOR }}
+                handleStyle={{
+                    backgroundColor: theme.ASCENT,
+                    borderTopEndRadius: SIZES.radius * 2,
+                    borderTopLeftRadius: SIZES.radius * 2,
+                    height: 30
+                }}
                 backgroundStyle={{
-                    backgroundColor: theme.ASCENT
+                    backgroundColor: theme.CARD_BACKGROUND
                 }}
             >
                 {order.status === ORDER_STATUS.picked_up_by_driver && (

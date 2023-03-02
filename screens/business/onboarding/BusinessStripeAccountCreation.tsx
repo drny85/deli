@@ -63,7 +63,7 @@ const BusinessStripeAccountCreation = ({
         try {
             if (url.includes('/return_url')) {
                 const { accountId } = getParams(url);
-
+                console.log('ACC => ', accountId);
                 const func = checkForConnectedAccount(
                     'addConnectedAccountToBusiness'
                 );

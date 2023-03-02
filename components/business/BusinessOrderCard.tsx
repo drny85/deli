@@ -34,7 +34,7 @@ const BusinessOrderCard = ({ order, onPress, orders }: Props) => {
                     backgroundColor:
                         order.status === ORDER_STATUS.cancelled
                             ? theme.DANGER
-                            : theme.BACKGROUND_COLOR,
+                            : theme.CARD_BACKGROUND,
                     width: SIZES.isSmallDevice
                         ? '98%'
                         : orders.length === 1

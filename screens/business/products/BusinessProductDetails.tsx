@@ -254,6 +254,8 @@ const BusinessProductDetails = ({
                                                     {size.size}
                                                 </Text>
                                                 <RadioButton
+                                                    // status={size}
+
                                                     selected={selected === size}
                                                     onPress={() => {
                                                         setSelected(size);

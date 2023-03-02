@@ -16,7 +16,8 @@ import { FontAwesome } from '@expo/vector-icons';
 import { Business } from '../redux/business/businessSlide';
 import { LinearGradient } from 'expo-linear-gradient';
 import { updateUser } from '../redux/auth/authActions';
-import { AppUser, setUserData } from '../redux/auth/authSlide';
+import { setUserData } from '../redux/auth/authSlide';
+import Communications from 'react-native-communications';
 
 type Props = {
     business: Business;
@@ -27,6 +28,14 @@ const BusinessHeader = ({ business }: Props) => {
     const { user } = useAppSelector((state) => state.auth);
     const dispatch = useAppDispatch();
     const navigation = useNavigation();
+    const callRestaurant = async (phone: string) => {
+        try {
+            Communications.phonecall(phone.replace(/-/g, ''), true);
+        } catch (error) {
+            const err = error as any;
+            console.log(err.message);
+        }
+    };
 
     const theme = useAppSelector((state) => state.theme);
     const toggleFavorite = useCallback(async () => {
@@ -217,12 +226,23 @@ const BusinessHeader = ({ business }: Props) => {
                     'rgba(0,0,0,0.6)'
                 ]}
             >
-                <Text lobster lightText medium>
-                    {business.name}
-                </Text>
+                <Row horizontalAlign="space-between">
+                    <Text lobster lightText medium>
+                        {business.name}
+                    </Text>
+                    <TouchableOpacity
+                        onPress={() => callRestaurant(business.phone!)}
+                    >
+                        <Text bold lightText>
+                            {business.phone}
+                        </Text>
+                    </TouchableOpacity>
+                </Row>
+
                 <Text bold lightText>
                     {business.address?.split(',')[0]}
                 </Text>
+
                 <Row horizontalAlign="space-between">
                     <Text lightText raleway_italic>
                         {business.minimumDelivery &&

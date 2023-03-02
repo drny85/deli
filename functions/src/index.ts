@@ -17,6 +17,7 @@ import {
     Business,
     CartItem,
     Courier,
+    NOTIFICATION_TYPE,
     Order,
     ORDER_STATUS
 } from './typing';
@@ -108,7 +109,11 @@ exports.createConnectedBusinessAccount = functions.https.onCall(
                 country: 'US',
                 email: email,
                 business_type: 'individual',
-                metadata: { businessId: context.auth.uid },
+                metadata: {
+                    businessId: context.auth.uid,
+                    owner: data.name + ' ' + data.lastName,
+                    phone: data.phone
+                },
                 capabilities: {
                     card_payments: { requested: true },
                     transfers: { requested: true }
@@ -674,6 +679,35 @@ exports.generateOrderNumber = functions.firestore
     .onCreate(async (snap, contex) => {
         try {
             const data = snap.data() as Order;
+
+            const businessId = data.businessId;
+            const user = await admin
+                .firestore()
+                .collection('users')
+                .doc(businessId)
+                .get();
+            if (user.exists) {
+                const userData = user.data() as AppUser;
+                if (userData.pushToken) {
+                    fetch('https://exp.host/--/api/v2/push/send', {
+                        method: 'POST',
+                        headers: {
+                            host: 'exp.host',
+                            accept: 'application/json',
+                            'accept-encoding': 'gzip, deflate',
+                            'content-type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            to: userData.pushToken,
+                            title: 'New Order',
+                            body: `You just got a new order $${data.total}`,
+                            data: {
+                                notificationType: NOTIFICATION_TYPE.new_order
+                            }
+                        })
+                    });
+                }
+            }
 
             const restaurantOrdersTotal = (
                 await admin

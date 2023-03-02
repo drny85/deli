@@ -11,7 +11,7 @@ import Row from './Row';
 type Props = {
     selected: boolean;
     onPress: () => void;
-    status: ORDER_STATUS;
+    status?: ORDER_STATUS;
 };
 
 const HEIGHT = 24;
@@ -58,7 +58,7 @@ const RadioButton = ({ selected, onPress, status }: Props) => {
                     />
                 </MotiView>
                 <Text bold={selected} px_4>
-                    {STATUS_NAME(status)}
+                    {STATUS_NAME(status!)}
                 </Text>
             </Row>
         </TouchableOpacity>

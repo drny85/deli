@@ -59,11 +59,14 @@ const config: ExpoConfig = {
         [
             '@stripe/stripe-react-native',
             {
-                merchantIdentifier: [
-                   
-                    'merchant.net.robertdev.deli.app'
-                ],
+                merchantIdentifier: ['merchant.net.robertdev.deli.app'],
                 enableGooglePay: true
+            }
+        ],
+        [
+            'expo-screen-orientation',
+            {
+                initialOrientation: 'PORTRAIT'
             }
         ]
     ],

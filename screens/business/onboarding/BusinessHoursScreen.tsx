@@ -20,6 +20,7 @@ import { BusinessOnBoardingStackScreens } from '../../../navigation/business/typ
 import OnBoardingStripeLottiView from '../../../components/lottie/OnBoardingStripeLottiView';
 import Divider from '../../../components/Divider';
 import Header from '../../../components/Header';
+import { useBusiness } from '../../../hooks/useBusiness';
 
 type Props = NativeStackScreenProps<
     BusinessOnBoardingStackScreens,
@@ -27,7 +28,8 @@ type Props = NativeStackScreenProps<
 >;
 
 const BusinessHoursScreen = ({ navigation }: Props) => {
-    const { business } = useAppSelector((state) => state.business);
+    const { user } = useAppSelector((state) => state.auth);
+    const { business } = useBusiness(user?.id!);
     const [showReview, setShowReview] = React.useState(false);
     const [loading, setLoading] = React.useState(false);
     const dispatch = useAppDispatch();
@@ -57,6 +59,7 @@ const BusinessHoursScreen = ({ navigation }: Props) => {
     };
 
     const handleUpdateBusinessDay = React.useCallback(async () => {
+        //console.log(business);
         const businessData: Business = {
             ...business!,
             hours: businessHours

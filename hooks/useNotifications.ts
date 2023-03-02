@@ -49,6 +49,7 @@ const useNotifications = () => {
 
                     const result = data as any;
                     const { id, notificationType } = result as NotiType;
+                    console.log('Notification type', notificationType);
 
                     //ACTIONS WHEN USER RECEIVES NOTIFICATION
                 }
@@ -109,6 +110,7 @@ const useNotifications = () => {
                         experienceId: 'deli'
                     })
                 ).data;
+                console.log('TOKEN', token);
 
                 if (user?.pushToken) return;
 

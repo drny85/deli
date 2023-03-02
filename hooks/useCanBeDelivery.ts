@@ -6,7 +6,10 @@ export const useCanBeDelivery = () => {
     const { deliveryZip } = useAppSelector((state) => state.orders);
     const { business } = useAppSelector((state) => state.business);
     useEffect(() => {
-        if (!business || !deliveryZip) return;
+        if (!business || !deliveryZip || !business.isOpen) {
+            setCanBe(false);
+            return;
+        }
         if (business.zips) {
             if (business.zips.includes(deliveryZip)) {
                 setCanBe(true);

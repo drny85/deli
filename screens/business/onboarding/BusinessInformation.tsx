@@ -121,18 +121,18 @@ const BusinessInformation = ({ navigation }: Props) => {
                 ...business!,
                 address: address,
                 coors,
-                phone,
+                phone: phone,
                 eta: +eta,
                 image: buss?.image!,
                 minimumDelivery: +minimunDeliveryAmount
             };
             setLoading(true);
+            console.log(businessData.phone);
 
             const { payload } = await dispatch(updateBusiness(businessData));
             if (!payload) return;
-            setAddress('');
-
-            setMinimunDeliveryAmount('');
+            //setAddress('');
+            // setMinimunDeliveryAmount('');
 
             navigation.navigate('BusinessHoursScreen');
         } catch (error) {
@@ -156,6 +156,7 @@ const BusinessInformation = ({ navigation }: Props) => {
             return false;
         }
         if (phone.length !== 14) {
+            console.log(phone.length);
             Alert.alert('Phone Number Provided', 'Please type a phone number');
             return false;
             // await getConnectedStoreUrl();
@@ -180,30 +181,29 @@ const BusinessInformation = ({ navigation }: Props) => {
 
         return true;
     };
+
     useEffect(() => {
+        // const sub = nav.addListener('focus', () => {
+
         if (!business) return;
-        const sub = nav.addListener('focus', () => {
-            console.log('FOCUS', business);
+        if (business.address) {
+            googleRef.current?.setAddressText(business.address);
+            setAddress(business.address);
+        }
+        if (business.phone) {
+            setPhone(business.phone);
+        }
+        if (business.minimumDelivery && !minimunDeliveryAmount) {
+            setMinimunDeliveryAmount(business.minimumDelivery.toString());
+        }
+        if (business.eta && !eta) {
+            setEta(business.eta.toString());
+        }
+        if (business.image) {
+            setBusiness({ ...business, image: business.image });
+        }
 
-            if (business.address) {
-                googleRef.current?.setAddressText(business.address);
-                setAddress(business.address);
-            }
-            if (business.phone) {
-                setPhone(business.phone);
-            }
-            if (business.minimumDelivery && !minimunDeliveryAmount) {
-                setMinimunDeliveryAmount(business.minimumDelivery.toString());
-            }
-            if (business.eta && !eta) {
-                setEta(business.eta.toString());
-            }
-            if (business.image) {
-                setBusiness({ ...business, image: business.image });
-            }
-        });
-
-        return sub;
+        // return sub;
     }, [nav, business]);
 
     if (loading || l) return <Loader />;

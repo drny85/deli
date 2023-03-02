@@ -49,8 +49,7 @@ const Checkout = ({ navigation }: CheckOutProps) => {
     const { initPaymentSheet, presentPaymentSheet } = useStripe();
     const { total, items, quantity } = useAppSelector((state) => state.cart);
     const dispatch = useAppDispatch();
-    const [canDelivery, setCanDelivery] = useState(true);
-
+    const canBeDelivery = useCanBeDelivery();
     //const navigation = useNavigation();
     const {
         order,
@@ -61,7 +60,6 @@ const Checkout = ({ navigation }: CheckOutProps) => {
         tip: { amount, percentage }
     } = useAppSelector((state) => state.orders);
     const { business } = useAppSelector((state) => state.business);
-    const canBeDelivery = useCanBeDelivery();
 
     const [pOrder, setPendingOrder] = useState<Order>();
 
@@ -338,7 +336,7 @@ const Checkout = ({ navigation }: CheckOutProps) => {
         <Screen>
             <StripeProvider
                 publishableKey={process.env.STRIPE_TEST_PK!}
-                merchantIdentifier="net.robertdev.deli.app"
+                merchantIdentifier="merchant.net.robertdev.deli.app"
                 threeDSecureParams={{
                     backgroundColor: theme.BACKGROUND_COLOR,
                     timeout: 8
