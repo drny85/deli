@@ -7,8 +7,10 @@ import { useNavigation } from '@react-navigation/native';
 import GoogleAutoComplete from '../../../components/GoogleAutoCompleteField';
 import {
     Order,
+    ORDER_TYPE,
     saveDeliveryAddress,
-    setDeliveryZip
+    setDeliveryZip,
+    switchOrderType
 } from '../../../redux/consumer/ordersSlide';
 import {
     GooglePlaceData,
@@ -24,6 +26,7 @@ import Stack from '../../../components/Stack';
 
 const DeliveryAddressSelection = () => {
     const { user } = useAppSelector((state) => state.auth);
+    const { orderType } = useAppSelector((state) => state.orders);
     const theme = useAppSelector((state) => state.theme);
     const navigation = useNavigation();
     const [address, setAddress] = useState<Order['address']>();
@@ -156,6 +159,30 @@ const DeliveryAddressSelection = () => {
                             ))}
                     </ScrollView>
                 </Stack>
+                <View
+                    style={{
+                        position: 'absolute',
+                        bottom: 30,
+                        alignSelf: 'center'
+                    }}
+                >
+                    <Button
+                        title={
+                            orderType === ORDER_TYPE.delivery
+                                ? 'Switch To Pick up'
+                                : 'Switch to Delivery'
+                        }
+                        onPress={() => {
+                            if (orderType === ORDER_TYPE.delivery) {
+                                dispatch(switchOrderType(ORDER_TYPE.pickup));
+                                dispatch(setDeliveryZip(null));
+                            } else {
+                                dispatch(switchOrderType(ORDER_TYPE.delivery));
+                            }
+                            navigation.goBack();
+                        }}
+                    />
+                </View>
             </View>
         </Screen>
     );

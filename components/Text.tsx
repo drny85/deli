@@ -63,16 +63,44 @@ const Text = styled(Animatable.Text)<TextProp>`
     ${({ small, medium, large, xlarge }: any) => {
         switch (true) {
             case small:
-                return `font-size: ${SIZES.isSmallDevice ? '10px' : '14px'}`;
+                return `font-size: ${
+                    SIZES.isVerySmall
+                        ? '8px'
+                        : SIZES.isSmallDevice
+                        ? '10px'
+                        : '12px'
+                }`;
             case large:
-                return `font-size: 24px`;
+                return `font-size: ${
+                    SIZES.isVerySmall
+                        ? '18px'
+                        : SIZES.isSmallDevice
+                        ? '22px'
+                        : '24px'
+                }`;
             case medium:
-                return `font-size: 18px`;
+                return `${
+                    SIZES.isVerySmall
+                        ? '14px'
+                        : SIZES.isSmallDevice
+                        ? '18px'
+                        : SIZES.width > 600
+                        ? '20px'
+                        : '20px'
+                }`;
             case xlarge:
                 return `font-size: 40px`;
 
             default:
-                return `font-size: ${SIZES.isSmallDevice ? '14px' : '16px'}`;
+                return `font-size: ${
+                    SIZES.isVerySmall
+                        ? '12px'
+                        : SIZES.isSmallDevice
+                        ? '14px'
+                        : SIZES.width > 600
+                        ? '16px'
+                        : '16px'
+                }`;
         }
     }};
     ${({ title, caption }: any) => {

@@ -10,7 +10,7 @@ import Loader from '../../../components/Loader';
 import { useOrder } from '../../../hooks/useOrder';
 import Row from '../../../components/Row';
 import { useAppDispatch, useAppSelector } from '../../../redux/store';
-import { SIZES } from '../../../constants';
+import { MY_TRANSACTION_FEE, SIZES } from '../../../constants';
 import ProductListItem from '../../../components/ProductListItem';
 import Button from '../../../components/Button';
 import Divider from '../../../components/Divider';
@@ -188,7 +188,7 @@ const BusinessOrderDetails = ({
                         <TouchableOpacity
                             onPress={() => makeCall(order.contactPerson.phone)}
                         >
-                            <Text textColor={theme.ASCENT} bold>
+                            <Text textColor={theme.TEXT_COLOR} py_2 bold>
                                 Phone: {order?.contactPerson.phone}
                             </Text>
                         </TouchableOpacity>
@@ -337,11 +337,26 @@ const BusinessOrderDetails = ({
                     containerStyle={{ width: '100%' }}
                     horizontalAlign="space-between"
                 >
+                    <Text py_4 capitalize caption small>
+                        Transaction Fee
+                    </Text>
+                    <Text capitalize>
+                        ${((order.total * MY_TRANSACTION_FEE) / 100).toFixed(2)}
+                    </Text>
+                </Row>
+                <Row
+                    containerStyle={{ width: '100%' }}
+                    horizontalAlign="space-between"
+                >
                     <Text py_4 bold large capitalize>
                         Total
                     </Text>
                     <Text bold large capitalize>
-                        ${order.total.toFixed(2)}
+                        $
+                        {(
+                            order.total -
+                            (order.total * MY_TRANSACTION_FEE) / 100
+                        ).toFixed(2)}
                     </Text>
                 </Row>
             </Stack>

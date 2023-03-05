@@ -33,7 +33,6 @@ const App = () => {
         }
     }, [isLoadingComplete, loading, businessLoading]);
 
-    console.log('PROS', processing);
     if (processing) return <Loader />;
     return (
         <ThemeProvider theme={theme}>

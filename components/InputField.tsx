@@ -137,9 +137,15 @@ const InputField: FC<Props> = React.forwardRef(
                             {
                                 flex: 1,
                                 paddingHorizontal: SIZES.base,
-                                fontSize: 14,
+                                fontSize: SIZES.font,
                                 fontFamily: 'montserrat',
-                                paddingVertical: p_y ? p_y : 14,
+                                paddingVertical: p_y
+                                    ? p_y
+                                    : SIZES.isVerySmall
+                                    ? 8
+                                    : SIZES.isSmallDevice
+                                    ? 12
+                                    : 14,
                                 color:
                                     theme.mode === 'dark'
                                         ? '#ffffff'

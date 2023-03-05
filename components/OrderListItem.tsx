@@ -5,7 +5,8 @@ import Text from './Text';
 import {
     Order,
     ORDER_STATUS,
-    saveDeliveryAddress
+    saveDeliveryAddress,
+    switchOrderType
 } from '../redux/consumer/ordersSlide';
 import { IMAGE_PLACEHOLDER, SIZES } from '../constants';
 import { useAppDispatch, useAppSelector } from '../redux/store';
@@ -67,6 +68,7 @@ const OrderListItem = ({ order, onPress }: Props) => {
             await resetCart();
             dispatch(saveDeliveryAddress({ ...order.address! }));
             dispatch(setCart({ items: items, quantity: qty, total: total }));
+            dispatch(switchOrderType(order.orderType));
             navigation.navigate('ConsumerCart', { screen: 'OrderReview' });
         } catch (error) {
             console.log(error);
@@ -98,45 +100,70 @@ const OrderListItem = ({ order, onPress }: Props) => {
                             ? business.image
                             : IMAGE_PLACEHOLDER
                     }}
-                    style={{ height: '100%', width: '20%' }}
+                    style={{
+                        height: '100%',
+                        width: '20%',
+                        borderRadius: SIZES.radius
+                    }}
                 />
                 <Row
                     containerStyle={{
                         flexGrow: 1,
+
                         paddingHorizontal: SIZES.base
                     }}
-                    horizontalAlign="space-between"
+                    horizontalAlign="space-evenly"
                 >
-                    <View>
+                    <View
+                        style={{
+                            width: '50%'
+                        }}
+                    >
                         <Text py_4 bold numberOfLines={1} ellipsizeMode="tail">
                             {business?.name}
                         </Text>
+                        <Text>Order #{order.orderNumber}</Text>
                         <Text>
                             Items {qty} - $
-                            {(order.total + stripeFee(order.total)).toFixed(2)}
+                            {(
+                                order.total +
+                                stripeFee(order.total, order.orderType)
+                            ).toFixed(2)}
                         </Text>
-                        <Text capitalize>
+                        <Text numberOfLines={1} ellipsizeMode="tail" capitalize>
                             {moment(order.orderDate).format('MMM DD')} - {''}
                             {STATUS_NAME(order.status)}
                         </Text>
                     </View>
-                    <View>
+                    <View style={{ flexGrow: 1 }}>
                         <Button
                             small
                             outlined
+                            containerStyle={{
+                                width: '60%',
+                                maxWidth: 120
+                            }}
                             title={
-                                order.status === ORDER_STATUS.delivered
+                                order.status === ORDER_STATUS.delivered ||
+                                order.status ===
+                                    ORDER_STATUS.picked_up_by_client
                                     ? 'Re-Order'
                                     : 'View'
                             }
                             onPress={() => {
-                                if (order.status !== ORDER_STATUS.delivered) {
+                                if (
+                                    order.status !== ORDER_STATUS.delivered &&
+                                    order.status !==
+                                        ORDER_STATUS.picked_up_by_client
+                                ) {
                                     navigation.navigate('ConsumerOrders', {
                                         screen: 'OrderDetails',
                                         params: { orderId: order.id! }
                                     });
                                 } else if (
-                                    order.status === ORDER_STATUS.delivered
+                                    order.status === ORDER_STATUS.delivered ||
+                                    order.status ===
+                                        ORDER_STATUS.picked_up_by_client
                                 ) {
                                     reOrder(order);
                                 }

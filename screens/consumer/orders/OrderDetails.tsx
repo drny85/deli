@@ -630,7 +630,11 @@ const OrderDetails = ({
                                     Service Fee
                                 </Text>
                                 <Text capitalize>
-                                    ${stripeFee(order.total).toFixed(2)}
+                                    $
+                                    {stripeFee(
+                                        order.total,
+                                        order.orderType
+                                    ).toFixed(2)}
                                 </Text>
                             </Row>
                             <Row

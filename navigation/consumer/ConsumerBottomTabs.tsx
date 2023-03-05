@@ -90,8 +90,7 @@ const ConsumerBottomTabs = () => {
                         display: tabBarVisibility(route),
                         backgroundColor: theme.BACKGROUND_COLOR,
                         borderTopWidth: 0,
-                        elevation: 0,
-                        height: tabBarVisibility(route) === 'flex' ? 79 : 0
+                        elevation: 0
                     },
                     tabBarBadge: quantity > 0 ? quantity : undefined,
                     tabBarBadgeStyle:

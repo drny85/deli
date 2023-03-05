@@ -18,13 +18,16 @@ import Button from '../../../components/Button';
 import PaymentLoading from '../../../components/lottie/PaymentLoading';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { ConsumerCartStackScreens } from '../../../navigation/consumer/typing';
+import { useGooglePay } from '@stripe/stripe-react-native';
 import {
     Order,
     ORDER_TYPE,
     setPaymentSuccess,
     setOrder,
     setTipAmount,
-    setGrandTotal
+    setGrandTotal,
+    setDeliveryZip,
+    switchOrderType
 } from '../../../redux/consumer/ordersSlide';
 import {
     placeOrder,
@@ -34,6 +37,8 @@ import { fetchPaymentParams } from '../../../firebase';
 
 import InputField from '../../../components/InputField';
 import { useCanBeDelivery } from '../../../hooks/useCanBeDelivery';
+import CustomTip from '../../../components/CustomTip';
+import KeyboardScreen from '../../../components/KeyboardScreen';
 
 export type CheckOutProps = NativeStackScreenProps<
     ConsumerCartStackScreens,
@@ -41,15 +46,20 @@ export type CheckOutProps = NativeStackScreenProps<
 >;
 const Checkout = ({ navigation }: CheckOutProps) => {
     const theme = useAppSelector((state) => state.theme);
+    const { isGooglePaySupported } = useGooglePay();
+
     const [loading, setLoading] = useState(false);
     const [paymentId, setPaymentId] = useState('');
     const { user } = useAppSelector((state) => state.auth);
     const [showCustomTip, setShowCustomTip] = useState(false);
+    const [deliveryInstructions, setDeliveryInstructions] = React.useState('');
+    const [showInstructions, setShowInstuctions] = React.useState(false);
     const [customTip, setCustomTip] = useState('');
     const { initPaymentSheet, presentPaymentSheet } = useStripe();
     const { total, items, quantity } = useAppSelector((state) => state.cart);
     const dispatch = useAppDispatch();
     const canBeDelivery = useCanBeDelivery();
+
     //const navigation = useNavigation();
     const {
         order,
@@ -120,7 +130,7 @@ const Checkout = ({ navigation }: CheckOutProps) => {
                 setPendingOrder({ ...pendingOrder });
                 const tAmount = +(
                     total +
-                    stripeFee(total) +
+                    stripeFee(total, orderType) +
                     (customTip ? +parseInt(customTip).toFixed(2) : amount)
                 ).toFixed(2);
 
@@ -229,7 +239,6 @@ const Checkout = ({ navigation }: CheckOutProps) => {
             const { error } = await initPaymentSheet({
                 customerEphemeralKeySecret: ephemeralKey,
                 paymentIntentClientSecret: paymentIntent,
-
                 customerId: customer,
                 appearance: {
                     primaryButton: {
@@ -253,12 +262,14 @@ const Checkout = ({ navigation }: CheckOutProps) => {
                         }
                     }
                 },
+                allowsDelayedPaymentMethods: true,
                 merchantDisplayName: business?.name!,
                 applePay: {
                     merchantCountryCode: 'US'
                 },
                 googlePay: {
                     merchantCountryCode: 'US',
+                    currencyCode: 'usd',
                     testEnv: true
                 },
                 defaultBillingDetails: {
@@ -293,6 +304,13 @@ const Checkout = ({ navigation }: CheckOutProps) => {
                     percentage: percentage > 0 ? percentage : 20
                 })
             );
+            if (deliveryAdd && !canBeDelivery) {
+                dispatch(
+                    setDeliveryZip(
+                        +deliveryAdd.street.split(', ')[2].split(' ')[1]
+                    )
+                );
+            }
         } else {
             dispatch(
                 setTipAmount({
@@ -309,7 +327,7 @@ const Checkout = ({ navigation }: CheckOutProps) => {
                 +(
                     total +
                     (total * percentage) / 100 +
-                    stripeFee(total)
+                    stripeFee(total, orderType)
                 ).toFixed(2)
             )
         );
@@ -334,318 +352,309 @@ const Checkout = ({ navigation }: CheckOutProps) => {
     if (loading || loadingOrder) return <PaymentLoading />;
     return (
         <Screen>
-            <StripeProvider
-                publishableKey={process.env.STRIPE_TEST_PK!}
-                merchantIdentifier="merchant.net.robertdev.deli.app"
-                threeDSecureParams={{
-                    backgroundColor: theme.BACKGROUND_COLOR,
-                    timeout: 8
-                }}
-            >
-                <Header
-                    title="Checkout"
-                    onPressBack={() => navigation.goBack()}
-                />
-                <Container
-                    style={{
-                        justifyContent: 'space-between',
-                        flexGrow: 1
+            <KeyboardScreen>
+                <StripeProvider
+                    publishableKey={process.env.STRIPE_TEST_PK!}
+                    merchantIdentifier="merchant.net.robertdev.deli.app"
+                    threeDSecureParams={{
+                        backgroundColor: theme.BACKGROUND_COLOR,
+                        timeout: 8
                     }}
                 >
-                    <ScrollView
-                        showsVerticalScrollIndicator={false}
-                        contentContainerStyle={{ maxHeight: '50%' }}
-                    >
-                        <View>
-                            <Section>
-                                <Row horizontalAlign="space-between">
-                                    <Stack>
-                                        <Text bold>Your information</Text>
-                                        <Text>
-                                            {order?.contactPerson.name}{' '}
-                                            {order?.contactPerson.lastName}
-                                        </Text>
-                                        <Text>
-                                            {order?.contactPerson.phone}
-                                        </Text>
-                                    </Stack>
-                                    <FontAwesome
-                                        name="chevron-right"
-                                        size={18}
-                                        color={theme.TEXT_COLOR}
-                                    />
-                                </Row>
-                            </Section>
-                            {orderType === ORDER_TYPE.pickup && (
-                                <Section>
-                                    <Row
-                                        containerStyle={{ width: '100%' }}
-                                        horizontalAlign="space-between"
-                                    >
-                                        <Stack>
-                                            <Text bold>
-                                                Pick up at {business?.name}
-                                            </Text>
-                                            <Text py_4>
-                                                {business?.address?.slice(
-                                                    0,
-                                                    -10
-                                                )}
-                                            </Text>
-                                            <Text>{business?.phone}</Text>
-                                        </Stack>
-                                        <FontAwesome
-                                            name="chevron-right"
-                                            size={18}
-                                            color={theme.TEXT_COLOR}
-                                        />
-                                    </Row>
-                                </Section>
-                            )}
-                            {orderType === ORDER_TYPE.delivery && (
-                                <Section
-                                    onPress={() =>
-                                        navigation.navigate('AddressSelection')
-                                    }
-                                >
-                                    <Row
-                                        containerStyle={{ width: '100%' }}
-                                        horizontalAlign="space-between"
-                                    >
-                                        <Stack>
-                                            <Text bold>Delivery To</Text>
-                                            <Text>
-                                                {deliveryAdd?.street?.substring(
-                                                    0,
-                                                    deliveryAdd.street.length -
-                                                        5
-                                                )}
-                                            </Text>
-                                            {deliveryAdd?.apt && (
-                                                <Text>
-                                                    Apt {deliveryAdd.apt}
-                                                </Text>
-                                            )}
-                                        </Stack>
-                                        <FontAwesome
-                                            name="chevron-right"
-                                            size={18}
-                                            color={theme.TEXT_COLOR}
-                                        />
-                                    </Row>
-                                </Section>
-                            )}
-                            {order?.deliveryInstructions && (
-                                <Section onPress={() => navigation.goBack()}>
-                                    <Row
-                                        containerStyle={{ width: '100%' }}
-                                        horizontalAlign="space-between"
-                                    >
-                                        <Stack>
-                                            <Text bold>
-                                                Delivery Instructions
-                                            </Text>
-                                            <Text>
-                                                {order.deliveryInstructions}
-                                            </Text>
-                                        </Stack>
-                                        <FontAwesome
-                                            name="chevron-right"
-                                            size={18}
-                                            color={theme.TEXT_COLOR}
-                                        />
-                                    </Row>
-                                </Section>
-                            )}
-                            <View
-                                style={{
-                                    paddingHorizontal: SIZES.padding,
-                                    maxHeight: '40%'
-                                }}
-                            >
-                                <>
-                                    <Divider />
-                                    <Text raleway_bold medium center py_4>
-                                        {quantity}{' '}
-                                        {quantity > 1 ? 'items' : 'item'}
-                                    </Text>
-                                    {items.map((item, index) => (
-                                        <ProductListItem
-                                            key={index.toString()}
-                                            item={item}
-                                            index={index}
-                                        />
-                                    ))}
-                                </>
-                            </View>
-                        </View>
-                    </ScrollView>
-
-                    <Princing>
-                        {orderType === ORDER_TYPE.delivery && (
-                            <Stack
-                                containerStyle={{
-                                    width: '100%',
-                                    alignSelf: 'center'
-                                }}
-                            >
-                                <Row
-                                    containerStyle={{
-                                        width: '100%',
-                                        marginVertical: SIZES.base
-                                    }}
-                                    horizontalAlign="space-between"
-                                >
-                                    <Text pb_4>Add a tip for your driver</Text>
-                                    <Text>
-                                        {!customTip ? percentage + '% ' : ''}
-
-                                        <Text bold px_4>
-                                            $
-                                            {customTip
-                                                ? customTip
-                                                : amount.toFixed(2)}
-                                        </Text>
-                                    </Text>
-                                </Row>
-
-                                <Row containerStyle={{ width: '100%' }}>
-                                    <Row
-                                        containerStyle={{
-                                            width: '85%',
-                                            alignSelf: 'center',
-                                            overflow: 'hidden',
-                                            backgroundColor:
-                                                theme.SECONDARY_BUTTON_COLOR,
-                                            borderRadius: SIZES.radius
-                                        }}
-                                        horizontalAlign="space-around"
-                                    >
-                                        {[10, 15, 20, 25].map((p, index) => (
-                                            <TouchableOpacity
-                                                onPress={() => {
-                                                    dispatch(
-                                                        setTipAmount({
-                                                            percentage: p,
-                                                            amount:
-                                                                (total * p) /
-                                                                100
-                                                        })
-                                                    );
-                                                    dispatch(
-                                                        setGrandTotal(
-                                                            +(
-                                                                total +
-                                                                (total * p) /
-                                                                    100 +
-                                                                stripeFee(total)
-                                                            ).toFixed(2)
-                                                        )
-                                                    );
-                                                    setCustomTip('');
-                                                }}
-                                                style={{
-                                                    justifyContent: 'center',
-                                                    backgroundColor:
-                                                        percentage === p &&
-                                                        !customTip
-                                                            ? theme.ASCENT
-                                                            : theme.SECONDARY_BUTTON_COLOR,
-                                                    alignItems: 'center',
-                                                    width: '25%',
-
-                                                    paddingVertical:
-                                                        SIZES.padding * 0.5,
-
-                                                    borderLeftColor:
-                                                        theme.TEXT_COLOR,
-                                                    borderLeftWidth:
-                                                        index === 0 ? 0 : 0.5
-                                                }}
-                                                key={p}
-                                            >
-                                                <Text
-                                                    lightText={
-                                                        percentage === p &&
-                                                        !customTip
-                                                    }
-                                                    bold={
-                                                        percentage === p &&
-                                                        !customTip
-                                                    }
-                                                    center
-                                                >
-                                                    {p}%
-                                                </Text>
-                                            </TouchableOpacity>
-                                        ))}
-                                    </Row>
-                                    <TouchableOpacity
-                                        style={{ flexGrow: 1 }}
-                                        onPress={() => setShowCustomTip(true)}
-                                    >
-                                        <Text px_4>Custom</Text>
-                                    </TouchableOpacity>
-                                </Row>
-                            </Stack>
-                        )}
-
-                        <Row horizontalAlign="space-between">
-                            <Text left>Sub-Total </Text>
-                            <Text>${total.toFixed(2)}</Text>
-                        </Row>
-
-                        <Row horizontalAlign="space-between">
-                            <Text py_2>Service Fee</Text>
-                            <Text>${stripeFee(total)}</Text>
-                        </Row>
-                        {orderType === ORDER_TYPE.delivery && (
-                            <Row horizontalAlign="space-between">
-                                <Text>Tip Amount</Text>
-                                <Text>
-                                    $
-                                    {customTip &&
-                                    orderType === ORDER_TYPE.delivery
-                                        ? customTip
-                                        : amount.toFixed(2)}{' '}
-                                </Text>
-                            </Row>
-                        )}
-
-                        <Row horizontalAlign="space-between">
-                            <Text bold medium>
-                                {' '}
-                                Total
-                            </Text>
-                            <Text py_4 left bold medium>
-                                $
-                                {(
-                                    total +
-                                    (customTip &&
-                                    orderType === ORDER_TYPE.delivery
-                                        ? +parseInt(customTip).toFixed(2)
-                                        : amount) +
-                                    stripeFee(total)
-                                ).toFixed(2)}
-                            </Text>
-                        </Row>
-                    </Princing>
-                    <Footer
+                    <Header
+                        title="Checkout"
+                        onPressBack={() => navigation.goBack()}
+                    />
+                    <Container
                         style={{
-                            alignSelf: 'center',
-                            width: '60%'
+                            flex: 1
                         }}
                     >
-                        <Button
-                            disabled={loading}
-                            isLoading={loading}
-                            title="Place Order"
-                            outlined
-                            onPress={handlePlacePendingOrder}
-                        />
-                    </Footer>
-                </Container>
-            </StripeProvider>
+                        <View style={{ flex: 0.7 }}>
+                            <ScrollView showsVerticalScrollIndicator={false}>
+                                <View>
+                                    <Section>
+                                        <Row horizontalAlign="space-between">
+                                            <Stack>
+                                                <Text bold>
+                                                    Your information
+                                                </Text>
+                                                <Text>
+                                                    {order?.contactPerson.name}{' '}
+                                                    {
+                                                        order?.contactPerson
+                                                            .lastName
+                                                    }
+                                                </Text>
+                                                <Text>
+                                                    {order?.contactPerson.phone}
+                                                </Text>
+                                            </Stack>
+                                            <FontAwesome
+                                                name="chevron-right"
+                                                size={18}
+                                                color={theme.TEXT_COLOR}
+                                            />
+                                        </Row>
+                                    </Section>
+                                    {orderType === ORDER_TYPE.pickup && (
+                                        <Section>
+                                            <Row
+                                                containerStyle={{
+                                                    width: '100%'
+                                                }}
+                                                horizontalAlign="space-between"
+                                            >
+                                                <Stack>
+                                                    <Text bold>
+                                                        Pick up at{' '}
+                                                        {business?.name}
+                                                    </Text>
+                                                    <Text py_4>
+                                                        {business?.address?.slice(
+                                                            0,
+                                                            -10
+                                                        )}
+                                                    </Text>
+                                                    <Text>
+                                                        {business?.phone}
+                                                    </Text>
+                                                </Stack>
+                                                <FontAwesome
+                                                    name="chevron-right"
+                                                    size={18}
+                                                    color={theme.TEXT_COLOR}
+                                                />
+                                            </Row>
+                                        </Section>
+                                    )}
+                                    {orderType === ORDER_TYPE.delivery && (
+                                        <Section
+                                            onPress={() =>
+                                                navigation.navigate(
+                                                    'AddressSelection'
+                                                )
+                                            }
+                                        >
+                                            <Row
+                                                containerStyle={{
+                                                    width: '100%'
+                                                }}
+                                                horizontalAlign="space-between"
+                                            >
+                                                <Stack>
+                                                    <Text bold>
+                                                        Delivery To
+                                                    </Text>
+                                                    <Text>
+                                                        {deliveryAdd?.street?.substring(
+                                                            0,
+                                                            deliveryAdd.street
+                                                                .length - 5
+                                                        )}
+                                                    </Text>
+                                                    {deliveryAdd?.apt && (
+                                                        <Text>
+                                                            Apt{' '}
+                                                            {deliveryAdd.apt}
+                                                        </Text>
+                                                    )}
+                                                </Stack>
+                                                <FontAwesome
+                                                    name="chevron-right"
+                                                    size={18}
+                                                    color={theme.TEXT_COLOR}
+                                                />
+                                            </Row>
+                                        </Section>
+                                    )}
+                                    {orderType === ORDER_TYPE.delivery && (
+                                        <Section>
+                                            <Row
+                                                containerStyle={{
+                                                    width: '100%',
+                                                    padding: SIZES.padding
+                                                }}
+                                                horizontalAlign="space-between"
+                                            >
+                                                <Text bold>
+                                                    Delivery Instructions
+                                                </Text>
+
+                                                <Button
+                                                    outlined
+                                                    title={
+                                                        order?.deliveryInstructions
+                                                            ? 'Edit'
+                                                            : 'Add'
+                                                    }
+                                                    onPress={() => {
+                                                        setShowInstuctions(
+                                                            true
+                                                        );
+                                                    }}
+                                                />
+                                            </Row>
+                                            {order?.deliveryInstructions && (
+                                                <View
+                                                    style={{
+                                                        padding: SIZES.base
+                                                    }}
+                                                >
+                                                    <Text px_4>
+                                                        {
+                                                            order?.deliveryInstructions
+                                                        }
+                                                    </Text>
+                                                </View>
+                                            )}
+                                        </Section>
+                                    )}
+                                    <View
+                                        style={{
+                                            paddingHorizontal: SIZES.padding,
+                                            maxHeight: '40%'
+                                        }}
+                                    >
+                                        <>
+                                            <Divider />
+                                            <Text
+                                                raleway_bold
+                                                medium
+                                                center
+                                                py_4
+                                            >
+                                                {quantity}{' '}
+                                                {quantity > 1
+                                                    ? 'items'
+                                                    : 'item'}
+                                            </Text>
+                                            {items.map((item, index) => (
+                                                <ProductListItem
+                                                    key={index.toString()}
+                                                    item={item}
+                                                    index={index}
+                                                />
+                                            ))}
+                                        </>
+                                        <Princing>
+                                            <Row horizontalAlign="space-between">
+                                                <Text bold left>
+                                                    Sub-Total{' '}
+                                                </Text>
+                                                <Text bold>
+                                                    ${total.toFixed(2)}
+                                                </Text>
+                                            </Row>
+
+                                            <Row horizontalAlign="space-between">
+                                                <Text py_2>Service Fee</Text>
+                                                <Text>
+                                                    $
+                                                    {stripeFee(
+                                                        total,
+                                                        orderType
+                                                    )}
+                                                </Text>
+                                            </Row>
+                                            {orderType ===
+                                                ORDER_TYPE.delivery && (
+                                                <Row horizontalAlign="space-between">
+                                                    <Text>Tip Amount</Text>
+                                                    <Text>
+                                                        $
+                                                        {customTip &&
+                                                        orderType ===
+                                                            ORDER_TYPE.delivery
+                                                            ? customTip
+                                                            : amount.toFixed(
+                                                                  2
+                                                              )}{' '}
+                                                    </Text>
+                                                </Row>
+                                            )}
+                                        </Princing>
+                                    </View>
+                                </View>
+                            </ScrollView>
+                        </View>
+                        <View style={{ flex: 0.3, justifyContent: 'flex-end' }}>
+                            <Footer
+                                style={{
+                                    justifyContent: 'flex-end',
+                                    borderRadius: SIZES.radius
+                                }}
+                            >
+                                {orderType === ORDER_TYPE.delivery ? (
+                                    <CustomTip
+                                        customTip={customTip}
+                                        setCustomTip={setCustomTip}
+                                        setShowCustomTip={setShowCustomTip}
+                                    />
+                                ) : (
+                                    <View
+                                        style={{
+                                            justifyContent: 'center',
+                                            alignItems: 'center',
+                                            marginVertical: 10
+                                        }}
+                                    >
+                                        <TouchableOpacity
+                                            onPress={() => {
+                                                Alert.alert(
+                                                    'Order Type',
+                                                    'Do you want to change your order to delivery?',
+                                                    [
+                                                        {
+                                                            text: 'No',
+                                                            style: 'cancel'
+                                                        },
+                                                        {
+                                                            text: 'Yes',
+                                                            style: 'destructive',
+                                                            onPress: () => {
+                                                                dispatch(
+                                                                    switchOrderType(
+                                                                        ORDER_TYPE.delivery
+                                                                    )
+                                                                );
+                                                            }
+                                                        }
+                                                    ]
+                                                );
+                                            }}
+                                        >
+                                            <Text bold py_6>
+                                                Switch to Delivery
+                                            </Text>
+                                        </TouchableOpacity>
+                                    </View>
+                                )}
+
+                                <Button
+                                    disabled={loading}
+                                    isLoading={loading}
+                                    containerStyle={{
+                                        width: '80%',
+                                        alignSelf: 'center',
+                                        marginVertical: SIZES.padding
+                                    }}
+                                    title={`Pay $${(
+                                        total +
+                                        (customTip &&
+                                        orderType === ORDER_TYPE.delivery
+                                            ? +parseInt(customTip).toFixed(2)
+                                            : amount) +
+                                        stripeFee(total, orderType)
+                                    ).toFixed(2)}`}
+                                    outlined
+                                    onPress={handlePlacePendingOrder}
+                                />
+                            </Footer>
+                        </View>
+                    </Container>
+                </StripeProvider>
+            </KeyboardScreen>
 
             <Modal
                 visible={showCustomTip}
@@ -719,11 +728,64 @@ const Checkout = ({ navigation }: CheckOutProps) => {
                                         +(
                                             total +
                                             +parseInt(customTip).toFixed(2) +
-                                            stripeFee(total)
+                                            stripeFee(total, orderType)
                                         ).toFixed(2)
                                     )
                                 );
                                 setShowCustomTip(false);
+                            }}
+                        />
+                    </View>
+                </View>
+            </Modal>
+            <Modal visible={showInstructions} animationType="slide">
+                <View
+                    style={{ flex: 1, backgroundColor: theme.BACKGROUND_COLOR }}
+                >
+                    <Header
+                        title="Delivery Instructions"
+                        onPressBack={() => setShowInstuctions(false)}
+                    />
+                    <View style={{ marginTop: 30 }}>
+                        <Text raleway_bold px_4>
+                            Delivery Instructions
+                        </Text>
+                        <InputField
+                            nogap
+                            containerStyle={{
+                                borderRadius: SIZES.radius
+                            }}
+                            multiline
+                            placeholder="Note for the driver"
+                            value={deliveryInstructions}
+                            maxLenght={100}
+                            onChangeText={(text) => {
+                                setDeliveryInstructions(text);
+                                dispatch(
+                                    setOrder({
+                                        ...order!,
+                                        deliveryInstructions: text
+                                    })
+                                );
+                            }}
+                        />
+                        {deliveryInstructions.length > 0 && (
+                            <Text px_4 small>
+                                {deliveryInstructions.length} / 100
+                            </Text>
+                        )}
+
+                        <Button
+                            containerStyle={{
+                                marginTop: 20,
+                                width: '80%',
+                                alignSelf: 'center'
+                            }}
+                            title={
+                                order?.deliveryInstructions ? 'Update' : 'Add'
+                            }
+                            onPress={() => {
+                                setShowInstuctions(false);
                             }}
                         />
                     </View>
@@ -736,16 +798,18 @@ const Checkout = ({ navigation }: CheckOutProps) => {
 export default Checkout;
 
 const Section = styled.TouchableOpacity`
-    background-color: ${(props) => props.theme.BACKGROUND_COLOR};
-    margin: 6px 0px
+    background-color: ${(props) => props.theme.CARD_BACKGROUND};
+    margin: 2px 0px
     shadow-opacity: 0.4;
     shadow-radius: 3px;
+    padding: 0px 4px;
+    border-radius: 6px;
     shadow-box: 4px 4px 6px ${(props) => props.theme.SHADOW_COLOR};
 `;
 
 const Footer = styled.View`
     padding: ${SIZES.base * 2}px;
-    height: 10%;
+    background-color: ${(props) => props.theme.CARD_BACKGROUND};
 `;
 const Container = styled.View``;
 const Princing = styled.View`

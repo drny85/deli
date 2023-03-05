@@ -1,112 +1,85 @@
 import { View } from 'react-native';
 import React from 'react';
 import Screen from '../../../components/Screen';
-import Text from '../../../components/Text';
-import {
-    LineChart,
-    BarChart,
-    PieChart,
-    ProgressChart,
-    ContributionGraph,
-    StackedBarChart
-} from 'react-native-chart-kit';
-
-import { useAppSelector } from '../../../redux/store';
-import { SIZES } from '../../../constants';
-import { businessProperty } from '../../../utils/businessProperty';
-import { useBusinessOrders } from '../../../hooks/useBusinessOrders';
-import moment from 'moment';
-import { Order } from '../../../redux/consumer/ordersSlide';
-import { GraphicDataValue } from '../../../types';
 import { useGraphicData } from '../../../hooks/useGraphicData';
-const line = {
-    labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
-    datasets: [
-        {
-            data: [20, 45, 28, 80, 99, 43, 85],
-            strokeWidth: 2
-            // optional
-        }
-    ]
-};
-const barData = {
-    labels: ['January', 'February', 'March', 'April', 'May', 'June'],
-    datasets: [
-        {
-            data: [192, 45, 28, 80, 99, 250]
-        }
-    ]
-};
+import EarningGraph from '../../../components/business/EarningGraph';
+import Loader from '../../../components/Loader';
+import Header from '../../../components/Header';
+import Text from '../../../components/Text';
+import { TOP_UNITS } from '../../../constants';
 
-type Props = {};
+const Earnings = () => {
+    const {
+        data: thisWeek,
+        categoriesData: categoriesThisMonth,
+        loadingStatus: lw
+    } = useGraphicData({
+        range: 'week'
+    });
+    const {
+        data: thisMonth,
+        categoriesData: categoriesThisWeek,
+        loadingStatus: lm
+    } = useGraphicData({
+        range: 'month'
+    });
 
-const Earnings = (props: Props) => {
-    const theme = useAppSelector((state) => state.theme);
-    const { orders, loading } = useBusinessOrders();
-    const data2 = businessProperty({
-        orders,
-        property: 'delivered'
-    }) as Order[];
-    const data1 = businessProperty({
-        orders,
-        property: 'picked_up_by_client'
-    }) as Order[];
-    const week1 = [...data2, ...data1];
-    console.log('W', week1);
-    const { data } = useGraphicData({ orders: week1, range: 'week' });
+    const {
+        data: thisYear,
+        categoriesData: categoriesThisYear,
+        loadingStatus: ty
+    } = useGraphicData({
+        range: 'year'
+    });
 
     //console.log(thisWeekData);
-
+    if (lw || lm || ty) return <Loader />;
     return (
         <Screen>
-            <View>
-                <LineChart
-                    data={line}
-                    width={SIZES.width * 0.9} // from react-native
-                    height={SIZES.height * 0.2}
-                    yAxisLabel={'$'}
-                    chartConfig={{
-                        backgroundColor: theme.BACKGROUND_COLOR,
-                        backgroundGradientFrom: theme.ASCENT,
-                        backgroundGradientTo: theme.CARD_BACKGROUND,
-                        decimalPlaces: 2, // optional, defaults to 2dp
-                        color: (opacity = 1) =>
-                            `rgba(255, 255, 255, ${opacity})`,
-                        style: {
-                            borderRadius: SIZES.radius
-                        }
-                    }}
-                    bezier
+            <Header title="Earnings By The Numbers" />
+            <View
+                style={{
+                    flex: 1,
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                }}
+            >
+                <Text medium raleway_bold>
+                    Top {TOP_UNITS} Items This Week
+                </Text>
+                <View
                     style={{
-                        marginVertical: SIZES.padding,
-                        borderRadius: SIZES.radius,
-                        alignSelf: 'center'
+                        flex: 0.4,
+                        flexDirection: 'row',
+                        width: '100%',
+                        alignItems: 'center',
+                        justifyContent: 'space-evenly'
                     }}
-                />
-                <BarChart
-                    yAxisSuffix=""
-                    style={{
-                        marginVertical: SIZES.padding,
-                        borderRadius: SIZES.radius,
-                        alignSelf: 'center'
-                    }}
-                    data={line}
-                    width={SIZES.width * 0.9}
-                    height={SIZES.height * 0.2}
-                    yAxisLabel={'$'}
-                    chartConfig={{
-                        backgroundColor: theme.BACKGROUND_COLOR,
-                        backgroundGradientFrom: theme.ASCENT,
-                        backgroundGradientTo: theme.CARD_BACKGROUND,
-                        decimalPlaces: 2,
-                        labelColor: (opacity = 1) => theme.WHITE_COLOR,
-                        // optional, defaults to 2dp
-                        color: (opacity = 1) => theme.BACKGROUND_COLOR,
-                        style: {
-                            borderRadius: SIZES.radius
-                        }
-                    }}
-                />
+                >
+                    <EarningGraph
+                        type="Pie Chart"
+                        data={categoriesThisWeek as any}
+                        title="Units Sold This Week"
+                    />
+                    <EarningGraph
+                        type="Pie Chart"
+                        data={categoriesThisMonth as any}
+                        title="Units Sold This Month"
+                    />
+                </View>
+                <View style={{ flex: 0.5 }}>
+                    <EarningGraph
+                        data={thisWeek}
+                        type="Line Chart"
+                        title="Earning By Day This Week"
+                    />
+
+                    <EarningGraph
+                        data={thisYear}
+                        type="Line Chart"
+                        title="Earning By Month This Year"
+                    />
+                </View>
             </View>
         </Screen>
     );

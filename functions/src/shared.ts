@@ -25,6 +25,8 @@ export const assignUserType = async (uid: string, type: string) => {
     }
 };
 
+export const myTransaction_fee = 1.1; //must change this amount in the constants.index.js
+
 export const stripeFee = (amount: number): number => {
     if (!amount) return 0;
     const p = (amount * 2.9) / 100 + 0.3;

@@ -35,6 +35,7 @@ const Home = ({}: Props) => {
     const couriers = businessProperty({ orders, property: 'deliveredBy' });
 
     useEffect(() => {
+        if (!business) return;
         if (business?.coors?.lat) return;
 
         Location.geocodeAsync(business?.address!)
@@ -125,7 +126,7 @@ const Home = ({}: Props) => {
                                         height: SIZES.height * 0.1
                                     }}
                                 >
-                                    <Text capitalize center bold medium>
+                                    <Text capitalize center bold>
                                         {STATUS_NAME(s)}
                                     </Text>
                                     <Text bold center medium py_6>
@@ -169,7 +170,7 @@ const Home = ({}: Props) => {
                                 height: SIZES.height * 0.1
                             }}
                         >
-                            <Text center bold large>
+                            <Text center bold medium>
                                 Orders History
                             </Text>
                             <Text bold center medium py_6>

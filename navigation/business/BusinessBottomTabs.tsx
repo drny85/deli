@@ -55,7 +55,7 @@ const BusinessBottomTabs = () => {
                         elevation: 0
                     },
 
-                    tabBarIcon: () => <TabBarIcon name="bicycle-sharp" />
+                    tabBarIcon: () => <TabBarIcon name="bar-chart-sharp" />
                 })}
             />
             <Screen

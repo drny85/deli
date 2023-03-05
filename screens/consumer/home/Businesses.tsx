@@ -41,6 +41,7 @@ import HomeBusinessOrderDetails from '../../../components/modals/HomeBusinessOrd
 
 const Businesses = () => {
     useNotifications();
+
     const { user, loading } = useAppSelector((state) => state.auth);
     const dispatch = useAppDispatch();
     const [visible, setVisible] = useState(false);
@@ -79,8 +80,6 @@ const Businesses = () => {
         }
         currentOffset.current = y;
     };
-
-    console.log(deliveryZip);
 
     const handleSearch = (text: string) => {
         setSearchValue(text.replace(/[^a-z]/gi, ''));

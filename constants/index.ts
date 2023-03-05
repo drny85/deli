@@ -1,13 +1,18 @@
 import Constants from 'expo-constants';
 import { Dimensions } from 'react-native';
 const { width, height } = Dimensions.get('window');
+
+export const TOP_UNITS = 5;
+
+export const MY_TRANSACTION_FEE = 1.1; //remeber to change this in the cloud funtions  => shared.ts
 export const SIZES = {
     base: 6,
     font: 14,
     radius: 12,
-    padding: 18,
+    padding: width <= 500 ? 16 : 18,
     statusBarHeight: Constants.statusBarHeight,
-    isSmallDevice: width < 500,
+    isSmallDevice: width < 500 && width > 381,
+    isVerySmall: width < 380,
     width,
     height
 };

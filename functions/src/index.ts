@@ -9,7 +9,7 @@ import { v4 as UUID } from 'uuid';
 
 import Stripe from 'stripe';
 
-import { assignUserType } from './shared';
+import { assignUserType, myTransaction_fee } from './shared';
 
 import { UserRecord } from 'firebase-functions/v1/auth';
 import {
@@ -339,7 +339,7 @@ exports.deli = functions.https.onRequest(
                         return res.status(404).send('no order found');
                     }
 
-                    let myFee = (total * 1.1) / 100;
+                    let myFee = (total * myTransaction_fee) / 100;
                     if (myFee >= 2) {
                         myFee = 2;
                     }
@@ -753,6 +753,20 @@ exports.updateUnitSold = functions.firestore
             }
         });
     });
+
+exports.getStripeAccountDetails = functions.https.onCall(
+    async (data, context) => {
+        try {
+            const balance = await stripe.balanceTransactions.retrieve(
+                'acct_1MMGYfCGpz9ntd7c'
+            );
+            return balance;
+        } catch (error) {
+            console.log(error);
+            return null;
+        }
+    }
+);
 
 exports.sendOrderStatusUpdates = functions.firestore
     .document('orders/{orderId}')

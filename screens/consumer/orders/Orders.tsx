@@ -108,7 +108,6 @@ const Orders = ({ route: { params } }: Props) => {
             </Text>
             <FlatList
                 showsVerticalScrollIndicator={false}
-                contentContainerStyle={{ width: '100%' }}
                 data={orders.sort((a, b) =>
                     moment(a.orderDate).isBefore(b.orderDate) ? 1 : -1
                 )}

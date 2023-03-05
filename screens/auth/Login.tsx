@@ -23,6 +23,7 @@ import Loader from '../../components/Loader';
 import useNotifications from '../../hooks/useNotifications';
 import { useNavigation } from '@react-navigation/native';
 import { isTherePreviousRoute } from '../../utils/checkForPreviousRoute';
+import Profile from '../consumer/profile/Profile';
 
 type Props = NativeStackScreenProps<AuthScreens, 'Login'>;
 
@@ -31,7 +32,7 @@ const Login = ({ navigation }: Props) => {
     const dispatch = useAppDispatch();
     const nav = useNavigation();
 
-    const { loading } = useAppSelector((state) => state.auth);
+    const { loading, user } = useAppSelector((state) => state.auth);
     const theme = useAppSelector((state) => state.theme);
 
     const emailRef = useRef<TextInput>(null);
@@ -63,6 +64,9 @@ const Login = ({ navigation }: Props) => {
             const { success, route } = await isTherePreviousRoute();
             if (success && route && route === 'OrderReview') {
                 nav.navigate('ConsumerCart', { screen: 'OrderReview' });
+            }
+            if (success && route && route === 'Orders') {
+                nav.navigate('ConsumerOrders', { screen: 'Orders' });
             }
         } catch (error) {
             const err = error as any;
@@ -96,6 +100,8 @@ const Login = ({ navigation }: Props) => {
     };
 
     if (loading) return <Loader />;
+
+    if (user && user.type === 'consumer') return <Profile />;
 
     return (
         <Screen>

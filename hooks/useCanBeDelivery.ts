@@ -4,6 +4,7 @@ import { useAppSelector } from '../redux/store';
 export const useCanBeDelivery = () => {
     const [canBe, setCanBe] = useState(true);
     const { deliveryZip } = useAppSelector((state) => state.orders);
+    console.log(deliveryZip);
     const { business } = useAppSelector((state) => state.business);
     useEffect(() => {
         if (!business || !deliveryZip || !business.isOpen) {

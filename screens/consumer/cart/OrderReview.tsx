@@ -150,216 +150,205 @@ const OrderReview = () => {
                 title="Order Review"
             />
 
-            <View>
-                {orderType === ORDER_TYPE.delivery && (
-                    <>
-                        <Stack px={4}>
-                            <Text raleway_bold> From: {business?.name}</Text>
-                            <Text px_4 raleway>
-                                {business?.address?.substring(
-                                    0,
-                                    business.address.length - 5
-                                )}
-                            </Text>
-                        </Stack>
-                        <Stack px={4} py={1}>
-                            <Text raleway_bold py_4>
-                                {' '}
-                                To: You
-                            </Text>
+            <View style={{ flex: 1 }}>
+                <View style={{ flex: 0.4 }}>
+                    {orderType === ORDER_TYPE.delivery && (
+                        <>
+                            <Stack px={4}>
+                                <Text raleway_bold>
+                                    {' '}
+                                    From: {business?.name}
+                                </Text>
+                                <Text px_4 raleway>
+                                    {business?.address?.substring(
+                                        0,
+                                        business.address.length - 5
+                                    )}
+                                </Text>
+                            </Stack>
+                            <Stack px={4} py={1}>
+                                <Text raleway_bold py_4>
+                                    {' '}
+                                    To: You
+                                </Text>
 
-                            <MotiView
-                                style={{ width: '100%' }}
-                                from={{ opacity: 0, translateY: -20 }}
-                                animate={{ opacity: 1, translateY: 0 }}
-                                exit={{ opacity: 0, translateY: -20 }}
-                                transition={{ type: 'timing' }}
-                            >
-                                <GoogleAutoComplete
-                                    inputRadius={SIZES.radius}
-                                    ref={googleRef}
-                                    placeholder="Please type your delivery address"
-                                    onPress={(
-                                        _: any,
-                                        details: GooglePlaceDetail
-                                    ) => {
-                                        setDeliveryAddress({
-                                            ...deliveryAddress!,
-                                            street: details.formatted_address,
-                                            coors: {
-                                                ...details.geometry.location
-                                            },
-                                            addedOn: new Date().toISOString()
-                                        });
-                                        dispatch(
-                                            saveDeliveryAddress({
+                                <MotiView
+                                    style={{ width: '100%' }}
+                                    from={{ opacity: 0, translateY: -20 }}
+                                    animate={{ opacity: 1, translateY: 0 }}
+                                    exit={{ opacity: 0, translateY: -20 }}
+                                    transition={{ type: 'timing' }}
+                                >
+                                    <GoogleAutoComplete
+                                        inputRadius={SIZES.radius}
+                                        ref={googleRef}
+                                        placeholder="Please type your delivery address"
+                                        onPress={(
+                                            _: any,
+                                            details: GooglePlaceDetail
+                                        ) => {
+                                            setDeliveryAddress({
+                                                ...deliveryAddress!,
                                                 street: details.formatted_address,
-                                                coors: details.geometry
-                                                    .location,
+                                                coors: {
+                                                    ...details.geometry.location
+                                                },
                                                 addedOn:
                                                     new Date().toISOString()
-                                            })
-                                        );
-                                    }}
-                                />
-                            </MotiView>
-                            <AnimatePresence>
-                                {deliveryAddress?.street && (
-                                    <MotiView
-                                        from={{ opacity: 0, translateY: -20 }}
-                                        animate={{ opacity: 1, translateY: 0 }}
-                                        style={{ width: '100%' }}
-                                    >
-                                        <Row containerStyle={{ width: '100%' }}>
-                                            <View style={{ flexGrow: 1 }}>
-                                                <Text px_4 bold>
-                                                    Apt #, Suite, Floor, etc
-                                                </Text>
-                                            </View>
-
-                                            <InputField
-                                                nogap
-                                                mainStyle={{
-                                                    width: '40%'
-                                                }}
+                                            });
+                                            dispatch(
+                                                saveDeliveryAddress({
+                                                    street: details.formatted_address,
+                                                    coors: details.geometry
+                                                        .location,
+                                                    addedOn:
+                                                        new Date().toISOString()
+                                                })
+                                            );
+                                        }}
+                                    />
+                                </MotiView>
+                                <AnimatePresence>
+                                    {deliveryAddress?.street && (
+                                        <MotiView
+                                            from={{
+                                                opacity: 0,
+                                                translateY: -20
+                                            }}
+                                            animate={{
+                                                opacity: 1,
+                                                translateY: 0
+                                            }}
+                                            style={{ width: '100%' }}
+                                        >
+                                            <Row
                                                 containerStyle={{
-                                                    borderRadius: SIZES.radius
+                                                    width: '100%'
                                                 }}
-                                                contentStyle={{
-                                                    textAlign: 'center'
-                                                }}
-                                                value={deliveryAddress?.apt!}
-                                                onChangeText={(text) => {
-                                                    setDeliveryAddress({
-                                                        ...deliveryAddress!,
-                                                        apt: text.toUpperCase()
-                                                    });
-                                                    dispatch(
-                                                        saveDeliveryAddress({
-                                                            ...deliveryAdd!,
+                                            >
+                                                <View style={{ flexGrow: 1 }}>
+                                                    <Text px_4 bold>
+                                                        Apt #, Suite, Floor, etc
+                                                    </Text>
+                                                </View>
+
+                                                <InputField
+                                                    nogap
+                                                    mainStyle={{
+                                                        width: '40%'
+                                                    }}
+                                                    containerStyle={{
+                                                        borderRadius:
+                                                            SIZES.radius
+                                                    }}
+                                                    contentStyle={{
+                                                        textAlign: 'center'
+                                                    }}
+                                                    value={
+                                                        deliveryAddress?.apt!
+                                                    }
+                                                    onChangeText={(text) => {
+                                                        setDeliveryAddress({
+                                                            ...deliveryAddress!,
                                                             apt: text.toUpperCase()
-                                                        })
-                                                    );
-                                                }}
-                                                placeholder="Apt #, Suite, Floor, etc"
-                                            />
-                                        </Row>
-
-                                        <View>
-                                            <Text raleway_bold px_4>
-                                                Delivery Instructions
-                                            </Text>
-                                            <InputField
-                                                nogap
-                                                containerStyle={{
-                                                    borderRadius: SIZES.radius
-                                                }}
-                                                multiline
-                                                placeholder="Note for the driver"
-                                                value={deliveryInstructions}
-                                                maxLenght={100}
-                                                onChangeText={(text) => {
-                                                    setDeliveryInstructions(
-                                                        text
-                                                    );
-                                                    dispatch(
-                                                        setOrder({
-                                                            ...order!,
-                                                            deliveryInstructions:
-                                                                text
-                                                        })
-                                                    );
-                                                }}
-                                            />
-                                            {deliveryInstructions.length >
-                                                0 && (
-                                                <Text px_4 small>
-                                                    {
-                                                        deliveryInstructions.length
-                                                    }{' '}
-                                                    / 100
-                                                </Text>
-                                            )}
-                                        </View>
-                                    </MotiView>
-                                )}
-                            </AnimatePresence>
+                                                        });
+                                                        dispatch(
+                                                            saveDeliveryAddress(
+                                                                {
+                                                                    ...deliveryAdd!,
+                                                                    apt: text.toUpperCase()
+                                                                }
+                                                            )
+                                                        );
+                                                    }}
+                                                    placeholder="Apt #, Suite, Floor, etc"
+                                                />
+                                            </Row>
+                                        </MotiView>
+                                    )}
+                                </AnimatePresence>
+                            </Stack>
+                        </>
+                    )}
+                    {orderType === ORDER_TYPE.pickup && (
+                        <Stack>
+                            <Text bold>Picking Up At</Text>
+                            <Text py_4>{business.address?.slice(0, -10)}</Text>
+                            <Text>{business.phone}</Text>
                         </Stack>
-                    </>
-                )}
-                {orderType === ORDER_TYPE.pickup && (
-                    <Stack>
-                        <Text bold>Picking Up At</Text>
-                        <Text py_4>{business.address?.slice(0, -10)}</Text>
-                        <Text>{business.phone}</Text>
-                    </Stack>
-                )}
+                    )}
 
-                <Divider small />
-                <ScrollView
-                    contentContainerStyle={{
-                        width: '100%',
-                        paddingHorizontal: SIZES.base,
-                        maxHeight: SIZES.height * 0.5
-                    }}
-                >
-                    <Text raleway_bold medium center>
-                        {quantity} Items
-                    </Text>
-                    {items.map((item, index) => (
-                        <ProductListItem
-                            key={index.toString()}
-                            item={item}
-                            index={index}
-                        />
-                    ))}
-                    <View
-                        style={{
-                            alignSelf: 'flex-end',
-                            paddingTop: SIZES.base
+                    <Divider small />
+                </View>
+                <View style={{ flex: 0.5 }}>
+                    <ScrollView
+                        contentContainerStyle={{
+                            width: '100%',
+                            paddingHorizontal: SIZES.base,
+                            height: '100%'
                         }}
                     >
-                        <Text right>sub-total ${total.toFixed(2)}</Text>
-                        <Row>
-                            <Text px_4>service fee</Text>
-                            <Text>${stripeFee(total)}</Text>
-                        </Row>
-                    </View>
-                </ScrollView>
-            </View>
-
-            <View
-                style={[
-                    styles.btn,
-                    {
-                        bottom: 30
-                    }
-                ]}
-            >
-                <Row horizontalAlign="space-evenly">
-                    <View
-                        style={[
-                            styles.leftBtn,
-                            {
-                                shadowColor: theme.SHADOW_COLOR,
-                                backgroundColor: theme.BACKGROUND_COLOR,
-                                borderColor: theme.SHADOW_COLOR
-                            }
-                        ]}
-                    >
-                        <Text bold medium>
-                            Total ${(total + stripeFee(total)).toFixed(2)}
+                        <Text raleway_bold medium center>
+                            {quantity} Items
                         </Text>
-                    </View>
-                    <Button
-                        outlined
-                        containerStyle={{
-                            paddingVertical: SIZES.padding * 0.8
-                        }}
-                        title={`Checkout`}
-                        onPress={continueToCheckout}
-                    />
-                </Row>
+                        {items.map((item, index) => (
+                            <ProductListItem
+                                key={index.toString()}
+                                item={item}
+                                index={index}
+                            />
+                        ))}
+                    </ScrollView>
+                </View>
+
+                <View
+                    style={[
+                        styles.btn,
+                        { backgroundColor: theme.CARD_BACKGROUND }
+                    ]}
+                >
+                    <Row
+                        containerStyle={{ paddingHorizontal: SIZES.padding }}
+                        horizontalAlign="space-between"
+                    >
+                        <Text bold right py_4>
+                            Sub-total ${total.toFixed(2)}
+                        </Text>
+                        <Row>
+                            <Text bold px_4>
+                                Service fee
+                            </Text>
+                            <Text bold>${stripeFee(total, orderType)}</Text>
+                        </Row>
+                    </Row>
+                    <Row horizontalAlign="space-evenly">
+                        <View
+                            style={[
+                                styles.leftBtn,
+                                {
+                                    shadowColor: theme.SHADOW_COLOR,
+                                    backgroundColor: theme.BACKGROUND_COLOR,
+                                    borderColor: theme.SHADOW_COLOR
+                                }
+                            ]}
+                        >
+                            <Text bold medium>
+                                Total $
+                                {(total + stripeFee(total, orderType)).toFixed(
+                                    2
+                                )}
+                            </Text>
+                        </View>
+                        <Button
+                            outlined
+                            containerStyle={{
+                                paddingVertical: SIZES.padding * 0.6
+                            }}
+                            title={`Checkout`}
+                            onPress={continueToCheckout}
+                        />
+                    </Row>
+                </View>
             </View>
         </Screen>
     );
@@ -369,9 +358,12 @@ export default OrderReview;
 
 const styles = StyleSheet.create({
     btn: {
-        position: 'absolute',
+        flex: 0.1,
         alignSelf: 'center',
-        width: '90%'
+        width: '100%',
+        justifyContent: 'flex-end',
+        padding: SIZES.padding,
+        borderRadius: SIZES.radius
     },
     leftBtn: {
         paddingVertical: SIZES.base * 1.5,

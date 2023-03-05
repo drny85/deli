@@ -33,7 +33,7 @@ const ConsumerCartStackNavigation = () => {
             <Screen
                 name="AddressSelection"
                 component={DeliveryAddressSelection}
-                // options={{ presentation: 'modal' }}
+                options={{ presentation: 'modal' }}
             />
             <Screen name="OrderSuccess" component={OrderSuccess} />
 
