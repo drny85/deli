@@ -1,3 +1,6 @@
+import { NavigatorScreenParams } from '@react-navigation/native';
+import { ConsumerProfileStackScreens } from '../consumer/typing';
+
 export type AuthScreens = {
     Login: undefined;
     Signup: undefined;

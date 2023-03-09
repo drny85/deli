@@ -147,7 +147,8 @@ const tabBarVisibility = (route: any) => {
         'OrderSuccess',
         'OrderDetails',
         'Checkout',
-        'OrderReview'
+        'OrderReview',
+        'ProductDetails'
     ];
 
     if (routes.findIndex((r) => r === routeName) !== -1) {

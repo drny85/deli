@@ -75,13 +75,13 @@ const Text = styled(Animatable.Text)<TextProp>`
                     SIZES.isVerySmall
                         ? '18px'
                         : SIZES.isSmallDevice
-                        ? '22px'
+                        ? '20px'
                         : '24px'
                 }`;
             case medium:
                 return `${
                     SIZES.isVerySmall
-                        ? '14px'
+                        ? '16px'
                         : SIZES.isSmallDevice
                         ? '18px'
                         : SIZES.width > 600

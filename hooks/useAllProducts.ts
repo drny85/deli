@@ -1,4 +1,4 @@
-import { getDocs, QuerySnapshot } from 'firebase/firestore';
+import { getDocs } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
 
 import { productsCollection } from '../firebase';

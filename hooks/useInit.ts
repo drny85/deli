@@ -58,6 +58,7 @@ export default function useCachedResources() {
     const autoSignIn = async () => {
         try {
             auth.onAuthStateChanged(async (authState) => {
+                console.log('AUTH =>', authState?.email);
                 if (authState?.uid) {
                     const data = await getUser(authState.uid);
 
@@ -89,6 +90,7 @@ export default function useCachedResources() {
                 LogBox.ignoreAllLogs(true);
 
                 autoSignIn();
+                console.log('Loading Fonts', fontsLoaded, err);
                 const cart = await loadCart();
                 if (cart) {
                     dispatch(setCart(cart));

@@ -4,8 +4,6 @@ import { businessCollection } from '../firebase';
 import { Business, setBusinesses } from '../redux/business/businessSlide';
 import { useAppDispatch } from '../redux/store';
 
-import { useLocation } from './useLocation';
-
 export const useBusinessAvailable = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [businessAvailable, setBusinessAvailable] = useState<Business[]>([]);
@@ -28,6 +26,7 @@ export const useBusinessAvailable = () => {
                 )
             );
         });
+
         setIsLoading(false);
 
         return sub;

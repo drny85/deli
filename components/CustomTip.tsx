@@ -1,4 +1,4 @@
-import { View, TouchableOpacity } from 'react-native';
+import { View, TouchableOpacity, StyleProp, ViewStyle } from 'react-native';
 import React from 'react';
 import Row from './Row';
 import { useAppDispatch, useAppSelector } from '../redux/store';
@@ -12,9 +12,15 @@ type Props = {
     customTip: string;
     setCustomTip: (value: string) => void;
     setShowCustomTip: (value: boolean) => void;
+    containerStyle?: StyleProp<ViewStyle>;
 };
 
-const CustomTip = ({ customTip, setCustomTip, setShowCustomTip }: Props) => {
+const CustomTip = ({
+    customTip,
+    setCustomTip,
+    setShowCustomTip,
+    containerStyle
+}: Props) => {
     const theme = useAppSelector((state) => state.theme);
     const { total } = useAppSelector((state) => state.cart);
     const { orderType } = useAppSelector((state) => state.orders);
@@ -23,7 +29,7 @@ const CustomTip = ({ customTip, setCustomTip, setShowCustomTip }: Props) => {
     } = useAppSelector((state) => state.orders);
     const dispatch = useAppDispatch();
     return (
-        <View>
+        <View style={containerStyle}>
             <Stack
                 py={6}
                 containerStyle={{

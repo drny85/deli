@@ -50,7 +50,8 @@ export const useLocation = () => {
                 });
                 setAddress(address[0]);
             } catch (error) {
-                console.log('ERROR', error);
+                const err = error as any;
+                console.log('ERROR', err.message);
             }
         })();
     }, [latitude, longitude]);

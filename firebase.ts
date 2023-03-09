@@ -1,11 +1,17 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import {
+    initializeAuth,
+    getAuth,
+    getReactNativePersistence
+} from 'firebase/auth/react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import {
     getFirestore,
     CollectionReference,
     DocumentData,
     collection
 } from 'firebase/firestore';
-import { getAuth, User } from 'firebase/auth';
+import { User } from 'firebase/auth';
 import { getStorage } from 'firebase/storage';
 import { getFunctions, httpsCallable } from 'firebase/functions';
 import { AppUser } from './redux/auth/authSlide';
@@ -24,11 +30,14 @@ const firebaseConfig = {
     appId: process.env.FIREBASE_APPID,
     measurementId: process.env.FIREBASE_MEASUREMENT_ID
 };
-console.log(process.env.FIREBASE_APIKEY);
+console.log('KEY', process.env.FIREBASE_APIKEY);
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 
 const db = getFirestore(app);
-const auth = getAuth(app);
+const authApp = initializeAuth(app, {
+    persistence: getReactNativePersistence(AsyncStorage)
+});
+const auth = getAuth(authApp.app);
 const storage = getStorage(app);
 
 interface Response {

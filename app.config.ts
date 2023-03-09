@@ -62,12 +62,6 @@ const config: ExpoConfig = {
                 merchantIdentifier: ['merchant.net.robertdev.deli.app'],
                 enableGooglePay: true
             }
-        ],
-        [
-            'expo-screen-orientation',
-            {
-                initialOrientation: 'PORTRAIT'
-            }
         ]
     ],
     extra: {

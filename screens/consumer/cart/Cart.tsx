@@ -3,8 +3,7 @@ import {
     FlatList,
     ListRenderItem,
     TouchableOpacity,
-    View,
-    StyleSheet
+    View
 } from 'react-native';
 import React from 'react';
 import Screen from '../../../components/Screen';
@@ -105,6 +104,7 @@ const Cart = ({}: Props) => {
             });
         });
     };
+
     return (
         <Screen>
             <Header
@@ -148,43 +148,33 @@ const Cart = ({}: Props) => {
                 </View>
 
                 <View style={{ flex: 0.1 }}>
-                    {items.length > 0 ? (
-                        <View
-                            style={{
-                                position: 'absolute',
-                                bottom: 10,
-                                alignSelf: 'center',
-                                width: '70%',
-                                zIndex: 100
-                            }}
-                        >
-                            <Button
-                                outlined
-                                notRounded
-                                title={`View Order $${total.toFixed(2)}`}
-                                onPress={handlePress}
-                            />
-                        </View>
-                    ) : (
-                        <View
-                            style={{
-                                position: 'absolute',
-                                bottom: 10,
-                                alignSelf: 'center',
-                                width: '70%',
-                                zIndex: 100
-                            }}
-                        >
-                            <Button
-                                title={'Start Shopping'}
-                                onPress={() =>
+                    <View
+                        style={{
+                            bottom: 10,
+                            alignSelf: 'center',
+                            width: '60%',
+                            height: '100%',
+                            justifyContent: 'flex-end'
+                        }}
+                    >
+                        <Button
+                            outlined
+                            title={
+                                total > 0
+                                    ? `View Order $${total.toFixed(2)}`
+                                    : 'Start Shopping'
+                            }
+                            onPress={() => {
+                                if (total > 0) {
+                                    handlePress();
+                                } else {
                                     naviagation.navigate('ConsumerHome', {
                                         screen: 'Businesses'
-                                    })
+                                    });
                                 }
-                            />
-                        </View>
-                    )}
+                            }}
+                        />
+                    </View>
                 </View>
             </View>
         </Screen>
@@ -192,22 +182,3 @@ const Cart = ({}: Props) => {
 };
 
 export default Cart;
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        padding: 24,
-        justifyContent: 'center',
-        backgroundColor: 'grey'
-    },
-    contentContainer: {
-        flex: 1,
-        alignItems: 'center',
-        zIndex: 100000,
-        position: 'absolute',
-        top: 0,
-        bottom: 0,
-        right: 0,
-        left: 0
-    }
-});

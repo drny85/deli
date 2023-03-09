@@ -11,6 +11,7 @@ import Stack from '../../../components/Stack';
 import Text from '../../../components/Text';
 import { PREVIOUS_ROUTE, SIZES } from '../../../constants';
 import { useAppSelector } from '../../../redux/store';
+import { FontAwesome } from '@expo/vector-icons';
 
 import Loader from '../../../components/Loader';
 
@@ -280,7 +281,9 @@ const OrderReview = () => {
 
                     <Divider small />
                 </View>
-                <View style={{ flex: 0.5 }}>
+                <View
+                    style={{ flex: 0.5, flexGrow: 1, paddingTop: SIZES.base }}
+                >
                     <ScrollView
                         contentContainerStyle={{
                             width: '100%',
@@ -288,7 +291,7 @@ const OrderReview = () => {
                             height: '100%'
                         }}
                     >
-                        <Text raleway_bold medium center>
+                        <Text bold py_2 center>
                             {quantity} Items
                         </Text>
                         {items.map((item, index) => (
@@ -345,6 +348,13 @@ const OrderReview = () => {
                                 paddingVertical: SIZES.padding * 0.6
                             }}
                             title={`Checkout`}
+                            leftIcon={
+                                <FontAwesome
+                                    name="credit-card"
+                                    size={20}
+                                    color={theme.TEXT_COLOR}
+                                />
+                            }
                             onPress={continueToCheckout}
                         />
                     </Row>
@@ -362,13 +372,14 @@ const styles = StyleSheet.create({
         alignSelf: 'center',
         width: '100%',
         justifyContent: 'flex-end',
-        padding: SIZES.padding,
-        borderRadius: SIZES.radius
+        paddingVertical: SIZES.padding * 2,
+        borderRadius: SIZES.radius,
+        paddingHorizontal: SIZES.padding
     },
     leftBtn: {
         paddingVertical: SIZES.base * 1.5,
         paddingHorizontal: SIZES.padding * 1.5,
-        borderRadius: SIZES.radius,
+        borderRadius: SIZES.base,
         elevation: 4,
         borderWidth: 0.3,
         shadowOffset: { width: 3, height: 3 },

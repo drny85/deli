@@ -95,15 +95,15 @@ const Home = ({}: Props) => {
                 </View>
             ) : (
                 <View style={styles.container}>
-                    <Text lobster large>
+                    <Text lobster py_4 large>
                         {moment().format('dddd, MMMM D, YYYY')}
                     </Text>
                     <View
                         style={{
                             flexWrap: 'wrap',
-
                             height: '60%',
-                            flexDirection: 'row'
+                            flexDirection: 'row',
+                            gap: SIZES.padding
                         }}
                     >
                         {Object.values(ORDER_STATUS).map((s) => {
@@ -148,7 +148,8 @@ const Home = ({}: Props) => {
                         style={{
                             flex: 1,
                             flexDirection: 'row',
-
+                            flexWrap: 'wrap',
+                            gap: SIZES.padding,
                             flexGrow: 1,
                             width: '100%'
                         }}
@@ -216,7 +217,8 @@ const styles = StyleSheet.create({
         flex: 1,
         width: '100%',
         height: '100%',
-        alignItems: 'center'
+        alignItems: 'center',
+        padding: 10
     }
 });
 
@@ -225,6 +227,6 @@ const Square = styled.TouchableOpacity`
     padding: 20px;
     shadow-color: ${({ theme }) => theme.SHADOW_COLOR};
     border-radius: 12px;
-    margin: 10px;
+  
     height: 15%;, 
 `;

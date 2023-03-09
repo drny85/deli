@@ -7,7 +7,7 @@ export const lightTheme: DefaultTheme = {
     BUTTON_TEXT_COLOR: '#ffffff',
     PRIMARY_BUTTON_COLOR: '#f8f9fa',
     SHADOW_COLOR: '#646262a6',
-    ASCENT: '#606c38', //A good color with white text always
+    ASCENT: '#2a9d8f', //A good color with white text always
     CARD_BACKGROUND: '#dad7cd',
     SECONDARY_BUTTON_COLOR: '#e0e1dd',
     WHITE_COLOR: '#ffffff',
@@ -20,7 +20,7 @@ export const darkTheme: DefaultTheme = {
     TEXT_COLOR: '#fff',
     BUTTON_TEXT_COLOR: '#ffffff',
     CARD_BACKGROUND: '#3a5a40',
-    ASCENT: '#606c38', //A good color with white text always
+    ASCENT: '#2a9d8f', //A good color with white text always #606c38
     PRIMARY_BUTTON_COLOR: '#10002b',
     SHADOW_COLOR: '#646262a6',
     SECONDARY_BUTTON_COLOR: '#457b9d',

@@ -101,7 +101,7 @@ const Login = ({ navigation }: Props) => {
 
     if (loading) return <Loader />;
 
-    if (user && user.type === 'consumer') return <Profile />;
+    // if (user && user.type === 'consumer') return <Profile navigation={navigation} route={route} />;
 
     return (
         <Screen>

@@ -11,14 +11,14 @@ import { TOP_UNITS } from '../../../constants';
 const Earnings = () => {
     const {
         data: thisWeek,
-        categoriesData: categoriesThisMonth,
+        categoriesData: categoriesThisWeek,
         loadingStatus: lw
     } = useGraphicData({
         range: 'week'
     });
     const {
         data: thisMonth,
-        categoriesData: categoriesThisWeek,
+        categoriesData: categoriesThisMonth,
         loadingStatus: lm
     } = useGraphicData({
         range: 'month'
@@ -33,7 +33,12 @@ const Earnings = () => {
     });
 
     //console.log(thisWeekData);
-    if (lw || lm || ty) return <Loader />;
+    if (thisYear.labels.length === 0)
+        return (
+            <Screen center>
+                <Text>No Data to show</Text>
+            </Screen>
+        );
     return (
         <Screen>
             <Header title="Earnings By The Numbers" />
@@ -56,23 +61,29 @@ const Earnings = () => {
                         justifyContent: 'space-evenly'
                     }}
                 >
-                    <EarningGraph
-                        type="Pie Chart"
-                        data={categoriesThisWeek as any}
-                        title="Units Sold This Week"
-                    />
+                    {categoriesThisWeek.length > 0 && (
+                        <EarningGraph
+                            type="Pie Chart"
+                            data={categoriesThisWeek as any}
+                            title="Units Sold This Week"
+                        />
+                    )}
+
                     <EarningGraph
                         type="Pie Chart"
                         data={categoriesThisMonth as any}
                         title="Units Sold This Month"
                     />
                 </View>
+
                 <View style={{ flex: 0.5 }}>
-                    <EarningGraph
-                        data={thisWeek}
-                        type="Line Chart"
-                        title="Earning By Day This Week"
-                    />
+                    {thisWeek.labels.length > 0 && (
+                        <EarningGraph
+                            data={thisWeek}
+                            type="Line Chart"
+                            title="Earning By Day This Week"
+                        />
+                    )}
 
                     <EarningGraph
                         data={thisYear}

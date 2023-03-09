@@ -21,9 +21,6 @@ export const useGraphicData = ({ range }: Props) => {
     const y: { name: string; quantity: number }[] = [];
     const z: GraphicDataValue = {};
     const [loadingStatus, setLoading] = useState(true);
-    const [categoriesGrapgicData, setCategoryGrapgicData] =
-        useState<CategoryGraphicData[]>();
-
     const { orders } = useBusinessOrders();
     const days = range === 'week' ? 'dddd' : range === 'year' ? 'MMMM' : 'YYYY';
     const randomColor = () => Math.floor(Math.random() * 16777215).toString(16);
@@ -51,6 +48,7 @@ export const useGraphicData = ({ range }: Props) => {
     y.forEach((_, index) => {
         const i = y[index].name;
         const q = y[index].quantity;
+
         if (z[i]) {
             z[i] = z[i] + q;
         } else {
@@ -108,16 +106,17 @@ export const useGraphicData = ({ range }: Props) => {
     };
 
     useEffect(() => {
-        if (!data.datasets[0].data.length || !categoriesData.length) return;
+        // if (!data.datasets[0].data.length || !categoriesData.length) return;
         //console.log(result);
         // setCategoryGrapgicData(result);
+        console.log('EF');
         setLoading(false);
 
         // if (result) {
         //     setCategoryGrapgicData(result);
         //     setLoading(false);
         // }
-    }, [data.datasets[0].data.length]);
+    }, [data.datasets[0].data.length, categoriesData.length]);
 
     // console.log('D', data);
 

@@ -24,6 +24,7 @@ import { AnimatePresence, MotiView } from 'moti';
 import Row from '../../../components/Row';
 import {
     Order,
+    ORDER_TYPE,
     saveDeliveryAddress,
     setDeliveryZip
 } from '../../../redux/consumer/ordersSlide';
@@ -43,9 +44,16 @@ const Businesses = () => {
     useNotifications();
 
     const { user, loading } = useAppSelector((state) => state.auth);
+    const { orderType } = useAppSelector((state) => state.orders);
+    const theme = useAppSelector((state) => state.theme);
     const dispatch = useAppDispatch();
     const [visible, setVisible] = useState(false);
     const [order, setOrder] = useState<Order>();
+    const {
+        businessAvailable,
+        allProducts,
+        loading: isLoading
+    } = useAllProducts();
     // variables
     const [showOnlyWithinDeliveryZone, setShowOnlyWithinDeliveryZone] =
         useState(true);
@@ -60,16 +68,11 @@ const Businesses = () => {
     const { deliveryAdd, deliveryZip } = useAppSelector(
         (state) => state.orders
     );
-    const theme = useAppSelector((state) => state.theme);
+
     const [show, setShow] = useState(true);
     const [searchValue, setSearchValue] = useState('');
     const listRef = useRef<FlatList>(null);
 
-    const {
-        businessAvailable,
-        allProducts,
-        loading: isLoading
-    } = useAllProducts();
     const [businesses, setBusinesses] = useState<Business[]>([]);
     const onScroll = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
         const y = e.nativeEvent.contentOffset.y;
@@ -177,6 +180,7 @@ const Businesses = () => {
             />
         );
     };
+    console.log(isLoading, businessAvailable.length, loading);
 
     if (isLoading || !businessAvailable.length || loading) return <Loader />;
 
@@ -208,7 +212,9 @@ const Businesses = () => {
                                     marginRight: SIZES.base * 1.5
                                 }}
                             >
-                                <Text px_4>Deliver Now</Text>
+                                <Text textColor={'#7d8597'} bold px_4>
+                                    Deliver Now
+                                </Text>
 
                                 <TouchableOpacity
                                     onPress={() => {
@@ -244,7 +250,7 @@ const Businesses = () => {
                 }}
             >
                 <View style={{ marginTop: 5 }} />
-                <Text lobster medium center>
+                <Text lobster large center>
                     What are you craving for right now?
                 </Text>
                 <InputField
@@ -313,26 +319,39 @@ const Businesses = () => {
                         containerStyle={{ marginVertical: 10 }}
                     >
                         <Text lobster medium px_4>
-                            {SIZES.isSmallDevice
+                            {SIZES.isVerySmall
                                 ? 'Stores'
                                 : 'Stores / Groceries'}
                         </Text>
-                        <Row>
-                            <Text bold px_4>
-                                {showOnlyWithinDeliveryZone && deliveryZip
-                                    ? `Stores delivering to ${deliveryZip}`
-                                    : 'Showing all stores'}
-                            </Text>
-                            <Switch
-                                value={showOnlyWithinDeliveryZone}
-                                onValueChange={setShowOnlyWithinDeliveryZone}
-                                thumbColor={theme.TEXT_COLOR}
-                                trackColor={{
-                                    true: theme.ASCENT,
-                                    false: theme.TEXT_COLOR
-                                }}
-                            />
-                        </Row>
+                        <AnimatePresence>
+                            {orderType === ORDER_TYPE.delivery && (
+                                <MotiView
+                                    from={{ opacity: 0, scale: 0 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    transition={{ type: 'timing' }}
+                                >
+                                    <Row horizontalAlign="space-between">
+                                        <Text bold px_4>
+                                            {showOnlyWithinDeliveryZone &&
+                                            deliveryZip
+                                                ? `Delivering to ${deliveryZip}`
+                                                : 'Showing all stores'}
+                                        </Text>
+                                        <Switch
+                                            value={showOnlyWithinDeliveryZone}
+                                            onValueChange={
+                                                setShowOnlyWithinDeliveryZone
+                                            }
+                                            thumbColor={theme.TEXT_COLOR}
+                                            trackColor={{
+                                                true: theme.ASCENT,
+                                                false: theme.TEXT_COLOR
+                                            }}
+                                        />
+                                    </Row>
+                                </MotiView>
+                            )}
+                        </AnimatePresence>
                     </Row>
                     {businesses.length > 0 ? (
                         <FlatList
@@ -366,7 +385,7 @@ const Businesses = () => {
                 </>
             )}
 
-            {businessAvailable.length && order && (
+            {businessAvailable.length > 0 && order && (
                 <HomeBusinessOrderDetails
                     businesses={businessAvailable}
                     order={order}

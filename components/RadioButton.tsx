@@ -14,12 +14,12 @@ type Props = {
     status?: ORDER_STATUS;
 };
 
-const HEIGHT = 24;
+const HEIGHT = 20;
 
 const RadioButton = ({ selected, onPress, status }: Props) => {
     const theme = useAppSelector((state) => state.theme);
     return (
-        <TouchableOpacity style={{ marginVertical: 10 }} onPress={onPress}>
+        <TouchableOpacity style={{ marginVertical: 4 }} onPress={onPress}>
             <Row>
                 <MotiView
                     style={{

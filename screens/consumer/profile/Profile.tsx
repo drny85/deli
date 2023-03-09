@@ -1,28 +1,24 @@
-import {
-    Alert,
-    ListRenderItem,
-    View,
-    Animated,
-    TouchableOpacity
-} from 'react-native';
-import React from 'react';
+import { Alert, View, TouchableOpacity } from 'react-native';
+import React, { useEffect } from 'react';
 import Screen from '../../../components/Screen';
 import Text from '../../../components/Text';
 import { useAppDispatch, useAppSelector } from '../../../redux/store';
 import Loader from '../../../components/Loader';
 
-import AuthNavigationStack from '../../../navigation/auth/AuthNavigationStack';
-import Divider from '../../../components/Divider';
-import Button from '../../../components/Button';
 import { logoutUser } from '../../../redux/auth/authActions';
 import Header from '../../../components/Header';
 import { FontAwesome } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 
-type Props = {};
+import { ConsumerProfileStackScreens } from '../../../navigation/consumer/typing';
 
-const Profile = ({}: Props) => {
+type Props = NativeStackScreenProps<ConsumerProfileStackScreens, 'Profile'>;
+
+const Profile = ({ navigation }: Props) => {
     const { user, loading } = useAppSelector((state) => state.auth);
     const theme = useAppSelector((state) => state.theme);
+
     const dispatch = useAppDispatch();
     const handleLogout = () => {
         Alert.alert('Loging Out', 'Do you want to log/sign out?', [
@@ -34,13 +30,15 @@ const Profile = ({}: Props) => {
             }
         ]);
     };
-
     if (loading) return <Loader />;
-    if (!user) return <AuthNavigationStack />;
+    if (!user) {
+        navigation.replace('Auth', { screen: 'Login' });
+    }
+
     return (
         <Screen>
             <Header
-                title={`Hi ${user.name}`}
+                title={`Hi ${user?.name}`}
                 rightIcon={
                     <TouchableOpacity
                         style={{ marginRight: 8 }}

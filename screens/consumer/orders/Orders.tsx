@@ -64,10 +64,12 @@ const Orders = ({ route: { params } }: Props) => {
         isPrevious();
     }, []);
 
+    if (loading) return <Loader />;
+
     if (!user)
         return (
             <Screen center>
-                <Text py_8 animation={'fadeInDown'} lobster medium>
+                <Text py_8 animation={'fadeInDown'} lobster large>
                     Please sign in to see your orders.
                 </Text>
                 <Button
@@ -98,8 +100,6 @@ const Orders = ({ route: { params } }: Props) => {
                 />
             </Screen>
         );
-
-    if (loading) return <Loader />;
 
     return (
         <Screen>

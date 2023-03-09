@@ -352,7 +352,7 @@ const Checkout = ({ navigation }: CheckOutProps) => {
     if (loading || loadingOrder) return <PaymentLoading />;
     return (
         <Screen>
-            <KeyboardScreen>
+            <KeyboardScreen containerStyle={{ flex: 1 }}>
                 <StripeProvider
                     publishableKey={process.env.STRIPE_TEST_PK!}
                     merchantIdentifier="merchant.net.robertdev.deli.app"
@@ -367,10 +367,13 @@ const Checkout = ({ navigation }: CheckOutProps) => {
                     />
                     <Container
                         style={{
-                            flex: 1
+                            flex: 1,
+
+                            height: '100%',
+                            justifyContent: 'space-between'
                         }}
                     >
-                        <View style={{ flex: 0.7 }}>
+                        <View style={{ flex: 0.7, flexGrow: 1 }}>
                             <ScrollView showsVerticalScrollIndicator={false}>
                                 <View>
                                     <Section>
@@ -578,7 +581,12 @@ const Checkout = ({ navigation }: CheckOutProps) => {
                                 </View>
                             </ScrollView>
                         </View>
-                        <View style={{ flex: 0.3, justifyContent: 'flex-end' }}>
+                        <View
+                            style={{
+                                flex: 0.3,
+                                justifyContent: 'flex-end'
+                            }}
+                        >
                             <Footer
                                 style={{
                                     justifyContent: 'flex-end',
@@ -587,6 +595,9 @@ const Checkout = ({ navigation }: CheckOutProps) => {
                             >
                                 {orderType === ORDER_TYPE.delivery ? (
                                     <CustomTip
+                                        containerStyle={{
+                                            marginVertical: SIZES.padding
+                                        }}
                                         customTip={customTip}
                                         setCustomTip={setCustomTip}
                                         setShowCustomTip={setShowCustomTip}
@@ -635,7 +646,7 @@ const Checkout = ({ navigation }: CheckOutProps) => {
                                     disabled={loading}
                                     isLoading={loading}
                                     containerStyle={{
-                                        width: '80%',
+                                        width: '40%',
                                         alignSelf: 'center',
                                         marginVertical: SIZES.padding
                                     }}
@@ -740,7 +751,12 @@ const Checkout = ({ navigation }: CheckOutProps) => {
             </Modal>
             <Modal visible={showInstructions} animationType="slide">
                 <View
-                    style={{ flex: 1, backgroundColor: theme.BACKGROUND_COLOR }}
+                    style={{
+                        flex: 1,
+                        backgroundColor: theme.BACKGROUND_COLOR,
+                        paddingTop: SIZES.statusBarHeight,
+                        padding: SIZES.padding
+                    }}
                 >
                     <Header
                         title="Delivery Instructions"
