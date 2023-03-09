@@ -23,7 +23,6 @@ import Loader from '../../components/Loader';
 import useNotifications from '../../hooks/useNotifications';
 import { useNavigation } from '@react-navigation/native';
 import { isTherePreviousRoute } from '../../utils/checkForPreviousRoute';
-import Profile from '../consumer/profile/Profile';
 
 type Props = NativeStackScreenProps<AuthScreens, 'Login'>;
 

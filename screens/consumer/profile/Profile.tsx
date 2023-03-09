@@ -1,17 +1,17 @@
 import { Alert, View, TouchableOpacity } from 'react-native';
-import React, { useEffect } from 'react';
+import React from 'react';
 import Screen from '../../../components/Screen';
-import Text from '../../../components/Text';
+
 import { useAppDispatch, useAppSelector } from '../../../redux/store';
 import Loader from '../../../components/Loader';
 
 import { logoutUser } from '../../../redux/auth/authActions';
 import Header from '../../../components/Header';
 import { FontAwesome } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 import { ConsumerProfileStackScreens } from '../../../navigation/consumer/typing';
+import Login from '../../auth/Login';
 
 type Props = NativeStackScreenProps<ConsumerProfileStackScreens, 'Profile'>;
 
@@ -31,9 +31,7 @@ const Profile = ({ navigation }: Props) => {
         ]);
     };
     if (loading) return <Loader />;
-    if (!user) {
-        navigation.replace('Auth', { screen: 'Login' });
-    }
+    //if (!user) return <Login />;
 
     return (
         <Screen>
